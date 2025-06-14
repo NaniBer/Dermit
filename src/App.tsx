@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,9 @@ import PatientProfile from "./pages/PatientProfile";
 import DoctorPatients from "./pages/DoctorPatients";
 import DoctorProfile from "./pages/DoctorProfile";
 import NotFound from "./pages/NotFound";
+import DoctorConsultations from "./pages/DoctorConsultations";
+import DoctorConsultationDetail from "./pages/DoctorConsultationDetail";
+import AdminDoctors from "./pages/AdminDoctors";
 
 const queryClient = new QueryClient();
 
@@ -40,12 +42,16 @@ const App = () => (
           
           {/* Doctor Routes */}
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+          <Route path="/doctor/consultations" element={<DoctorConsultations />} />
+          <Route path="/doctor/consultation/:id" element={<DoctorConsultationDetail />} />
           <Route path="/doctor/patients" element={<DoctorPatients />} />
           <Route path="/doctor/profile" element={<DoctorProfile />} />
           
           {/* Admin Routes */}
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/overview" element={<AdminOverview />} />
+          <Route path="/admin/doctors" element={<AdminDoctors />} />
           <Route path="/admin/patients" element={<AdminPatients />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -32,6 +32,10 @@ const DoctorDashboard = () => {
     navigate("/login");
   };
 
+  const handleConsultationClick = (consultationId: number) => {
+    navigate(`/doctor/consultation/${consultationId}`);
+  };
+
   // Mock data - in real app this would come from API
   const activeConsultations = [
     {
@@ -220,13 +224,17 @@ const DoctorDashboard = () => {
                   <MessageSquare className="w-5 h-5 text-green-600" />
                   <span>Active Consultations</span>
                 </CardTitle>
-                <CardDescription>Patients waiting for your response</CardDescription>
+                <CardDescription>Patients waiting for your response - click to view details</CardDescription>
               </CardHeader>
               <CardContent>
                 {activeConsultations.length > 0 ? (
                   <div className="space-y-4">
                     {activeConsultations.map((consultation) => (
-                      <div key={consultation.id} className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer">
+                      <div 
+                        key={consultation.id} 
+                        onClick={() => handleConsultationClick(consultation.id)}
+                        className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200 cursor-pointer hover:bg-gray-50"
+                      >
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center space-x-3">
                             <Avatar>
