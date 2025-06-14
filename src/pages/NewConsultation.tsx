@@ -1,0 +1,438 @@
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Upload, 
+  X, 
+  Camera, 
+  FileText, 
+  User, 
+  ArrowRight,
+  CheckCircle,
+  AlertCircle,
+  Stethoscope
+} from "lucide-react";
+import { Link } from "react-router-dom";
+
+const NewConsultation = () => {
+  const [formData, setFormData] = useState({
+    chiefComplaint: "",
+    knownIllnesses: "",
+    additionalComments: "",
+    doctorCode: "",
+  });
+  
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            setUploadedImages(prev => [...prev, e.target!.result as string]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Consultation request:", { ...formData, images: uploadedImages });
+    // Handle form submission logic here
+    setCurrentStep(4); // Show success step
+  };
+
+  const nextStep = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  if (currentStep === 4) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center shadow-xl border-0">
+          <CardContent className="p-8">
+            <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Consultation Requested!</h2>
+            <p className="text-gray-600 mb-6">
+              Your consultation request has been submitted successfully. 
+              A dermatologist will review your case and contact you within 24 hours.
+            </p>
+            <div className="space-y-3">
+              <Link to="/patient/dashboard">
+                <Button className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
+                  Go to Dashboard
+                </Button>
+              </Link>
+              <Link to="/patient/chat">
+                <Button variant="outline" className="w-full">
+                  View Messages
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/patient/dashboard" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+                <Stethoscope className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-gray-900">Dermit</span>
+            </Link>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">Step {currentStep} of 3</span>
+              <div className="flex space-x-2">
+                {[1, 2, 3].map((step) => (
+                  <div
+                    key={step}
+                    className={`w-2 h-2 rounded-full ${
+                      step <= currentStep ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">New Consultation Request</h1>
+          <p className="text-gray-600">
+            Share your skin concern with our certified dermatologists for professional advice
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2">
+              {/* Step 1: Image Upload */}
+              {currentStep === 1 && (
+                <Card className="shadow-xl border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Camera className="w-5 h-5 text-blue-600" />
+                      <span>Upload Images (Optional)</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Upload clear photos of your skin concern for better diagnosis
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                      <input
+                        type="file"
+                        id="image-upload"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                          Upload Photos
+                        </h3>
+                        <p className="text-gray-500">
+                          Click to browse or drag and drop your images here
+                        </p>
+                        <p className="text-sm text-gray-400 mt-2">
+                          Supports: JPG, PNG, WebP (Max 5MB each)
+                        </p>
+                      </label>
+                    </div>
+
+                    {uploadedImages.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {uploadedImages.map((image, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={image}
+                              alt={`Upload ${index + 1}`}
+                              className="w-full h-32 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-800 mb-2">Photography Tips:</h4>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        <li>• Use good lighting - natural light works best</li>
+                        <li>• Take multiple angles if possible</li>
+                        <li>• Keep the camera steady and in focus</li>
+                        <li>• Include surrounding healthy skin for comparison</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 2: Medical Information */}
+              {currentStep === 2 && (
+                <Card className="shadow-xl border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5 text-green-600" />
+                      <span>Medical Information</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Provide details about your skin concern and medical history
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="chief-complaint" className="text-base font-semibold">
+                        Chief Complaint *
+                      </Label>
+                      <Textarea
+                        id="chief-complaint"
+                        placeholder="Describe your main skin concern (e.g., 'Red, itchy rash on my arms for 2 weeks')"
+                        value={formData.chiefComplaint}
+                        onChange={(e) => setFormData({...formData, chiefComplaint: e.target.value})}
+                        className="min-h-[100px]"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="known-illnesses" className="text-base font-semibold">
+                        Known Medical Conditions
+                      </Label>
+                      <Textarea
+                        id="known-illnesses"
+                        placeholder="List any medical conditions, allergies, or medications you're currently taking"
+                        value={formData.knownIllnesses}
+                        onChange={(e) => setFormData({...formData, knownIllnesses: e.target.value})}
+                        className="min-h-[80px]"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="additional-comments" className="text-base font-semibold">
+                        Additional Comments
+                      </Label>
+                      <Textarea
+                        id="additional-comments"
+                        placeholder="Any additional information that might be relevant to your case"
+                        value={formData.additionalComments}
+                        onChange={(e) => setFormData({...formData, additionalComments: e.target.value})}
+                        className="min-h-[80px]"
+                      />
+                    </div>
+
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-semibold text-yellow-800">Important Note</h4>
+                          <p className="text-sm text-yellow-700">
+                            This platform is for non-emergency consultations only. 
+                            If you have a medical emergency, please contact emergency services immediately.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Step 3: Doctor Assignment */}
+              {currentStep === 3 && (
+                <Card className="shadow-xl border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <User className="w-5 h-5 text-blue-600" />
+                      <span>Doctor Assignment</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Choose how you'd like to be assigned to a dermatologist
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <input
+                            type="radio"
+                            id="auto-assign"
+                            name="assignment"
+                            className="w-4 h-4 text-blue-600"
+                            defaultChecked
+                          />
+                          <label htmlFor="auto-assign" className="font-semibold text-blue-800">
+                            Automatic Assignment (Recommended)
+                          </label>
+                        </div>
+                        <p className="text-sm text-blue-700 ml-7">
+                          We'll assign you to the next available dermatologist based on your case and their expertise.
+                        </p>
+                      </div>
+
+                      <div className="p-4 border-2 border-gray-200 rounded-lg">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <input
+                            type="radio"
+                            id="doctor-code"
+                            name="assignment"
+                            className="w-4 h-4 text-blue-600"
+                          />
+                          <label htmlFor="doctor-code" className="font-semibold text-gray-800">
+                            Specific Doctor (Optional)
+                          </label>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-7 mb-3">
+                          If you were referred by a specific doctor, enter their referral code below.
+                        </p>
+                        <div className="ml-7">
+                          <Input
+                            type="text"
+                            placeholder="Enter doctor's referral code"
+                            value={formData.doctorCode}
+                            onChange={(e) => setFormData({...formData, doctorCode: e.target.value})}
+                            className="max-w-xs"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-green-800 mb-2">What happens next?</h4>
+                      <ul className="text-sm text-green-700 space-y-1">
+                        <li>• Your case will be reviewed by a certified dermatologist</li>
+                        <li>• You'll receive a notification when the doctor responds</li>
+                        <li>• A chat session will be opened for direct communication</li>
+                        <li>• You'll receive a diagnosis and treatment plan</li>
+                      </ul>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Progress Summary */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-lg">Consultation Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Images uploaded</span>
+                    <Badge variant={uploadedImages.length > 0 ? "default" : "secondary"}>
+                      {uploadedImages.length}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Chief complaint</span>
+                    <Badge variant={formData.chiefComplaint ? "default" : "secondary"}>
+                      {formData.chiefComplaint ? "✓" : "○"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Medical history</span>
+                    <Badge variant={formData.knownIllnesses ? "default" : "secondary"}>
+                      {formData.knownIllnesses ? "✓" : "○"}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Expected Timeline */}
+              <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50">
+                <CardHeader>
+                  <CardTitle className="text-blue-800">Expected Timeline</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <span className="text-blue-700">Submit request: Now</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-blue-400 rounded-full"></div>
+                      <span className="text-blue-700">Doctor review: Within 24 hours</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
+                      <span className="text-gray-600">Initial response: 24-48 hours</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+            <div>
+              {currentStep > 1 && (
+                <Button type="button" variant="outline" onClick={prevStep}>
+                  Previous
+                </Button>
+              )}
+            </div>
+            <div className="flex items-center space-x-4">
+              {currentStep < 3 ? (
+                <Button type="button" onClick={nextStep} className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
+                  Next Step
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              ) : (
+                <Button type="submit" className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+                  Submit Consultation Request
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default NewConsultation;
