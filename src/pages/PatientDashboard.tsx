@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +12,26 @@ import {
   Camera,
   Clock,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  ChevronDown,
+  LogOut,
+  Edit
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const PatientDashboard = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
   // Mock data - in real app this would come from API
   const upcomingConsultations = [
     {
@@ -90,10 +104,28 @@ const PatientDashboard = () => {
               <Button variant="ghost" size="sm">
                 <Bell className="w-4 h-4" />
               </Button>
-              <Avatar>
-                <AvatarImage src="/placeholder-patient.jpg" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-2">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src="/placeholder-patient.jpg" />
+                      <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                    <span className="hidden md:block text-sm font-medium">John Doe</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => navigate("/patient/profile")}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -120,15 +152,17 @@ const PatientDashboard = () => {
             </Card>
           </Link>
 
-          <Card className="shadow-lg">
-            <CardContent className="p-6 text-center">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="w-6 h-6 text-green-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Active Chats</h3>
-              <p className="text-sm text-gray-600">2 ongoing conversations</p>
-            </CardContent>
-          </Card>
+          <Link to="/patient/chat">
+            <Card className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="font-semibold text-gray-900 mb-2">Active Chats</h3>
+                <p className="text-sm text-gray-600">2 ongoing conversations</p>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card className="shadow-lg">
             <CardContent className="p-6 text-center">

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +12,26 @@ import {
   AlertCircle,
   Calendar,
   Bell,
-  Activity
+  Activity,
+  ChevronDown,
+  LogOut,
+  Edit
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const DoctorDashboard = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
   // Mock data - in real app this would come from API
   const activeConsultations = [
     {
@@ -104,10 +118,28 @@ const DoctorDashboard = () => {
               <Button variant="ghost" size="sm">
                 <Bell className="w-4 h-4" />
               </Button>
-              <Avatar>
-                <AvatarImage src="/placeholder-doctor.jpg" />
-                <AvatarFallback>Dr</AvatarFallback>
-              </Avatar>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-2">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src="/placeholder-doctor.jpg" />
+                      <AvatarFallback>Dr</AvatarFallback>
+                    </Avatar>
+                    <span className="hidden md:block text-sm font-medium">Dr. Sarah Johnson</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => navigate("/doctor/profile")}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -261,9 +293,11 @@ const DoctorDashboard = () => {
                     </div>
                   ))}
                 </div>
-                <Button variant="outline" className="w-full mt-4">
-                  View All Diagnoses
-                </Button>
+                <Link to="/doctor/patients">
+                  <Button variant="outline" className="w-full mt-4">
+                    View All Patients
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -281,10 +315,12 @@ const DoctorDashboard = () => {
                   <FileText className="w-4 h-4 mr-2" />
                   Diagnosis Templates
                 </Button>
-                <Button variant="outline" className="w-full">
-                  <Users className="w-4 h-4 mr-2" />
-                  Patient Directory
-                </Button>
+                <Link to="/doctor/patients">
+                  <Button variant="outline" className="w-full">
+                    <Users className="w-4 h-4 mr-2" />
+                    Patient Directory
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>

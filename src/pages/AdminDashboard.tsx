@@ -12,15 +12,25 @@ import {
   Users, 
   UserCheck, 
   Mail, 
-  Phone,
-  MapPin,
+  Upload,
   Calendar,
   Trash2,
-  Edit
+  Edit,
+  FileText,
+  BarChart3,
+  ChevronDown,
+  LogOut
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [newDoctor, setNewDoctor] = useState({
     firstName: "",
     lastName: "",
@@ -28,7 +38,10 @@ const AdminDashboard = () => {
     phone: "",
     specialty: "",
     licenseNumber: "",
-    experience: ""
+    experience: "",
+    licenseExpiry: "",
+    medicalCertificate: null as File | null,
+    medicalLicense: null as File | null
   });
 
   // Mock data for existing doctors
@@ -42,7 +55,8 @@ const AdminDashboard = () => {
       experience: "8 years",
       status: "active",
       consultations: 156,
-      joinDate: "2023-01-15"
+      joinDate: "2023-01-15",
+      licenseExpiry: "2025-12-31"
     },
     {
       id: 2,
@@ -53,7 +67,8 @@ const AdminDashboard = () => {
       experience: "12 years",
       status: "active",
       consultations: 203,
-      joinDate: "2023-03-22"
+      joinDate: "2023-03-22",
+      licenseExpiry: "2024-08-15"
     }
   ];
 
@@ -68,12 +83,23 @@ const AdminDashboard = () => {
       phone: "",
       specialty: "",
       licenseNumber: "",
-      experience: ""
+      experience: "",
+      licenseExpiry: "",
+      medicalCertificate: null,
+      medicalLicense: null
     });
   };
 
   const handleInputChange = (field: string, value: string) => {
     setNewDoctor(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (field: string, file: File | null) => {
+    setNewDoctor(prev => ({ ...prev, [field]: file }));
+  };
+
+  const handleLogout = () => {
+    navigate("/login");
   };
 
   return (
@@ -92,16 +118,34 @@ const AdminDashboard = () => {
               </Link>
               <nav className="hidden md:flex space-x-6">
                 <Link to="/admin/dashboard" className="text-gray-900 font-medium">Dashboard</Link>
+                <Link to="/admin/overview" className="text-gray-600 hover:text-gray-900">Overview</Link>
                 <Link to="/admin/doctors" className="text-gray-600 hover:text-gray-900">Doctors</Link>
                 <Link to="/admin/patients" className="text-gray-600 hover:text-gray-900">Patients</Link>
-                <Link to="/admin/analytics" className="text-gray-600 hover:text-gray-900">Analytics</Link>
               </nav>
             </div>
             <div className="flex items-center space-x-4">
-              <Avatar>
-                <AvatarImage src="/placeholder-admin.jpg" />
-                <AvatarFallback>AD</AvatarFallback>
-              </Avatar>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-2">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src="/placeholder-admin.jpg" />
+                      <AvatarFallback>AD</AvatarFallback>
+                    </Avatar>
+                    <span className="hidden md:block text-sm font-medium">Admin User</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem onClick={() => navigate("/admin/profile")}>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -115,7 +159,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card className="shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -153,6 +197,20 @@ const AdminDashboard = () => {
                 </div>
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                   <Users className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">License Expiring</p>
+                  <p className="text-3xl font-bold text-orange-600">1</p>
+                </div>
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-orange-600" />
                 </div>
               </div>
             </CardContent>
@@ -235,6 +293,17 @@ const AdminDashboard = () => {
                       required
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="licenseExpiry">License Expiry Date</Label>
+                    <Input
+                      id="licenseExpiry"
+                      type="date"
+                      value={newDoctor.licenseExpiry}
+                      onChange={(e) => handleInputChange("licenseExpiry", e.target.value)}
+                      required
+                    />
+                  </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="experience">Years of Experience</Label>
@@ -245,6 +314,34 @@ const AdminDashboard = () => {
                       placeholder="e.g., 5"
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="medicalCertificate">Medical Certificate</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="medicalCertificate"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange("medicalCertificate", e.target.files?.[0] || null)}
+                        className="flex-1"
+                      />
+                      <Upload className="w-4 h-4 text-gray-400" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="medicalLicense">Medical License</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="medicalLicense"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange("medicalLicense", e.target.files?.[0] || null)}
+                        className="flex-1"
+                      />
+                      <Upload className="w-4 h-4 text-gray-400" />
+                    </div>
                   </div>
                   
                   <Button 
@@ -290,6 +387,9 @@ const AdminDashboard = () => {
                             <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                               <Badge variant="outline">{doctor.specialty}</Badge>
                               <span>License: {doctor.licenseNumber}</span>
+                              <span className={`${new Date(doctor.licenseExpiry) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) ? 'text-orange-600' : 'text-green-600'}`}>
+                                Expires: {doctor.licenseExpiry}
+                              </span>
                             </div>
                           </div>
                         </div>
