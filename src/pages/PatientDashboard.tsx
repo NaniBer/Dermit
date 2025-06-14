@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import EmptyState from "@/components/EmptyState";
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
@@ -33,20 +34,12 @@ const PatientDashboard = () => {
   };
 
   // Mock data - in real app this would come from API
-  const upcomingConsultations = [
-    {
-      id: 1,
-      doctor: "Dr. Sarah Johnson",
-      date: "2024-06-15",
-      time: "10:00 AM",
-      status: "upcoming",
-      specialty: "Dermatology"
-    }
-  ];
+  const upcomingConsultations = []; // Empty to show empty state
 
   const recentChats = [
     {
       id: 1,
+      conversationId: '1',
       doctor: "Dr. Sarah Johnson",
       lastMessage: "Based on the image you shared, this appears to be a mild case of eczema...",
       time: "2 hours ago",
@@ -54,6 +47,7 @@ const PatientDashboard = () => {
     },
     {
       id: 2,
+      conversationId: '2',
       doctor: "Dr. Michael Chen",
       lastMessage: "Your skin condition has improved significantly. Continue with the treatment...",
       time: "1 day ago",
@@ -79,6 +73,10 @@ const PatientDashboard = () => {
       prescription: "Observation, Follow-up in 6 months"
     }
   ];
+
+  const handleChatClick = (conversationId: string) => {
+    navigate(`/patient/chat?conversation=${conversationId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -159,7 +157,7 @@ const PatientDashboard = () => {
                   <MessageCircle className="w-6 h-6 text-green-600" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Active Chats</h3>
-                <p className="text-sm text-gray-600">2 ongoing conversations</p>
+                <p className="text-sm text-gray-600">{recentChats.length} ongoing conversations</p>
               </CardContent>
             </Card>
           </Link>
@@ -214,15 +212,7 @@ const PatientDashboard = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">No upcoming consultations</p>
-                    <Link to="/patient/new-consultation">
-                      <Button className="mt-4 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
-                        Schedule Consultation
-                      </Button>
-                    </Link>
-                  </div>
+                  <EmptyState type="appointments" />
                 )}
               </CardContent>
             </Card>
@@ -237,25 +227,33 @@ const PatientDashboard = () => {
                 <CardDescription>Latest communications with your doctors</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {recentChats.map((chat) => (
-                    <div key={chat.id} className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg cursor-pointer">
-                      <Avatar>
-                        <AvatarFallback>Dr</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-semibold text-gray-900">{chat.doctor}</h4>
-                          <span className="text-sm text-gray-500">{chat.time}</span>
+                {recentChats.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentChats.map((chat) => (
+                      <div 
+                        key={chat.id} 
+                        onClick={() => handleChatClick(chat.conversationId)}
+                        className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                      >
+                        <Avatar>
+                          <AvatarFallback>Dr</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-semibold text-gray-900">{chat.doctor}</h4>
+                            <span className="text-sm text-gray-500">{chat.time}</span>
+                          </div>
+                          <p className="text-sm text-gray-600 line-clamp-2">{chat.lastMessage}</p>
+                          {chat.unread && (
+                            <Badge className="mt-2 bg-blue-100 text-blue-800">New</Badge>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-600 line-clamp-2">{chat.lastMessage}</p>
-                        {chat.unread && (
-                          <Badge className="mt-2 bg-blue-100 text-blue-800">New</Badge>
-                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState type="conversations" />
+                )}
               </CardContent>
             </Card>
           </div>

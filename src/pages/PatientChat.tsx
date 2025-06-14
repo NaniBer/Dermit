@@ -7,27 +7,29 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
   Send,
-  Paperclip,
-  Camera,
   Phone,
   Video,
   MoreVertical,
-  Stethoscope,
   ChevronDown,
   LogOut,
   Edit,
-  User
+  FileText,
+  Image as ImageIcon
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import FileUpload from "@/components/FileUpload";
+import EmptyState from "@/components/EmptyState";
 
 const PatientChat = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const activeConversationId = searchParams.get('conversation') || '1';
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +37,29 @@ const PatientChat = () => {
     navigate("/login");
   };
 
-  // Mock chat messages
+  // Mock conversations data
+  const conversations = [
+    {
+      id: '1',
+      doctor: "Dr. Sarah Johnson",
+      specialty: "Dermatology",
+      lastMessage: "Based on your symptoms and the images, this appears to be atopic dermatitis...",
+      timestamp: "2 hours ago",
+      status: "active",
+      unread: true
+    },
+    {
+      id: '2',
+      doctor: "Dr. Michael Chen",
+      specialty: "Pediatric Dermatology",
+      lastMessage: "Your skin condition has improved significantly. Continue with the treatment...",
+      timestamp: "1 day ago",
+      status: "completed",
+      unread: false
+    }
+  ];
+
+  // Mock messages data - would be filtered by conversation ID in real app
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -74,18 +98,32 @@ const PatientChat = () => {
     }
   ]);
 
+  const activeConversation = conversations.find(conv => conv.id === activeConversationId);
+
   const sendMessage = () => {
     if (message.trim()) {
       const newMessage = {
         id: messages.length + 1,
-        sender: "patient",
+        sender: "patient" as const,
         content: message,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: "text"
+        type: "text" as const
       };
       setMessages([...messages, newMessage]);
       setMessage("");
     }
+  };
+
+  const handleFileSelect = (file: File, type: 'image' | 'file' | 'camera') => {
+    const fileMessage = {
+      id: messages.length + 1,
+      sender: "patient" as const,
+      content: `📎 ${file.name}`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      type: type === 'image' || type === 'camera' ? 'image' : 'file'
+    };
+    setMessages([...messages, fileMessage]);
+    console.log(`File uploaded: ${file.name}, Type: ${type}`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -93,6 +131,10 @@ const PatientChat = () => {
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  const selectConversation = (conversationId: string) => {
+    navigate(`/patient/chat?conversation=${conversationId}`);
   };
 
   useEffect(() => {
@@ -156,109 +198,135 @@ const PatientChat = () => {
                 <CardTitle className="text-lg">Your Conversations</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer">
-                    <div className="flex items-center space-x-3">
-                      <Avatar>
-                        <AvatarFallback>SJ</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">Dr. Sarah Johnson</h4>
-                        <p className="text-xs text-gray-600">Dermatology</p>
-                        <Badge className="mt-1 bg-green-100 text-green-800 text-xs">Active</Badge>
+                {conversations.length > 0 ? (
+                  <div className="space-y-3">
+                    {conversations.map((conversation) => (
+                      <div 
+                        key={conversation.id}
+                        onClick={() => selectConversation(conversation.id)}
+                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                          activeConversationId === conversation.id 
+                            ? 'bg-blue-50 border-blue-200' 
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Avatar>
+                            <AvatarFallback>{conversation.doctor.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-sm">{conversation.doctor}</h4>
+                            <p className="text-xs text-gray-600">{conversation.specialty}</p>
+                            <p className="text-xs text-gray-500 line-clamp-1 mt-1">{conversation.lastMessage}</p>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-xs text-gray-400">{conversation.timestamp}</span>
+                              <Badge className={`text-xs ${
+                                conversation.status === 'active' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {conversation.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
+                    ))}
                   </div>
-                  
-                  <div className="p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                    <div className="flex items-center space-x-3">
-                      <Avatar>
-                        <AvatarFallback>MC</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">Dr. Michael Chen</h4>
-                        <p className="text-xs text-gray-600">Pediatric Dermatology</p>
-                        <Badge variant="secondary" className="mt-1 text-xs">Completed</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                ) : (
+                  <EmptyState type="conversations" />
+                )}
               </CardContent>
             </Card>
           </div>
 
           {/* Main Chat Area */}
           <div className="lg:col-span-3">
-            <Card className="shadow-lg h-full flex flex-col">
-              {/* Chat Header */}
-              <CardHeader className="border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <Avatar>
-                      <AvatarFallback className="bg-green-100 text-green-600">SJ</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">Dr. Sarah Johnson</h3>
-                      <p className="text-sm text-gray-600">Dermatology Specialist • Online</p>
+            {activeConversation ? (
+              <Card className="shadow-lg h-full flex flex-col">
+                {/* Chat Header */}
+                <CardHeader className="border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <Avatar>
+                        <AvatarFallback className="bg-green-100 text-green-600">
+                          {activeConversation.doctor.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{activeConversation.doctor}</h3>
+                        <p className="text-sm text-gray-600">{activeConversation.specialty} • Online</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button variant="ghost" size="sm">
+                        <Phone className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <Video className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm">
-                      <Phone className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Video className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              {/* Messages */}
-              <CardContent className="flex-1 overflow-y-auto p-6 space-y-4">
-                {messages.map((msg) => (
-                  <div key={msg.id} className={`flex ${msg.sender === 'patient' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                      msg.sender === 'patient' 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-100 text-gray-900'
-                    }`}>
-                      <p className="text-sm">{msg.content}</p>
-                      <p className={`text-xs mt-1 ${
-                        msg.sender === 'patient' ? 'text-blue-100' : 'text-gray-500'
+                {/* Messages */}
+                <CardContent className="flex-1 overflow-y-auto p-6 space-y-4">
+                  {messages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.sender === 'patient' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        msg.sender === 'patient' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-100 text-gray-900'
                       }`}>
-                        {msg.timestamp}
-                      </p>
+                        {msg.type === 'image' && (
+                          <div className="flex items-center space-x-2 mb-1">
+                            <ImageIcon className="w-4 h-4" />
+                            <span className="text-xs">Image</span>
+                          </div>
+                        )}
+                        {msg.type === 'file' && (
+                          <div className="flex items-center space-x-2 mb-1">
+                            <FileText className="w-4 h-4" />
+                            <span className="text-xs">File</span>
+                          </div>
+                        )}
+                        <p className="text-sm">{msg.content}</p>
+                        <p className={`text-xs mt-1 ${
+                          msg.sender === 'patient' ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {msg.timestamp}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </CardContent>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </CardContent>
 
-              {/* Message Input */}
-              <div className="border-t border-gray-200 p-4">
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm">
-                    <Paperclip className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Camera className="w-4 h-4" />
-                  </Button>
-                  <Input
-                    placeholder="Type your message..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="flex-1"
-                  />
-                  <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700">
-                    <Send className="w-4 h-4" />
-                  </Button>
+                {/* Message Input */}
+                <div className="border-t border-gray-200 p-4">
+                  <div className="flex items-center space-x-2">
+                    <FileUpload onFileSelect={handleFileSelect} />
+                    <Input
+                      placeholder="Type your message..."
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="flex-1"
+                    />
+                    <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700">
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            ) : (
+              <Card className="shadow-lg h-full flex items-center justify-center">
+                <EmptyState type="conversations" />
+              </Card>
+            )}
           </div>
         </div>
       </div>

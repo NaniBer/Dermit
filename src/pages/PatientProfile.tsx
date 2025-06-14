@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   User,
   Mail,
@@ -16,7 +16,8 @@ import {
   Save,
   ChevronDown,
   LogOut,
-  Edit
+  Edit,
+  Lock
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -41,6 +42,12 @@ const PatientProfile = () => {
     currentMedications: "None"
   });
 
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+
   const handleLogout = () => {
     navigate("/login");
   };
@@ -51,8 +58,30 @@ const PatientProfile = () => {
     // Handle profile update logic here
   };
 
+  const handlePasswordChange = () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("New passwords don't match!");
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      alert("Password must be at least 6 characters long!");
+      return;
+    }
+    console.log("Changing password...");
+    setPasswordData({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    });
+    alert("Password changed successfully!");
+  };
+
   const handleInputChange = (field: string, value: string) => {
     setProfile(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePasswordInputChange = (field: string, value: string) => {
+    setPasswordData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -140,127 +169,189 @@ const PatientProfile = () => {
           {/* Profile Information */}
           <div className="lg:col-span-2">
             <Card className="shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Personal Information</CardTitle>
-                  <CardDescription>Update your personal details</CardDescription>
-                </div>
-                <Button 
-                  onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {isEditing ? (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Changes
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </>
-                  )}
-                </Button>
+              <CardHeader>
+                <CardTitle>Account Settings</CardTitle>
+                <CardDescription>Manage your account information and security</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      value={profile.firstName}
-                      onChange={(e) => handleInputChange("firstName", e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      value={profile.lastName}
-                      onChange={(e) => handleInputChange("lastName", e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
+              <CardContent>
+                <Tabs defaultValue="personal" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="personal">Personal Info</TabsTrigger>
+                    <TabsTrigger value="security">Security</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="personal" className="space-y-6 mt-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-medium">Personal Information</h3>
+                      <Button 
+                        onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {isEditing ? (
+                          <>
+                            <Save className="w-4 h-4 mr-2" />
+                            Save Changes
+                          </>
+                        ) : (
+                          <>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit Profile
+                          </>
+                        )}
+                      </Button>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={profile.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    disabled={!isEditing}
-                  />
-                </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          value={profile.firstName}
+                          onChange={(e) => handleInputChange("firstName", e.target.value)}
+                          disabled={!isEditing}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          value={profile.lastName}
+                          onChange={(e) => handleInputChange("lastName", e.target.value)}
+                          disabled={!isEditing}
+                        />
+                      </div>
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      value={profile.phone}
-                      onChange={(e) => handleInputChange("phone", e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                    <Input
-                      id="dateOfBirth"
-                      type="date"
-                      value={profile.dateOfBirth}
-                      onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={profile.email}
+                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={profile.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    disabled={!isEditing}
-                  />
-                </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          value={profile.phone}
+                          onChange={(e) => handleInputChange("phone", e.target.value)}
+                          disabled={!isEditing}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                        <Input
+                          id="dateOfBirth"
+                          type="date"
+                          value={profile.dateOfBirth}
+                          onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                          disabled={!isEditing}
+                        />
+                      </div>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="emergencyContact">Emergency Contact</Label>
-                  <Input
-                    id="emergencyContact"
-                    value={profile.emergencyContact}
-                    onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
-                    disabled={!isEditing}
-                    placeholder="Name - Phone Number"
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="address">Address</Label>
+                      <Input
+                        id="address"
+                        value={profile.address}
+                        onChange={(e) => handleInputChange("address", e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="medicalHistory">Medical History</Label>
-                  <Textarea
-                    id="medicalHistory"
-                    value={profile.medicalHistory}
-                    onChange={(e) => handleInputChange("medicalHistory", e.target.value)}
-                    disabled={!isEditing}
-                    rows={3}
-                    placeholder="Any relevant medical history, allergies, or previous conditions..."
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="emergencyContact">Emergency Contact</Label>
+                      <Input
+                        id="emergencyContact"
+                        value={profile.emergencyContact}
+                        onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
+                        disabled={!isEditing}
+                        placeholder="Name - Phone Number"
+                      />
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="currentMedications">Current Medications</Label>
-                  <Textarea
-                    id="currentMedications"
-                    value={profile.currentMedications}
-                    onChange={(e) => handleInputChange("currentMedications", e.target.value)}
-                    disabled={!isEditing}
-                    rows={2}
-                    placeholder="List any medications you are currently taking..."
-                  />
-                </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="medicalHistory">Medical History</Label>
+                      <Textarea
+                        id="medicalHistory"
+                        value={profile.medicalHistory}
+                        onChange={(e) => handleInputChange("medicalHistory", e.target.value)}
+                        disabled={!isEditing}
+                        rows={3}
+                        placeholder="Any relevant medical history, allergies, or previous conditions..."
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="currentMedications">Current Medications</Label>
+                      <Textarea
+                        id="currentMedications"
+                        value={profile.currentMedications}
+                        onChange={(e) => handleInputChange("currentMedications", e.target.value)}
+                        disabled={!isEditing}
+                        rows={2}
+                        placeholder="List any medications you are currently taking..."
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="security" className="space-y-6 mt-6">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Lock className="w-5 h-5 text-blue-600" />
+                      <h3 className="text-lg font-medium">Change Password</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="currentPassword">Current Password</Label>
+                        <Input
+                          id="currentPassword"
+                          type="password"
+                          value={passwordData.currentPassword}
+                          onChange={(e) => handlePasswordInputChange("currentPassword", e.target.value)}
+                          placeholder="Enter your current password"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="newPassword">New Password</Label>
+                        <Input
+                          id="newPassword"
+                          type="password"
+                          value={passwordData.newPassword}
+                          onChange={(e) => handlePasswordInputChange("newPassword", e.target.value)}
+                          placeholder="Enter your new password"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          value={passwordData.confirmPassword}
+                          onChange={(e) => handlePasswordInputChange("confirmPassword", e.target.value)}
+                          placeholder="Confirm your new password"
+                        />
+                      </div>
+
+                      <Button 
+                        onClick={handlePasswordChange}
+                        className="bg-blue-600 hover:bg-blue-700"
+                        disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                      >
+                        <Lock className="w-4 h-4 mr-2" />
+                        Change Password
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </div>
