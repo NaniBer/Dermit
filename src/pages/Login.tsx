@@ -5,25 +5,76 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Stethoscope, User, UserCheck } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Stethoscope, User, UserCheck, Shield } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [patientEmail, setPatientEmail] = useState("");
   const [patientPassword, setPatientPassword] = useState("");
   const [doctorEmail, setDoctorEmail] = useState("");
   const [doctorPassword, setDoctorPassword] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+
+  // Sample users for testing
+  const sampleUsers = {
+    patient: { email: "john.doe@example.com", password: "patient123" },
+    doctor: { email: "sarah.johnson@dermit.com", password: "doctor123" },
+    admin: { email: "admin@dermit.com", password: "admin123" }
+  };
 
   const handlePatientLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Patient login:", { email: patientEmail, password: patientPassword });
-    // Handle patient login logic here
+    
+    // Check sample user credentials
+    if (patientEmail === sampleUsers.patient.email && patientPassword === sampleUsers.patient.password) {
+      navigate("/patient/dashboard");
+    } else {
+      alert("Invalid credentials. Try: john.doe@example.com / patient123");
+    }
   };
 
   const handleDoctorLogin = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Doctor login:", { email: doctorEmail, password: doctorPassword });
-    // Handle doctor login logic here
+    
+    // Check sample user credentials
+    if (doctorEmail === sampleUsers.doctor.email && doctorPassword === sampleUsers.doctor.password) {
+      navigate("/doctor/dashboard");
+    } else {
+      alert("Invalid credentials. Try: sarah.johnson@dermit.com / doctor123");
+    }
+  };
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Admin login:", { email: adminEmail, password: adminPassword });
+    
+    // Check sample user credentials
+    if (adminEmail === sampleUsers.admin.email && adminPassword === sampleUsers.admin.password) {
+      navigate("/admin/dashboard");
+    } else {
+      alert("Invalid credentials. Try: admin@dermit.com / admin123");
+    }
+  };
+
+  const fillSampleCredentials = (type: 'patient' | 'doctor' | 'admin') => {
+    switch (type) {
+      case 'patient':
+        setPatientEmail(sampleUsers.patient.email);
+        setPatientPassword(sampleUsers.patient.password);
+        break;
+      case 'doctor':
+        setDoctorEmail(sampleUsers.doctor.email);
+        setDoctorPassword(sampleUsers.doctor.password);
+        break;
+      case 'admin':
+        setAdminEmail(sampleUsers.admin.email);
+        setAdminPassword(sampleUsers.admin.password);
+        break;
+    }
   };
 
   return (
@@ -49,7 +100,7 @@ const Login = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <Tabs defaultValue="patient" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="patient" className="flex items-center space-x-2">
                   <User className="w-4 h-4" />
                   <span>Patient</span>
@@ -57,6 +108,10 @@ const Login = () => {
                 <TabsTrigger value="doctor" className="flex items-center space-x-2">
                   <UserCheck className="w-4 h-4" />
                   <span>Doctor</span>
+                </TabsTrigger>
+                <TabsTrigger value="admin" className="flex items-center space-x-2">
+                  <Shield className="w-4 h-4" />
+                  <span>Admin</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -91,6 +146,14 @@ const Login = () => {
                     className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-2"
                   >
                     Sign In as Patient
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => fillSampleCredentials('patient')}
+                  >
+                    Use Sample Patient Account
                   </Button>
                 </form>
               </TabsContent>
@@ -127,6 +190,57 @@ const Login = () => {
                   >
                     Sign In as Doctor
                   </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => fillSampleCredentials('doctor')}
+                  >
+                    Use Sample Doctor Account
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="admin">
+                <form onSubmit={handleAdminLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-email">Email</Label>
+                    <Input
+                      id="admin-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={adminEmail}
+                      onChange={(e) => setAdminEmail(e.target.value)}
+                      required
+                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="admin-password">Password</Label>
+                    <Input
+                      id="admin-password"
+                      type="password"
+                      placeholder="Enter your password"
+                      value={adminPassword}
+                      onChange={(e) => setAdminPassword(e.target.value)}
+                      required
+                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-2"
+                  >
+                    Sign In as Admin
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => fillSampleCredentials('admin')}
+                  >
+                    Use Sample Admin Account
+                  </Button>
                 </form>
               </TabsContent>
             </Tabs>
@@ -141,6 +255,18 @@ const Login = () => {
                   Sign up
                 </Link>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Sample Credentials Info */}
+        <Card className="mt-6 bg-blue-50 border-blue-200">
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-blue-900 mb-2">Sample Test Accounts:</h3>
+            <div className="text-sm text-blue-800 space-y-1">
+              <p><strong>Patient:</strong> john.doe@example.com / patient123</p>
+              <p><strong>Doctor:</strong> sarah.johnson@dermit.com / doctor123</p>
+              <p><strong>Admin:</strong> admin@dermit.com / admin123</p>
             </div>
           </CardContent>
         </Card>
