@@ -137,7 +137,7 @@ const PatientDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Link to="/patient/new-consultation">
             <Card className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer border-2 border-dashed border-blue-200 hover:border-blue-400">
               <CardContent className="p-6 text-center">
@@ -162,7 +162,7 @@ const PatientDashboard = () => {
             </Card>
           </Link>
 
-          <Card className="shadow-lg">
+          {/* <Card className="shadow-lg">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-6 h-6 text-blue-600" />
@@ -170,7 +170,7 @@ const PatientDashboard = () => {
               <h3 className="font-semibold text-gray-900 mb-2">Health Records</h3>
               <p className="text-sm text-gray-600">View your consultation history</p>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
