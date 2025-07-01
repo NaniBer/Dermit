@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,156 +10,84 @@ import {
   Phone,
   Video,
   MoreVertical,
-  ChevronDown,
-  LogOut,
-  Edit,
   FileText,
   Image as ImageIcon,
 } from "lucide-react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useSearchParams } from "react-router-dom";
 import FileUpload from "@/components/FileUpload";
 import EmptyState from "@/components/EmptyState";
 import PatientHeader from "@/components/PatientHeader";
+import { useChat } from "@/hooks/useChat";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const PatientChat = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const activeConversationId = searchParams.get("conversation") || "1";
+  const activeConversationId = searchParams.get("conversation") || "";
   const [message, setMessage] = useState("");
+  const [conversations, setConversations] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const { messages, loading, sendMessage } = useChat(activeConversationId);
 
-  const handleLogout = () => {
-    navigate("/login");
-  };
-
-  // Mock conversations data
-  const conversations = [
-    {
-      id: "1",
-      doctor: "Dr. Sarah Johnson",
-      specialty: "Dermatology",
-      lastMessage:
-        "Based on your symptoms and the images, this appears to be atopic dermatitis...",
-      timestamp: "2 hours ago",
-      status: "active",
-      unread: true,
-    },
-    {
-      id: "2",
-      doctor: "Dr. Michael Chen",
-      specialty: "Pediatric Dermatology",
-      lastMessage:
-        "Your skin condition has improved significantly. Continue with the treatment...",
-      timestamp: "1 day ago",
-      status: "completed",
-      unread: false,
-    },
-  ];
-
-  // Mock messages data - would be filtered by conversation ID in real app
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "doctor",
-      content:
-        "Hello! I've reviewed the images you uploaded. Can you tell me more about when you first noticed this skin condition?",
-      timestamp: "10:30 AM",
-      type: "text",
-    },
-    {
-      id: 2,
-      sender: "patient",
-      content:
-        "Hi Dr. Johnson! I first noticed it about 2 weeks ago. It started as a small red patch and has been getting bigger.",
-      timestamp: "10:32 AM",
-      type: "text",
-    },
-    {
-      id: 3,
-      sender: "doctor",
-      content:
-        "Thank you for the information. Have you experienced any itching, burning, or pain in the affected area?",
-      timestamp: "10:35 AM",
-      type: "text",
-    },
-    {
-      id: 4,
-      sender: "patient",
-      content:
-        "Yes, there's been some mild itching, especially at night. No burning or severe pain though.",
-      timestamp: "10:37 AM",
-      type: "text",
-    },
-    {
-      id: 5,
-      sender: "doctor",
-      content:
-        "Based on your symptoms and the images, this appears to be atopic dermatitis (eczema). I'm prescribing a topical corticosteroid cream. Apply it twice daily to the affected area.",
-      timestamp: "10:45 AM",
-      type: "text",
-    },
-  ]);
+  // Fetch user's consultations
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchConsultations = async () => {
+      const { data } = await supabase
+        .from('consultations')
+        .select('*')
+        .eq('patient_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      setConversations(data || []);
+    };
+    
+    fetchConsultations();
+  }, [user]);
 
   const activeConversation = conversations.find(
     (conv) => conv.id === activeConversationId
   );
 
-  const sendMessage = () => {
-    if (message.trim()) {
-      const newMessage = {
-        id: messages.length + 1,
-        sender: "patient" as const,
-        content: message,
-        timestamp: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        type: "text" as const,
-      };
-      setMessages([...messages, newMessage]);
+  const handleSendMessage = () => {
+    if (message.trim() && activeConversationId) {
+      sendMessage(message);
       setMessage("");
     }
   };
 
   const handleFileSelect = (file: File, type: "image" | "file" | "camera") => {
-    const fileMessage = {
-      id: messages.length + 1,
-      sender: "patient" as const,
-      content: `📎 ${file.name}`,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      type: type === "image" || type === "camera" ? "image" : "file",
-    };
-    setMessages([...messages, fileMessage]);
-    console.log(`File uploaded: ${file.name}, Type: ${type}`);
+    if (activeConversationId) {
+      sendMessage(`📎 ${file.name}`, type === "image" || type === "camera" ? "image" : "file");
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      sendMessage();
+      handleSendMessage();
     }
   };
 
   const selectConversation = (conversationId: string) => {
-    navigate(`/patient/chat?conversation=${conversationId}`);
+    const url = new URL(window.location.href);
+    url.searchParams.set("conversation", conversationId);
+    window.history.pushState({}, "", url.toString());
+    window.location.reload();
   };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  if (!user) {
+    return <div>Please log in to access chat.</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Header */}
       <PatientHeader />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -184,30 +113,22 @@ const PatientChat = () => {
                       >
                         <div className="flex items-center space-x-3">
                           <Avatar>
-                            <AvatarFallback>
-                              {conversation.doctor
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
+                            <AvatarFallback>Dr</AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
                             <h4 className="font-medium text-sm">
-                              {conversation.doctor}
+                              {conversation.title}
                             </h4>
-                            <p className="text-xs text-gray-600">
-                              {conversation.specialty}
-                            </p>
-                            <p className="text-xs text-gray-500 line-clamp-1 mt-1">
-                              {conversation.lastMessage}
+                            <p className="text-xs text-gray-600 line-clamp-1 mt-1">
+                              {conversation.description}
                             </p>
                             <div className="flex items-center justify-between mt-2">
                               <span className="text-xs text-gray-400">
-                                {conversation.timestamp}
+                                {new Date(conversation.created_at).toLocaleDateString()}
                               </span>
                               <Badge
                                 className={`text-xs ${
-                                  conversation.status === "active"
+                                  conversation.status === "in_progress"
                                     ? "bg-green-100 text-green-800"
                                     : "bg-gray-100 text-gray-800"
                                 }`}
@@ -237,18 +158,15 @@ const PatientChat = () => {
                     <div className="flex items-center space-x-4">
                       <Avatar>
                         <AvatarFallback className="bg-green-100 text-green-600">
-                          {activeConversation.doctor
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                          Dr
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <h3 className="font-semibold text-gray-900">
-                          {activeConversation.doctor}
+                          {activeConversation.title}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {activeConversation.specialty} • Online
+                          Consultation • {activeConversation.status}
                         </p>
                       </div>
                     </div>
@@ -268,47 +186,54 @@ const PatientChat = () => {
 
                 {/* Messages */}
                 <CardContent className="flex-1 overflow-y-auto p-6 space-y-4">
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${
-                        msg.sender === "patient"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
+                  {loading ? (
+                    <div className="flex justify-center">Loading messages...</div>
+                  ) : (
+                    messages.map((msg) => (
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          msg.sender === "patient"
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 text-gray-900"
+                        key={msg.id}
+                        className={`flex ${
+                          msg.sender_id === user.id
+                            ? "justify-end"
+                            : "justify-start"
                         }`}
                       >
-                        {msg.type === "image" && (
-                          <div className="flex items-center space-x-2 mb-1">
-                            <ImageIcon className="w-4 h-4" />
-                            <span className="text-xs">Image</span>
-                          </div>
-                        )}
-                        {msg.type === "file" && (
-                          <div className="flex items-center space-x-2 mb-1">
-                            <FileText className="w-4 h-4" />
-                            <span className="text-xs">File</span>
-                          </div>
-                        )}
-                        <p className="text-sm">{msg.content}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            msg.sender === "patient"
-                              ? "text-blue-100"
-                              : "text-gray-500"
+                        <div
+                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                            msg.sender_id === user.id
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-100 text-gray-900"
                           }`}
                         >
-                          {msg.timestamp}
-                        </p>
+                          {msg.message_type === "image" && (
+                            <div className="flex items-center space-x-2 mb-1">
+                              <ImageIcon className="w-4 h-4" />
+                              <span className="text-xs">Image</span>
+                            </div>
+                          )}
+                          {msg.message_type === "file" && (
+                            <div className="flex items-center space-x-2 mb-1">
+                              <FileText className="w-4 h-4" />
+                              <span className="text-xs">File</span>
+                            </div>
+                          )}
+                          <p className="text-sm">{msg.content}</p>
+                          <p
+                            className={`text-xs mt-1 ${
+                              msg.sender_id === user.id
+                                ? "text-blue-100"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {new Date(msg.created_at!).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                   <div ref={messagesEndRef} />
                 </CardContent>
 
@@ -324,7 +249,7 @@ const PatientChat = () => {
                       className="flex-1"
                     />
                     <Button
-                      onClick={sendMessage}
+                      onClick={handleSendMessage}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       <Send className="w-4 h-4" />

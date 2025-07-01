@@ -7,11 +7,23 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Stethoscope, User, UserCheck } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const defaultTab = searchParams.get("type") || "patient";
+  const { signUp, user } = useAuth();
+  const { toast } = useToast();
+
+  // Redirect if already logged in
+  if (user) {
+    navigate("/patient/dashboard");
+    return null;
+  }
 
   // Patient form state
   const [patientData, setPatientData] = useState({
@@ -38,16 +50,86 @@ const Register = () => {
     bio: "",
   });
 
-  const handlePatientRegister = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handlePatientRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Patient registration:", patientData);
-    // Handle patient registration logic here
+    
+    if (patientData.password !== patientData.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords don't match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const { error } = await signUp(
+        patientData.email,
+        patientData.password,
+        patientData.firstName,
+        patientData.lastName
+      );
+
+      if (!error) {
+        // Add patient role
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          await supabase.from('user_roles').insert({
+            user_id: userData.user.id,
+            role: 'patient'
+          });
+        }
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDoctorRegister = (e: React.FormEvent) => {
+  const handleDoctorRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Doctor registration:", doctorData);
-    // Handle doctor registration logic here
+    
+    if (doctorData.password !== doctorData.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords don't match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const { error } = await signUp(
+        doctorData.email,
+        doctorData.password,
+        doctorData.firstName,
+        doctorData.lastName
+      );
+
+      if (!error) {
+        // Add doctor role
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          await supabase.from('user_roles').insert({
+            user_id: userData.user.id,
+            role: 'doctor'
+          });
+        }
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -143,34 +225,12 @@ const Register = () => {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="patient-phone">Phone</Label>
-                      <Input
-                        id="patient-phone"
-                        type="tel"
-                        placeholder="Enter phone number"
-                        value={patientData.phone}
-                        onChange={(e) => setPatientData({...patientData, phone: e.target.value})}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="patient-dob">Date of Birth</Label>
-                      <Input
-                        id="patient-dob"
-                        type="date"
-                        value={patientData.dateOfBirth}
-                        onChange={(e) => setPatientData({...patientData, dateOfBirth: e.target.value})}
-                        required
-                      />
-                    </div>
-                  </div>
                   <Button 
                     type="submit" 
                     className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-2"
+                    disabled={loading}
                   >
-                    Create Patient Account
+                    {loading ? "Creating Account..." : "Create Patient Account"}
                   </Button>
                 </form>
               </TabsContent>
@@ -293,8 +353,9 @@ const Register = () => {
                   <Button 
                     type="submit" 
                     className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-2"
+                    disabled={loading}
                   >
-                    Create Doctor Account
+                    {loading ? "Creating Account..." : "Create Doctor Account"}
                   </Button>
                 </form>
               </TabsContent>
