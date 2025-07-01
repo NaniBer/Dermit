@@ -1,11 +1,10 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Send,
   Phone,
   Video,
@@ -14,7 +13,7 @@ import {
   LogOut,
   Edit,
   FileText,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -25,11 +24,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import FileUpload from "@/components/FileUpload";
 import EmptyState from "@/components/EmptyState";
+import PatientHeader from "@/components/PatientHeader";
 
 const PatientChat = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const activeConversationId = searchParams.get('conversation') || '1';
+  const activeConversationId = searchParams.get("conversation") || "1";
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -40,23 +40,25 @@ const PatientChat = () => {
   // Mock conversations data
   const conversations = [
     {
-      id: '1',
+      id: "1",
       doctor: "Dr. Sarah Johnson",
       specialty: "Dermatology",
-      lastMessage: "Based on your symptoms and the images, this appears to be atopic dermatitis...",
+      lastMessage:
+        "Based on your symptoms and the images, this appears to be atopic dermatitis...",
       timestamp: "2 hours ago",
       status: "active",
-      unread: true
+      unread: true,
     },
     {
-      id: '2',
+      id: "2",
       doctor: "Dr. Michael Chen",
       specialty: "Pediatric Dermatology",
-      lastMessage: "Your skin condition has improved significantly. Continue with the treatment...",
+      lastMessage:
+        "Your skin condition has improved significantly. Continue with the treatment...",
       timestamp: "1 day ago",
       status: "completed",
-      unread: false
-    }
+      unread: false,
+    },
   ];
 
   // Mock messages data - would be filtered by conversation ID in real app
@@ -64,41 +66,48 @@ const PatientChat = () => {
     {
       id: 1,
       sender: "doctor",
-      content: "Hello! I've reviewed the images you uploaded. Can you tell me more about when you first noticed this skin condition?",
+      content:
+        "Hello! I've reviewed the images you uploaded. Can you tell me more about when you first noticed this skin condition?",
       timestamp: "10:30 AM",
-      type: "text"
+      type: "text",
     },
     {
       id: 2,
       sender: "patient",
-      content: "Hi Dr. Johnson! I first noticed it about 2 weeks ago. It started as a small red patch and has been getting bigger.",
+      content:
+        "Hi Dr. Johnson! I first noticed it about 2 weeks ago. It started as a small red patch and has been getting bigger.",
       timestamp: "10:32 AM",
-      type: "text"
+      type: "text",
     },
     {
       id: 3,
       sender: "doctor",
-      content: "Thank you for the information. Have you experienced any itching, burning, or pain in the affected area?",
+      content:
+        "Thank you for the information. Have you experienced any itching, burning, or pain in the affected area?",
       timestamp: "10:35 AM",
-      type: "text"
+      type: "text",
     },
     {
       id: 4,
       sender: "patient",
-      content: "Yes, there's been some mild itching, especially at night. No burning or severe pain though.",
+      content:
+        "Yes, there's been some mild itching, especially at night. No burning or severe pain though.",
       timestamp: "10:37 AM",
-      type: "text"
+      type: "text",
     },
     {
       id: 5,
       sender: "doctor",
-      content: "Based on your symptoms and the images, this appears to be atopic dermatitis (eczema). I'm prescribing a topical corticosteroid cream. Apply it twice daily to the affected area.",
+      content:
+        "Based on your symptoms and the images, this appears to be atopic dermatitis (eczema). I'm prescribing a topical corticosteroid cream. Apply it twice daily to the affected area.",
       timestamp: "10:45 AM",
-      type: "text"
-    }
+      type: "text",
+    },
   ]);
 
-  const activeConversation = conversations.find(conv => conv.id === activeConversationId);
+  const activeConversation = conversations.find(
+    (conv) => conv.id === activeConversationId
+  );
 
   const sendMessage = () => {
     if (message.trim()) {
@@ -106,28 +115,34 @@ const PatientChat = () => {
         id: messages.length + 1,
         sender: "patient" as const,
         content: message,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: "text" as const
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        type: "text" as const,
       };
       setMessages([...messages, newMessage]);
       setMessage("");
     }
   };
 
-  const handleFileSelect = (file: File, type: 'image' | 'file' | 'camera') => {
+  const handleFileSelect = (file: File, type: "image" | "file" | "camera") => {
     const fileMessage = {
       id: messages.length + 1,
       sender: "patient" as const,
       content: `📎 ${file.name}`,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      type: type === 'image' || type === 'camera' ? 'image' : 'file'
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      type: type === "image" || type === "camera" ? "image" : "file",
     };
     setMessages([...messages, fileMessage]);
     console.log(`File uploaded: ${file.name}, Type: ${type}`);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
@@ -144,50 +159,7 @@ const PatientChat = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <Link to="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">D</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">Dermit</span>
-              </Link>
-              <nav className="hidden md:flex space-x-6">
-                <Link to="/patient/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
-                <Link to="/patient/consultations" className="text-gray-600 hover:text-gray-900">Consultations</Link>
-                <Link to="/patient/chat" className="text-gray-900 font-medium">Messages</Link>
-                <Link to="/patient/profile" className="text-gray-600 hover:text-gray-900">Profile</Link>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src="/placeholder-patient.jpg" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden md:block text-sm font-medium">John Doe</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => navigate("/patient/profile")}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PatientHeader />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-4 gap-8 h-[calc(100vh-200px)]">
@@ -201,30 +173,45 @@ const PatientChat = () => {
                 {conversations.length > 0 ? (
                   <div className="space-y-3">
                     {conversations.map((conversation) => (
-                      <div 
+                      <div
                         key={conversation.id}
                         onClick={() => selectConversation(conversation.id)}
                         className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                          activeConversationId === conversation.id 
-                            ? 'bg-blue-50 border-blue-200' 
-                            : 'border-gray-200 hover:bg-gray-50'
+                          activeConversationId === conversation.id
+                            ? "bg-blue-50 border-blue-200"
+                            : "border-gray-200 hover:bg-gray-50"
                         }`}
                       >
                         <div className="flex items-center space-x-3">
                           <Avatar>
-                            <AvatarFallback>{conversation.doctor.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            <AvatarFallback>
+                              {conversation.doctor
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
-                            <h4 className="font-medium text-sm">{conversation.doctor}</h4>
-                            <p className="text-xs text-gray-600">{conversation.specialty}</p>
-                            <p className="text-xs text-gray-500 line-clamp-1 mt-1">{conversation.lastMessage}</p>
+                            <h4 className="font-medium text-sm">
+                              {conversation.doctor}
+                            </h4>
+                            <p className="text-xs text-gray-600">
+                              {conversation.specialty}
+                            </p>
+                            <p className="text-xs text-gray-500 line-clamp-1 mt-1">
+                              {conversation.lastMessage}
+                            </p>
                             <div className="flex items-center justify-between mt-2">
-                              <span className="text-xs text-gray-400">{conversation.timestamp}</span>
-                              <Badge className={`text-xs ${
-                                conversation.status === 'active' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
+                              <span className="text-xs text-gray-400">
+                                {conversation.timestamp}
+                              </span>
+                              <Badge
+                                className={`text-xs ${
+                                  conversation.status === "active"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
                                 {conversation.status}
                               </Badge>
                             </div>
@@ -250,12 +237,19 @@ const PatientChat = () => {
                     <div className="flex items-center space-x-4">
                       <Avatar>
                         <AvatarFallback className="bg-green-100 text-green-600">
-                          {activeConversation.doctor.split(' ').map(n => n[0]).join('')}
+                          {activeConversation.doctor
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{activeConversation.doctor}</h3>
-                        <p className="text-sm text-gray-600">{activeConversation.specialty} • Online</p>
+                        <h3 className="font-semibold text-gray-900">
+                          {activeConversation.doctor}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {activeConversation.specialty} • Online
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -275,28 +269,41 @@ const PatientChat = () => {
                 {/* Messages */}
                 <CardContent className="flex-1 overflow-y-auto p-6 space-y-4">
                   {messages.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.sender === 'patient' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                        msg.sender === 'patient' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-100 text-gray-900'
-                      }`}>
-                        {msg.type === 'image' && (
+                    <div
+                      key={msg.id}
+                      className={`flex ${
+                        msg.sender === "patient"
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          msg.sender === "patient"
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 text-gray-900"
+                        }`}
+                      >
+                        {msg.type === "image" && (
                           <div className="flex items-center space-x-2 mb-1">
                             <ImageIcon className="w-4 h-4" />
                             <span className="text-xs">Image</span>
                           </div>
                         )}
-                        {msg.type === 'file' && (
+                        {msg.type === "file" && (
                           <div className="flex items-center space-x-2 mb-1">
                             <FileText className="w-4 h-4" />
                             <span className="text-xs">File</span>
                           </div>
                         )}
                         <p className="text-sm">{msg.content}</p>
-                        <p className={`text-xs mt-1 ${
-                          msg.sender === 'patient' ? 'text-blue-100' : 'text-gray-500'
-                        }`}>
+                        <p
+                          className={`text-xs mt-1 ${
+                            msg.sender === "patient"
+                              ? "text-blue-100"
+                              : "text-gray-500"
+                          }`}
+                        >
                           {msg.timestamp}
                         </p>
                       </div>
@@ -316,7 +323,10 @@ const PatientChat = () => {
                       onKeyPress={handleKeyPress}
                       className="flex-1"
                     />
-                    <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700">
+                    <Button
+                      onClick={sendMessage}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>

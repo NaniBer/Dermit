@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import DoctorConsultations from "./pages/DoctorConsultations";
 import DoctorConsultationDetail from "./pages/DoctorConsultationDetail";
 import AdminDoctors from "./pages/AdminDoctors";
+import PatientConsultations from "./pages/PatientConsultation";
 
 const queryClient = new QueryClient();
 
@@ -33,27 +34,40 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
+
           {/* Patient Routes */}
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
-          <Route path="/patient/new-consultation" element={<NewConsultation />} />
+          <Route
+            path="/patient/new-consultation"
+            element={<NewConsultation />}
+          />
           <Route path="/patient/chat" element={<PatientChat />} />
           <Route path="/patient/profile" element={<PatientProfile />} />
-          
+          <Route
+            path="/patient/consultations"
+            element={<PatientConsultations />}
+          />
+
           {/* Doctor Routes */}
           <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-          <Route path="/doctor/consultations" element={<DoctorConsultations />} />
-          <Route path="/doctor/consultation/:id" element={<DoctorConsultationDetail />} />
+          <Route
+            path="/doctor/consultations"
+            element={<DoctorConsultations />}
+          />
+          <Route
+            path="/doctor/consultation/:id"
+            element={<DoctorConsultationDetail />}
+          />
           <Route path="/doctor/patients" element={<DoctorPatients />} />
           <Route path="/doctor/profile" element={<DoctorProfile />} />
-          
+
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/overview" element={<AdminOverview />} />
           <Route path="/admin/doctors" element={<AdminDoctors />} />
           <Route path="/admin/patients" element={<AdminPatients />} />
-          
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

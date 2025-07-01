@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
+import {
   User,
   Mail,
   Phone,
@@ -17,7 +23,7 @@ import {
   ChevronDown,
   LogOut,
   Edit,
-  Lock
+  Lock,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -26,6 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import PatientHeader from "@/components/PatientHeader";
 
 const PatientProfile = () => {
   const navigate = useNavigate();
@@ -38,14 +45,15 @@ const PatientProfile = () => {
     dateOfBirth: "1990-05-15",
     address: "123 Main St, Anytown, AT 12345",
     emergencyContact: "Jane Doe - +1 (555) 987-6543",
-    medicalHistory: "No known allergies. Previous skin conditions: mild eczema as a child.",
-    currentMedications: "None"
+    medicalHistory:
+      "No known allergies. Previous skin conditions: mild eczema as a child.",
+    currentMedications: "None",
   });
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const handleLogout = () => {
@@ -71,72 +79,33 @@ const PatientProfile = () => {
     setPasswordData({
       currentPassword: "",
       newPassword: "",
-      confirmPassword: ""
+      confirmPassword: "",
     });
     alert("Password changed successfully!");
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
+    setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
   const handlePasswordInputChange = (field: string, value: string) => {
-    setPasswordData(prev => ({ ...prev, [field]: value }));
+    setPasswordData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <Link to="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">D</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">Dermit</span>
-              </Link>
-              <nav className="hidden md:flex space-x-6">
-                <Link to="/patient/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
-                <Link to="/patient/consultations" className="text-gray-600 hover:text-gray-900">Consultations</Link>
-                <Link to="/patient/chat" className="text-gray-600 hover:text-gray-900">Messages</Link>
-                <Link to="/patient/profile" className="text-gray-900 font-medium">Profile</Link>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src="/placeholder-patient.jpg" />
-                      <AvatarFallback>JD</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden md:block text-sm font-medium">{profile.firstName} {profile.lastName}</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => navigate("/patient/profile")}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PatientHeader />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
-          <p className="text-gray-600">Manage your personal information and preferences</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Profile Settings
+          </h1>
+          <p className="text-gray-600">
+            Manage your personal information and preferences
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -150,7 +119,10 @@ const PatientProfile = () => {
                 <div className="relative inline-block">
                   <Avatar className="w-32 h-32 mx-auto">
                     <AvatarImage src="/placeholder-patient.jpg" />
-                    <AvatarFallback className="text-2xl">{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
+                    <AvatarFallback className="text-2xl">
+                      {profile.firstName[0]}
+                      {profile.lastName[0]}
+                    </AvatarFallback>
                   </Avatar>
                   <Button
                     size="sm"
@@ -171,7 +143,9 @@ const PatientProfile = () => {
             <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle>Account Settings</CardTitle>
-                <CardDescription>Manage your account information and security</CardDescription>
+                <CardDescription>
+                  Manage your account information and security
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="personal" className="w-full">
@@ -179,12 +153,16 @@ const PatientProfile = () => {
                     <TabsTrigger value="personal">Personal Info</TabsTrigger>
                     <TabsTrigger value="security">Security</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="personal" className="space-y-6 mt-6">
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium">Personal Information</h3>
-                      <Button 
-                        onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                      <h3 className="text-lg font-medium">
+                        Personal Information
+                      </h3>
+                      <Button
+                        onClick={() =>
+                          isEditing ? handleSave() : setIsEditing(true)
+                        }
                         className="bg-blue-600 hover:bg-blue-700"
                       >
                         {isEditing ? (
@@ -207,7 +185,9 @@ const PatientProfile = () => {
                         <Input
                           id="firstName"
                           value={profile.firstName}
-                          onChange={(e) => handleInputChange("firstName", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("firstName", e.target.value)
+                          }
                           disabled={!isEditing}
                         />
                       </div>
@@ -216,7 +196,9 @@ const PatientProfile = () => {
                         <Input
                           id="lastName"
                           value={profile.lastName}
-                          onChange={(e) => handleInputChange("lastName", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("lastName", e.target.value)
+                          }
                           disabled={!isEditing}
                         />
                       </div>
@@ -228,7 +210,9 @@ const PatientProfile = () => {
                         id="email"
                         type="email"
                         value={profile.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
                         disabled={!isEditing}
                       />
                     </div>
@@ -239,7 +223,9 @@ const PatientProfile = () => {
                         <Input
                           id="phone"
                           value={profile.phone}
-                          onChange={(e) => handleInputChange("phone", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("phone", e.target.value)
+                          }
                           disabled={!isEditing}
                         />
                       </div>
@@ -249,7 +235,9 @@ const PatientProfile = () => {
                           id="dateOfBirth"
                           type="date"
                           value={profile.dateOfBirth}
-                          onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                          onChange={(e) =>
+                            handleInputChange("dateOfBirth", e.target.value)
+                          }
                           disabled={!isEditing}
                         />
                       </div>
@@ -260,17 +248,23 @@ const PatientProfile = () => {
                       <Input
                         id="address"
                         value={profile.address}
-                        onChange={(e) => handleInputChange("address", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("address", e.target.value)
+                        }
                         disabled={!isEditing}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="emergencyContact">Emergency Contact</Label>
+                      <Label htmlFor="emergencyContact">
+                        Emergency Contact
+                      </Label>
                       <Input
                         id="emergencyContact"
                         value={profile.emergencyContact}
-                        onChange={(e) => handleInputChange("emergencyContact", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("emergencyContact", e.target.value)
+                        }
                         disabled={!isEditing}
                         placeholder="Name - Phone Number"
                       />
@@ -281,7 +275,9 @@ const PatientProfile = () => {
                       <Textarea
                         id="medicalHistory"
                         value={profile.medicalHistory}
-                        onChange={(e) => handleInputChange("medicalHistory", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("medicalHistory", e.target.value)
+                        }
                         disabled={!isEditing}
                         rows={3}
                         placeholder="Any relevant medical history, allergies, or previous conditions..."
@@ -289,11 +285,18 @@ const PatientProfile = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="currentMedications">Current Medications</Label>
+                      <Label htmlFor="currentMedications">
+                        Current Medications
+                      </Label>
                       <Textarea
                         id="currentMedications"
                         value={profile.currentMedications}
-                        onChange={(e) => handleInputChange("currentMedications", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "currentMedications",
+                            e.target.value
+                          )
+                        }
                         disabled={!isEditing}
                         rows={2}
                         placeholder="List any medications you are currently taking..."
@@ -309,12 +312,19 @@ const PatientProfile = () => {
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="currentPassword">Current Password</Label>
+                        <Label htmlFor="currentPassword">
+                          Current Password
+                        </Label>
                         <Input
                           id="currentPassword"
                           type="password"
                           value={passwordData.currentPassword}
-                          onChange={(e) => handlePasswordInputChange("currentPassword", e.target.value)}
+                          onChange={(e) =>
+                            handlePasswordInputChange(
+                              "currentPassword",
+                              e.target.value
+                            )
+                          }
                           placeholder="Enter your current password"
                         />
                       </div>
@@ -325,26 +335,42 @@ const PatientProfile = () => {
                           id="newPassword"
                           type="password"
                           value={passwordData.newPassword}
-                          onChange={(e) => handlePasswordInputChange("newPassword", e.target.value)}
+                          onChange={(e) =>
+                            handlePasswordInputChange(
+                              "newPassword",
+                              e.target.value
+                            )
+                          }
                           placeholder="Enter your new password"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                        <Label htmlFor="confirmPassword">
+                          Confirm New Password
+                        </Label>
                         <Input
                           id="confirmPassword"
                           type="password"
                           value={passwordData.confirmPassword}
-                          onChange={(e) => handlePasswordInputChange("confirmPassword", e.target.value)}
+                          onChange={(e) =>
+                            handlePasswordInputChange(
+                              "confirmPassword",
+                              e.target.value
+                            )
+                          }
                           placeholder="Confirm your new password"
                         />
                       </div>
 
-                      <Button 
+                      <Button
                         onClick={handlePasswordChange}
                         className="bg-blue-600 hover:bg-blue-700"
-                        disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                        disabled={
+                          !passwordData.currentPassword ||
+                          !passwordData.newPassword ||
+                          !passwordData.confirmPassword
+                        }
                       >
                         <Lock className="w-4 h-4 mr-2" />
                         Change Password
