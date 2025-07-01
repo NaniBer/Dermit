@@ -1,14 +1,19 @@
-
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { 
+import {
   ArrowLeft,
-  MessageSquare, 
+  MessageSquare,
   Clock,
   CheckCircle,
   FileText,
@@ -16,7 +21,7 @@ import {
   Send,
   Phone,
   Video,
-  Calendar
+  Calendar,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -37,45 +42,49 @@ const DoctorConsultationDetail = () => {
     time: "10:30 AM",
     symptoms: "Dry, itchy skin patches on arms and legs, worsening at night",
     medicalHistory: "Previous eczema episodes, family history of allergies",
-    currentMedications: "None reported"
+    currentMedications: "None reported",
   };
 
   const messages = [
     {
       id: 1,
       sender: "patient",
-      message: "Hello Dr. Johnson, I've been experiencing some skin issues lately. The patches on my arms are getting worse.",
+      message:
+        "Hello Dr. Johnson, I've been experiencing some skin issues lately. The patches on my arms are getting worse.",
       timestamp: "10:30 AM",
-      attachments: []
+      attachments: [],
     },
     {
       id: 2,
       sender: "patient",
       message: "Here are some photos of the affected areas",
       timestamp: "10:32 AM",
-      attachments: ["image1.jpg", "image2.jpg"]
+      attachments: ["image1.jpg", "image2.jpg"],
     },
     {
       id: 3,
       sender: "doctor",
-      message: "Thank you for sharing the photos. Based on what I can see, this appears to be atopic dermatitis. How long have you been experiencing these symptoms?",
+      message:
+        "Thank you for sharing the photos. Based on what I can see, this appears to be atopic dermatitis. How long have you been experiencing these symptoms?",
       timestamp: "11:15 AM",
-      attachments: []
+      attachments: [],
     },
     {
       id: 4,
       sender: "patient",
-      message: "It started about 2 weeks ago and has been getting progressively worse, especially at night.",
+      message:
+        "It started about 2 weeks ago and has been getting progressively worse, especially at night.",
       timestamp: "11:20 AM",
-      attachments: []
+      attachments: [],
     },
     {
       id: 5,
       sender: "doctor",
-      message: "I recommend starting with a gentle moisturizer twice daily and a mild topical steroid. Please avoid harsh soaps and hot water. I'll send you a detailed treatment plan.",
+      message:
+        "I recommend starting with a gentle moisturizer twice daily and a mild topical steroid. Please avoid harsh soaps and hot water. I'll send you a detailed treatment plan.",
       timestamp: "11:25 AM",
-      attachments: ["treatment_plan.pdf"]
-    }
+      attachments: ["treatment_plan.pdf"],
+    },
   ];
 
   const handleSendMessage = () => {
@@ -100,8 +109,8 @@ const DoctorConsultationDetail = () => {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate("/doctor/consultations")}
           className="mb-6"
         >
@@ -117,11 +126,20 @@ const DoctorConsultationDetail = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <Avatar className="w-12 h-12">
-                      <AvatarFallback>{consultation.patient.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      <AvatarFallback>
+                        {consultation.patient
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
-                      <CardTitle className="text-lg">{consultation.patient}</CardTitle>
-                      <CardDescription>Consultation #{consultation.id}</CardDescription>
+                      <CardTitle className="text-lg">
+                        {consultation.patient}
+                      </CardTitle>
+                      <CardDescription>
+                        Consultation #{consultation.id}
+                      </CardDescription>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -134,28 +152,35 @@ const DoctorConsultationDetail = () => {
                   </div>
                 </div>
               </CardHeader>
-              
+
               {/* Messages */}
               <CardContent className="flex-1 overflow-y-auto">
                 <div className="space-y-4">
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.sender === 'doctor' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${
+                        message.sender === "doctor"
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
                     >
                       <div
                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.sender === 'doctor'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-900'
+                          message.sender === "doctor"
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-100 text-gray-900"
                         }`}
                       >
                         <p className="text-sm">{message.message}</p>
                         {message.attachments.length > 0 && (
                           <div className="mt-2 space-y-1">
                             {message.attachments.map((attachment, index) => (
-                              <div key={index} className="flex items-center space-x-2 text-xs">
-                                {attachment.includes('image') ? (
+                              <div
+                                key={index}
+                                className="flex items-center space-x-2 text-xs"
+                              >
+                                {attachment.includes("image") ? (
                                   <Camera className="w-3 h-3" />
                                 ) : (
                                   <FileText className="w-3 h-3" />
@@ -165,13 +190,15 @@ const DoctorConsultationDetail = () => {
                             ))}
                           </div>
                         )}
-                        <p className="text-xs mt-1 opacity-75">{message.timestamp}</p>
+                        <p className="text-xs mt-1 opacity-75">
+                          {message.timestamp}
+                        </p>
                       </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
-              
+
               {/* Message Input */}
               <div className="p-4 border-t">
                 <div className="flex space-x-2">
@@ -199,36 +226,52 @@ const DoctorConsultationDetail = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Name</label>
+                    <label className="text-sm font-medium text-gray-600">
+                      Name
+                    </label>
                     <p className="text-gray-900">{consultation.patient}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Age</label>
-                    <p className="text-gray-900">{consultation.age} years old</p>
+                    <label className="text-sm font-medium text-gray-600">
+                      Age
+                    </label>
+                    <p className="text-gray-900">
+                      {consultation.age} years old
+                    </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Condition</label>
+                    <label className="text-sm font-medium text-gray-600">
+                      Condition
+                    </label>
                     <Badge variant="outline">{consultation.condition}</Badge>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Status</label>
-                    <Badge 
+                    <label className="text-sm font-medium text-gray-600">
+                      Status
+                    </label>
+                    <Badge
                       className={
-                        consultation.status === 'active' ? 'bg-green-100 text-green-800' : 
-                        consultation.status === 'waiting' ? 'bg-orange-100 text-orange-800' : 
-                        'bg-gray-100 text-gray-800'
+                        consultation.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : consultation.status === "waiting"
+                          ? "bg-orange-100 text-orange-800"
+                          : "bg-gray-100 text-gray-800"
                       }
                     >
                       {consultation.status}
                     </Badge>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Priority</label>
-                    <Badge 
+                    <label className="text-sm font-medium text-gray-600">
+                      Priority
+                    </label>
+                    <Badge
                       className={
-                        consultation.urgency === 'high' ? 'bg-red-100 text-red-800' : 
-                        consultation.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-green-100 text-green-800'
+                        consultation.urgency === "high"
+                          ? "bg-red-100 text-red-800"
+                          : consultation.urgency === "medium"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-green-100 text-green-800"
                       }
                     >
                       {consultation.urgency}
@@ -246,38 +289,52 @@ const DoctorConsultationDetail = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Symptoms</label>
-                    <p className="text-sm text-gray-900">{consultation.symptoms}</p>
+                    <label className="text-sm font-medium text-gray-600">
+                      Symptoms
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {consultation.symptoms}
+                    </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Medical History</label>
-                    <p className="text-sm text-gray-900">{consultation.medicalHistory}</p>
+                    <label className="text-sm font-medium text-gray-600">
+                      Medical History
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {consultation.medicalHistory}
+                    </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Current Medications</label>
-                    <p className="text-sm text-gray-900">{consultation.currentMedications}</p>
+                    <label className="text-sm font-medium text-gray-600">
+                      Current Medications
+                    </label>
+                    <p className="text-sm text-gray-900">
+                      {consultation.currentMedications}
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Actions */}
-            {consultation.status === 'waiting' && (
+            {consultation.status === "waiting" && (
               <Card className="shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-lg">Consultation Actions</CardTitle>
+                  <CardTitle className="text-lg">
+                    Consultation Actions
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
+                  <Button
                     onClick={handleAcceptConsultation}
                     className="w-full bg-green-600 hover:bg-green-700"
                   >
                     <CheckCircle className="w-4 h-4 mr-2" />
                     Accept Consultation
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleDeclineConsultation}
-                    variant="outline" 
+                    variant="outline"
                     className="w-full border-red-200 text-red-600 hover:bg-red-50"
                   >
                     Decline Consultation

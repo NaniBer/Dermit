@@ -1,11 +1,26 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, User, Edit, X, LogOut, ChevronDown, Stethoscope, Lock } from "lucide-react";
+import {
+  Camera,
+  User,
+  Edit,
+  X,
+  LogOut,
+  ChevronDown,
+  Stethoscope,
+  Lock,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -13,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import DoctorHeader from "@/components/DoctorHeader";
 
 const DoctorProfile = () => {
   const navigate = useNavigate();
@@ -28,13 +44,13 @@ const DoctorProfile = () => {
     yearsOfExperience: "8",
     education: "MD from Johns Hopkins University",
     certifications: "Board Certified Dermatologist, FAAD",
-    bio: "Experienced dermatologist specializing in medical and cosmetic dermatology with over 8 years of practice."
+    bio: "Experienced dermatologist specializing in medical and cosmetic dermatology with over 8 years of practice.",
   });
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const handleLogout = () => {
@@ -61,14 +77,14 @@ const DoctorProfile = () => {
       alert("Password must be at least 6 characters long!");
       return;
     }
-    
+
     // In real app, this would make API call to change password
     console.log("Changing password...");
     alert("Password changed successfully!");
     setPasswordData({
       currentPassword: "",
       newPassword: "",
-      confirmPassword: ""
+      confirmPassword: "",
     });
     setShowPasswordChange(false);
   };
@@ -76,57 +92,17 @@ const DoctorProfile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <Link to="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
-                  <Stethoscope className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-gray-900">Dermit</span>
-                <Badge variant="secondary" className="ml-2">Doctor</Badge>
-              </Link>
-              <nav className="hidden md:flex space-x-6">
-                <Link to="/doctor/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
-                <Link to="/doctor/consultations" className="text-gray-600 hover:text-gray-900">Consultations</Link>
-                <Link to="/doctor/patients" className="text-gray-600 hover:text-gray-900">Patients</Link>
-                <Link to="/doctor/profile" className="text-gray-900 font-medium">Profile</Link>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src="/placeholder-doctor.jpg" />
-                      <AvatarFallback>Dr</AvatarFallback>
-                    </Avatar>
-                    <span className="hidden md:block text-sm font-medium">Dr. Sarah Johnson</span>
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => navigate("/doctor/profile")}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-      </header>
-      
+      <DoctorHeader />
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Doctor Profile</h1>
-          <p className="text-gray-600">Manage your professional information and settings</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Doctor Profile
+          </h1>
+          <p className="text-gray-600">
+            Manage your professional information and settings
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -137,7 +113,8 @@ const DoctorProfile = () => {
                 <Avatar className="w-32 h-32 mx-auto mb-4">
                   <AvatarImage src="/placeholder-doctor.jpg" />
                   <AvatarFallback className="text-2xl">
-                    {profileData.firstName[0]}{profileData.lastName[0]}
+                    {profileData.firstName[0]}
+                    {profileData.lastName[0]}
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -148,8 +125,8 @@ const DoctorProfile = () => {
                   <Camera className="w-4 h-4 mr-2" />
                   Change Photo
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full"
                   onClick={() => setShowPasswordChange(!showPasswordChange)}
                 >
@@ -167,11 +144,17 @@ const DoctorProfile = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Years of Experience</span>
-                    <span className="font-medium">{profileData.yearsOfExperience} years</span>
+                    <span className="text-sm text-gray-600">
+                      Years of Experience
+                    </span>
+                    <span className="font-medium">
+                      {profileData.yearsOfExperience} years
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Total Patients</span>
+                    <span className="text-sm text-gray-600">
+                      Total Patients
+                    </span>
                     <span className="font-medium">1,247</span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -206,7 +189,12 @@ const DoctorProfile = () => {
                         id="currentPassword"
                         type="password"
                         value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            currentPassword: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
@@ -216,28 +204,43 @@ const DoctorProfile = () => {
                         id="newPassword"
                         type="password"
                         value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            newPassword: e.target.value,
+                          })
+                        }
                         required
                         minLength={6}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <Label htmlFor="confirmPassword">
+                        Confirm New Password
+                      </Label>
                       <Input
                         id="confirmPassword"
                         type="password"
                         value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                        onChange={(e) =>
+                          setPasswordData({
+                            ...passwordData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
                         required
                         minLength={6}
                       />
                     </div>
                     <div className="flex space-x-3">
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                      <Button
+                        type="submit"
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
                         Update Password
                       </Button>
-                      <Button 
-                        type="button" 
+                      <Button
+                        type="button"
                         variant="outline"
                         onClick={() => setShowPasswordChange(false)}
                       >
@@ -257,13 +260,17 @@ const DoctorProfile = () => {
                     <User className="w-5 h-5 text-blue-600" />
                     <span>Personal Information</span>
                   </CardTitle>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => setIsEditing(!isEditing)}
                   >
-                    {isEditing ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-                    {isEditing ? 'Cancel' : 'Edit'}
+                    {isEditing ? (
+                      <X className="w-4 h-4" />
+                    ) : (
+                      <Edit className="w-4 h-4" />
+                    )}
+                    {isEditing ? "Cancel" : "Edit"}
                   </Button>
                 </div>
               </CardHeader>
@@ -276,7 +283,12 @@ const DoctorProfile = () => {
                         <Input
                           id="firstName"
                           value={profileData.firstName}
-                          onChange={(e) => setProfileData({...profileData, firstName: e.target.value})}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              firstName: e.target.value,
+                            })
+                          }
                         />
                       </div>
                       <div>
@@ -284,7 +296,12 @@ const DoctorProfile = () => {
                         <Input
                           id="lastName"
                           value={profileData.lastName}
-                          onChange={(e) => setProfileData({...profileData, lastName: e.target.value})}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              lastName: e.target.value,
+                            })
+                          }
                         />
                       </div>
                     </div>
@@ -294,7 +311,12 @@ const DoctorProfile = () => {
                         id="email"
                         type="email"
                         value={profileData.email}
-                        onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            email: e.target.value,
+                          })
+                        }
                       />
                     </div>
                     <div>
@@ -302,14 +324,26 @@ const DoctorProfile = () => {
                       <Input
                         id="phone"
                         value={profileData.phone}
-                        onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            phone: e.target.value,
+                          })
+                        }
                       />
                     </div>
                     <div className="flex space-x-3">
-                      <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                      <Button
+                        type="submit"
+                        className="bg-green-600 hover:bg-green-700"
+                      >
                         Save Changes
                       </Button>
-                      <Button type="button" variant="outline" onClick={handleCancel}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleCancel}
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -318,20 +352,28 @@ const DoctorProfile = () => {
                   <div className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-gray-600">First Name</label>
+                        <label className="text-sm font-medium text-gray-600">
+                          First Name
+                        </label>
                         <p className="text-gray-900">{profileData.firstName}</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-gray-600">Last Name</label>
+                        <label className="text-sm font-medium text-gray-600">
+                          Last Name
+                        </label>
                         <p className="text-gray-900">{profileData.lastName}</p>
                       </div>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Email</label>
+                      <label className="text-sm font-medium text-gray-600">
+                        Email
+                      </label>
                       <p className="text-gray-900">{profileData.email}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">Phone</label>
+                      <label className="text-sm font-medium text-gray-600">
+                        Phone
+                      </label>
                       <p className="text-gray-900">{profileData.phone}</p>
                     </div>
                   </div>
@@ -350,23 +392,35 @@ const DoctorProfile = () => {
               <CardContent>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Specialty</label>
+                    <label className="text-sm font-medium text-gray-600">
+                      Specialty
+                    </label>
                     <p className="text-gray-900">{profileData.specialty}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">License Number</label>
+                    <label className="text-sm font-medium text-gray-600">
+                      License Number
+                    </label>
                     <p className="text-gray-900">{profileData.licenseNumber}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Education</label>
+                    <label className="text-sm font-medium text-gray-600">
+                      Education
+                    </label>
                     <p className="text-gray-900">{profileData.education}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Certifications</label>
-                    <p className="text-gray-900">{profileData.certifications}</p>
+                    <label className="text-sm font-medium text-gray-600">
+                      Certifications
+                    </label>
+                    <p className="text-gray-900">
+                      {profileData.certifications}
+                    </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">Bio</label>
+                    <label className="text-sm font-medium text-gray-600">
+                      Bio
+                    </label>
                     <p className="text-gray-900">{profileData.bio}</p>
                   </div>
                 </div>

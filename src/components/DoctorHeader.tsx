@@ -1,47 +1,49 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Plus,
-  MessageCircle,
+  Stethoscope,
   Bell,
   ChevronDown,
   LogOut,
   Edit,
-  Stethoscope,
   LayoutDashboard,
+  MessageCircle,
 } from "lucide-react";
-
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-const PatientHeader = () => {
+const DoctorHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
-
   const handleLogout = () => {
     navigate("/login");
   };
+
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
                 <Stethoscope className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Dermit</span>
+              <Badge variant="secondary" className="ml-2">
+                Doctor
+              </Badge>
             </Link>
             <nav className="hidden md:flex space-x-6">
               <Link
-                to="/patient/dashboard"
+                to="/doctor/dashboard"
                 className={`${
-                  currentPath === "/patient/dashboard"
+                  currentPath === "/doctor/dashboard"
                     ? "text-gray-900 font-semibold"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
@@ -49,9 +51,9 @@ const PatientHeader = () => {
                 Dashboard
               </Link>
               <Link
-                to="/patient/consultations"
+                to="/doctor/consultations"
                 className={`${
-                  currentPath === "/patient/consultations"
+                  currentPath === "/doctor/consultations"
                     ? "text-gray-900 font-semibold"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
@@ -59,19 +61,19 @@ const PatientHeader = () => {
                 Consultations
               </Link>
               <Link
-                to="/patient/chat"
+                to="/doctor/patients"
                 className={`${
-                  currentPath === "/patient/chat"
+                  currentPath === "/doctor/patients"
                     ? "text-gray-900 font-semibold"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
               >
-                Messages
+                Patients
               </Link>
               <Link
-                to="/patient/profile"
+                to="/doctor/profile"
                 className={`${
-                  currentPath === "/patient/profile"
+                  currentPath === "/doctor/profile"
                     ? "text-gray-900 font-semibold"
                     : "text-gray-600 hover:text-gray-900"
                 }`}
@@ -88,11 +90,11 @@ const PatientHeader = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
                   <Avatar className="w-8 h-8">
-                    <AvatarImage src="/placeholder-patient.jpg" />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarImage src="/placeholder-doctor.jpg" />
+                    <AvatarFallback>Dr</AvatarFallback>
                   </Avatar>
                   <span className="hidden md:block text-sm font-medium">
-                    John Doe
+                    Dr. Sarah Johnson
                   </span>
                   <ChevronDown className="w-4 h-4" />
                 </Button>
@@ -100,23 +102,25 @@ const PatientHeader = () => {
               <DropdownMenuContent align="end" className="w-56">
                 <div className="block md:hidden ">
                   <DropdownMenuItem
-                    onClick={() => navigate("/patient/dashboard")}
+                    onClick={() => navigate("/doctor/dashboard")}
                   >
                     <LayoutDashboard className="w-4 h-4 mr-2" />
                     Dashboard
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => navigate("/patient/consultations")}
+                    onClick={() => navigate("/doctor/consultations")}
                   >
                     <Stethoscope className="w-4 h-4 mr-2" />
                     Consultations
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/patient/chat")}>
+                  <DropdownMenuItem
+                    onClick={() => navigate("/doctor/patients")}
+                  >
                     <MessageCircle className="w-4 h-4 mr-2" />
-                    Messages
+                    Patients
                   </DropdownMenuItem>
                 </div>
-                <DropdownMenuItem onClick={() => navigate("/patient/profile")}>
+                <DropdownMenuItem onClick={() => navigate("/doctor/profile")}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Profile
                 </DropdownMenuItem>
@@ -132,5 +136,4 @@ const PatientHeader = () => {
     </header>
   );
 };
-
-export default PatientHeader;
+export default DoctorHeader;

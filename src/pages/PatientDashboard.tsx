@@ -18,9 +18,61 @@ import UpcomingConsultations from "@/components/patientDashboard/UpcomingConsult
 import DailyTips from "@/components/patientDashboard/DailyTips";
 import PatientHeader from "@/components/PatientHeader";
 import NewConsultationButton from "@/components/buttons/NewConsultationButton";
+import ChatList from "@/components/ChatList";
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
+  const pastDiagnoses = [
+    {
+      id: 1,
+      condition: "Atopic Dermatitis",
+      doctor: "Dr. Sarah Johnson",
+      date: "2024-06-10",
+      status: "completed",
+      prescription:
+        "Moisturizer twice daily, Topical steroid (Hydrocortisone 1%)",
+      symptoms: "Red, itchy patches on arms and legs, worsening at night",
+      diagnosis:
+        "Based on the clinical presentation and patient history, this appears to be atopic dermatitis (eczema). The condition is characterized by dry, inflamed skin with intense itching.",
+      treatment:
+        "Apply moisturizer twice daily to affected areas. Use hydrocortisone 1% cream for flare-ups, but limit use to 7-10 days. Avoid known triggers such as harsh soaps and extreme temperatures.",
+      followUp:
+        "Follow-up in 4 weeks to assess treatment response. Contact if symptoms worsen or new areas are affected.",
+      severity: "Mild to Moderate",
+    },
+    {
+      id: 2,
+      condition: "Seborrheic Keratosis",
+      doctor: "Dr. Michael Chen",
+      date: "2024-05-28",
+      status: "completed",
+      prescription: "Observation, Follow-up in 6 months",
+      symptoms: "Brown, waxy growth on back, no pain or itching",
+      diagnosis:
+        "Benign seborrheic keratosis confirmed through dermoscopic examination. This is a common, non-cancerous skin growth that typically appears with age.",
+      treatment:
+        "No treatment required at this time. The lesion is benign and poses no health risk. Monitor for any changes in size, color, or texture.",
+      followUp:
+        "Routine follow-up in 6 months. Return sooner if any changes are noticed in the lesion's appearance.",
+      severity: "Benign",
+    },
+    {
+      id: 3,
+      condition: "Contact Dermatitis",
+      doctor: "Dr. Sarah Johnson",
+      date: "2024-04-15",
+      status: "completed",
+      prescription: "Topical corticosteroid, Avoid allergen exposure",
+      symptoms: "Red, swollen skin on hands after using new detergent",
+      diagnosis:
+        "Allergic contact dermatitis likely caused by exposure to fragrances or preservatives in household detergent. Patch testing may be considered if reactions persist.",
+      treatment:
+        "Apply topical corticosteroid cream twice daily for 7-10 days. Switch to fragrance-free, hypoallergenic detergents. Wear gloves when handling cleaning products.",
+      followUp:
+        "Symptoms should resolve within 1-2 weeks. Contact if no improvement or if reactions occur with other products.",
+      severity: "Mild",
+    },
+  ];
 
   const recentChats = [
     {
@@ -101,73 +153,24 @@ const PatientDashboard = () => {
             <UpcomingConsultations />
 
             {/* Recent Messages */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageCircle className="w-5 h-5 text-green-600" />
-                  <span>Recent Messages</span>
-                </CardTitle>
-                <CardDescription>
-                  Latest communications with your doctors
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {recentChats.length > 0 ? (
-                  <div className="space-y-4">
-                    {recentChats.map((chat) => (
-                      <div
-                        key={chat.id}
-                        onClick={() => handleChatClick(chat.conversationId)}
-                        className="flex items-start space-x-4 p-4 hover:bg-gray-50 rounded-lg cursor-pointer transition-all duration-200 border border-gray-100 hover:border-gray-200 hover:shadow-md"
-                      >
-                        <Avatar className="w-12 h-12">
-                          <AvatarFallback className="bg-green-100 text-green-600">
-                            {chat.avatar}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-1">
-                            <div>
-                              <h4 className="font-semibold text-gray-900">
-                                {chat.doctor}
-                              </h4>
-                              <p className="text-xs text-gray-500">
-                                {chat.specialty}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-sm text-gray-500">
-                                {chat.time}
-                              </span>
-                              {chat.unread && (
-                                <div className="w-2 h-2 bg-red-500 rounded-full ml-auto mt-1"></div>
-                              )}
-                            </div>
-                          </div>
-                          <p className="text-sm text-gray-600 line-clamp-2">
-                            {chat.lastMessage}
-                          </p>
-                          {chat.unread && (
-                            <Badge className="mt-2 bg-blue-100 text-blue-800 text-xs">
-                              New Message
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState type="conversations" />
-                )}
-              </CardContent>
-            </Card>
+            <ChatList
+              title="Recent Messages"
+              description="Latest communications with your doctors"
+              icon={MessageCircle}
+              items={recentChats.map((chat) => ({
+                ...chat,
+                id: chat.id.toString(),
+              }))}
+              type="patient"
+              onClick={handleChatClick}
+            />
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Past Diagnoses */}
 
-            <PastDiagnosis />
+            <PastDiagnosis pastDiagnosesList={pastDiagnoses} />
 
             {/* Health Tips */}
             <DailyTips />
