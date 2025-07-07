@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Stethoscope,
-  Bell,
   ChevronDown,
   LogOut,
   Edit,
@@ -17,8 +16,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useNotifications } from "@/hooks/useNotifications";
 import { useAuth } from "@/hooks/useAuth";
+import NotificationDropdown from "@/components/NotificationDropdown";
 const DoctorHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,16 +25,9 @@ const DoctorHeader = () => {
   const { user } = useAuth();
   const fullname =
     user.user_metadata?.first_name + " " + user.user_metadata?.last_name;
-  const { unreadCount, markAllAsRead } = useNotifications();
 
   const handleLogout = () => {
     navigate("/login");
-  };
-
-  const handleNotificationClick = () => {
-    if (unreadCount > 0) {
-      markAllAsRead();
-    }
   };
 
   return (
@@ -96,22 +88,7 @@ const DoctorHeader = () => {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="relative"
-              onClick={handleNotificationClick}
-            >
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <Badge
-                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white"
-                  variant="destructive"
-                >
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </Badge>
-              )}
-            </Button>
+            <NotificationDropdown />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
