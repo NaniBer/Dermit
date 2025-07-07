@@ -17,12 +17,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useNotifications } from "@/hooks/useNotifications";
 const DoctorHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { unreadCount, markAllAsRead } = useNotifications();
+  
   const handleLogout = () => {
     navigate("/login");
+  };
+
+  const handleNotificationClick = () => {
+    if (unreadCount > 0) {
+      markAllAsRead();
+    }
   };
 
   return (
@@ -83,8 +92,21 @@ const DoctorHeader = () => {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="relative"
+              onClick={handleNotificationClick}
+            >
               <Bell className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <Badge 
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white"
+                  variant="destructive"
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Badge>
+              )}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

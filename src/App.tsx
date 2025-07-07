@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import DoctorNotificationToast from "@/components/DoctorNotificationToast";
+import ConsultationNotificationToast from "@/components/ConsultationNotificationToast";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -35,7 +35,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <DoctorNotificationToast />
+        <ConsultationNotificationToast />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
