@@ -17,9 +17,16 @@ import {
   AlertCircle,
   Stethoscope
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const NewConsultation = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const [formData, setFormData] = useState({
     chiefComplaint: "",
     knownIllnesses: "",
@@ -29,6 +36,7 @@ const NewConsultation = () => {
   
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -49,11 +57,62 @@ const NewConsultation = () => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Consultation request:", { ...formData, images: uploadedImages });
-    // Handle form submission logic here
-    setCurrentStep(4); // Show success step
+    
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to submit a consultation request.",
+        variant: "destructive",
+      });
+      navigate("/login");
+      return;
+    }
+
+    if (!formData.chiefComplaint.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please describe your chief complaint.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("consultations")
+        .insert({
+          patient_id: user.id,
+          title: formData.chiefComplaint.substring(0, 100), // Use first 100 chars as title
+          description: `Chief Complaint: ${formData.chiefComplaint}\n\nMedical History: ${formData.knownIllnesses}\n\nAdditional Comments: ${formData.additionalComments}`,
+          status: "pending",
+          priority: "normal",
+          images: uploadedImages,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Consultation Submitted!",
+        description: "Your consultation request has been submitted successfully.",
+      });
+
+      setCurrentStep(4); // Show success step
+    } catch (error) {
+      console.error("Error submitting consultation:", error);
+      toast({
+        title: "Submission Failed",
+        description: "Failed to submit consultation request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const nextStep = () => {
@@ -422,8 +481,12 @@ const NewConsultation = () => {
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               ) : (
-                <Button type="submit" className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
-                  Submit Consultation Request
+                <Button 
+                  type="submit" 
+                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                  disabled={loading}
+                >
+                  {loading ? "Submitting..." : "Submit Consultation Request"}
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               )}
