@@ -11,27 +11,16 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import {
-  Stethoscope,
   MessageSquare,
   Users,
   Clock,
   CheckCircle,
-  AlertCircle,
   Search,
   Filter,
   Bell,
-  ChevronDown,
-  LogOut,
-  Edit,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import ChatList from "@/components/ChatList";
+
 import DashboardButton from "@/components/doctorDashboard/DashboardButtons";
 import DoctorHeader from "@/components/DoctorHeader";
 import { useConsultations } from "@/hooks/useConsultations";
@@ -43,14 +32,12 @@ const DoctorConsultations = () => {
   const { consultations, loading } = useConsultations();
   const { notifications, unreadCount } = useNotifications();
 
-  const handleLogout = () => {
-    navigate("/login");
-  };
-
   const filteredConsultations = consultations.filter(
     (consultation) =>
       consultation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (consultation.description || "").toLowerCase().includes(searchTerm.toLowerCase())
+      (consultation.description || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
 
   const handleConsultationClick = (consultationId: string) => {
@@ -103,7 +90,7 @@ const DoctorConsultations = () => {
                   <Bell className="h-5 w-5 text-blue-600" />
                   <div>
                     <p className="font-medium text-blue-900">
-                      {unreadCount} new notification{unreadCount > 1 ? 's' : ''}
+                      {unreadCount} new notification{unreadCount > 1 ? "s" : ""}
                     </p>
                     <p className="text-sm text-blue-700">
                       New consultation requests available
@@ -126,7 +113,9 @@ const DoctorConsultations = () => {
 
           <DashboardButton
             description="Active"
-            value={consultations.filter((c) => c.status === "in_progress").length}
+            value={
+              consultations.filter((c) => c.status === "in_progress").length
+            }
             icon={MessageSquare}
             color="green"
           />
@@ -168,8 +157,8 @@ const DoctorConsultations = () => {
               </Card>
             ) : (
               filteredConsultations.map((consultation) => (
-                <Card 
-                  key={consultation.id} 
+                <Card
+                  key={consultation.id}
                   className="shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
                   onClick={() => handleConsultationClick(consultation.id)}
                 >
@@ -187,7 +176,10 @@ const DoctorConsultations = () => {
                               {consultation.title}
                             </h3>
                             <p className="text-sm text-gray-600">
-                              Created {new Date(consultation.created_at!).toLocaleDateString()}
+                              Created{" "}
+                              {new Date(
+                                consultation.created_at!
+                              ).toLocaleDateString()}
                             </p>
                           </div>
                         </div>

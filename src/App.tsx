@@ -25,22 +25,24 @@ import AdminDoctors from "./pages/AdminDoctors";
 import PatientConsultations from "./pages/PatientConsultation";
 import PatientConsultationChat from "./pages/PatientConsultationChat";
 import Consultations from "./pages/Consultations";
+import { useNotifications } from "./hooks/useNotifications";
 
 const queryClient = new QueryClient();
 
+const NotificationSetup = () => {
+  const { refetch } = useNotifications();
+  return <ConsultationNotificationToast fetchNotifications={refetch} />;
+};
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-<<<<<<< HEAD
 
-=======
-        <ConsultationNotificationToast />
->>>>>>> c364b6b9f31030af0e3d824f0b10ab5a5b3cf64e
         <BrowserRouter>
-          <DoctorNotificationToast />
+          <NotificationSetup />
+          {/* <DoctorNotificationToast /> */}
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
