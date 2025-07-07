@@ -19,10 +19,6 @@ import { useAuth } from "@/hooks/useAuth";
 const DoctorDashboard = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    navigate("/login");
-  };
-
   const handleConsultationClick = (consultationId: number) => {
     navigate(`/doctor/consultation/${consultationId}`);
   };
