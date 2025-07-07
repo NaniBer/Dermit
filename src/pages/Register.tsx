@@ -128,7 +128,8 @@ const Register = () => {
         doctorData.email,
         doctorData.password,
         doctorData.firstName,
-        doctorData.lastName
+        doctorData.lastName,
+        "doctor"
       );
 
       if (!error) {

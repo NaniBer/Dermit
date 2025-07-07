@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -24,86 +24,147 @@ import {
   Calendar,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useChat } from "@/hooks/useChat";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import type { Database } from "@/integrations/supabase/types";
+
+type Consultation = Database['public']['Tables']['consultations']['Row'];
 
 const DoctorConsultationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [newMessage, setNewMessage] = useState("");
+  const [consultation, setConsultation] = useState<Consultation | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - would come from API based on consultation ID
-  const consultation = {
-    id: parseInt(id || "1"),
-    patient: "John Doe",
-    age: 34,
-    condition: "Atopic Dermatitis",
-    status: "active",
-    urgency: "medium",
-    date: "2024-06-14",
-    time: "10:30 AM",
-    symptoms: "Dry, itchy skin patches on arms and legs, worsening at night",
-    medicalHistory: "Previous eczema episodes, family history of allergies",
-    currentMedications: "None reported",
-  };
+  // Use real-time chat
+  const { messages, sendMessage } = useChat(id || "");
 
-  const messages = [
-    {
-      id: 1,
-      sender: "patient",
-      message:
-        "Hello Dr. Johnson, I've been experiencing some skin issues lately. The patches on my arms are getting worse.",
-      timestamp: "10:30 AM",
-      attachments: [],
-    },
-    {
-      id: 2,
-      sender: "patient",
-      message: "Here are some photos of the affected areas",
-      timestamp: "10:32 AM",
-      attachments: ["image1.jpg", "image2.jpg"],
-    },
-    {
-      id: 3,
-      sender: "doctor",
-      message:
-        "Thank you for sharing the photos. Based on what I can see, this appears to be atopic dermatitis. How long have you been experiencing these symptoms?",
-      timestamp: "11:15 AM",
-      attachments: [],
-    },
-    {
-      id: 4,
-      sender: "patient",
-      message:
-        "It started about 2 weeks ago and has been getting progressively worse, especially at night.",
-      timestamp: "11:20 AM",
-      attachments: [],
-    },
-    {
-      id: 5,
-      sender: "doctor",
-      message:
-        "I recommend starting with a gentle moisturizer twice daily and a mild topical steroid. Please avoid harsh soaps and hot water. I'll send you a detailed treatment plan.",
-      timestamp: "11:25 AM",
-      attachments: ["treatment_plan.pdf"],
-    },
-  ];
+  useEffect(() => {
+    if (!id) return;
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      // In real app, this would send message via API
-      console.log("Sending message:", newMessage);
+    const fetchConsultation = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("consultations")
+          .select("*")
+          .eq("id", id)
+          .single();
+
+        if (error) throw error;
+        setConsultation(data);
+      } catch (error) {
+        console.error("Error fetching consultation:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load consultation details",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConsultation();
+  }, [id, toast]);
+
+  const handleSendMessage = async () => {
+    if (newMessage.trim() && user) {
+      await sendMessage(newMessage);
       setNewMessage("");
     }
   };
 
-  const handleAcceptConsultation = () => {
-    console.log("Accepting consultation");
-    // API call to accept consultation
+  const handleAcceptConsultation = async () => {
+    if (!consultation || !user) return;
+
+    try {
+      const { error } = await supabase
+        .from("consultations")
+        .update({
+          doctor_id: user.id,
+          status: "in_progress",
+        })
+        .eq("id", consultation.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Consultation Accepted",
+        description: "You can now start chatting with the patient.",
+      });
+
+      // Update local state
+      setConsultation({
+        ...consultation,
+        doctor_id: user.id,
+        status: "in_progress",
+      });
+
+    } catch (error) {
+      console.error("Error accepting consultation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to accept consultation",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeclineConsultation = () => {
-    console.log("Declining consultation");
-    // API call to decline consultation
+  const handleDeclineConsultation = async () => {
+    if (!consultation) return;
+
+    try {
+      const { error } = await supabase
+        .from("consultations")
+        .update({ status: "cancelled" })
+        .eq("id", consultation.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Consultation Declined",
+        description: "The consultation has been declined.",
+      });
+
+      navigate("/doctor/consultations");
+    } catch (error) {
+      console.error("Error declining consultation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to decline consultation",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading consultation...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!consultation) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Consultation not found</p>
+          <Button onClick={() => navigate("/doctor/consultations")} className="mt-4">
+            Back to Consultations
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
@@ -125,22 +186,19 @@ const DoctorConsultationDetail = () => {
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <Avatar className="w-12 h-12">
-                      <AvatarFallback>
-                        {consultation.patient
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-lg">
-                        {consultation.patient}
-                      </CardTitle>
-                      <CardDescription>
-                        Consultation #{consultation.id}
-                      </CardDescription>
-                    </div>
+                     <Avatar className="w-12 h-12">
+                       <AvatarFallback>
+                         PT
+                       </AvatarFallback>
+                     </Avatar>
+                     <div>
+                       <CardTitle className="text-lg">
+                         Patient Consultation
+                       </CardTitle>
+                       <CardDescription>
+                         Consultation #{consultation.id.substring(0, 8)}
+                       </CardDescription>
+                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button variant="outline" size="sm">
@@ -156,46 +214,41 @@ const DoctorConsultationDetail = () => {
               {/* Messages */}
               <CardContent className="flex-1 overflow-y-auto">
                 <div className="space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${
-                        message.sender === "doctor"
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.sender === "doctor"
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-100 text-gray-900"
-                        }`}
-                      >
-                        <p className="text-sm">{message.message}</p>
-                        {message.attachments.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {message.attachments.map((attachment, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center space-x-2 text-xs"
-                              >
-                                {attachment.includes("image") ? (
-                                  <Camera className="w-3 h-3" />
-                                ) : (
-                                  <FileText className="w-3 h-3" />
-                                )}
-                                <span>{attachment}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        <p className="text-xs mt-1 opacity-75">
-                          {message.timestamp}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                     {messages.map((message) => (
+                       <div
+                         key={message.id}
+                         className={`flex ${
+                           message.sender_id === user?.id
+                             ? "justify-end"
+                             : "justify-start"
+                         }`}
+                       >
+                         <div
+                           className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                             message.sender_id === user?.id
+                               ? "bg-blue-600 text-white"
+                               : "bg-gray-100 text-gray-900"
+                           }`}
+                         >
+                           <p className="text-sm">{message.content}</p>
+                           {message.file_url && (
+                             <div className="mt-2">
+                               <div className="flex items-center space-x-2 text-xs">
+                                 {message.message_type === "image" ? (
+                                   <Camera className="w-3 h-3" />
+                                 ) : (
+                                   <FileText className="w-3 h-3" />
+                                 )}
+                                 <span>Attachment</span>
+                               </div>
+                             </div>
+                           )}
+                           <p className="text-xs mt-1 opacity-75">
+                             {new Date(message.created_at!).toLocaleTimeString()}
+                           </p>
+                         </div>
+                       </div>
+                     ))}
                 </div>
               </CardContent>
 
@@ -225,58 +278,52 @@ const DoctorConsultationDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Name
-                    </label>
-                    <p className="text-gray-900">{consultation.patient}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Age
-                    </label>
-                    <p className="text-gray-900">
-                      {consultation.age} years old
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Condition
-                    </label>
-                    <Badge variant="outline">{consultation.condition}</Badge>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Status
-                    </label>
-                    <Badge
-                      className={
-                        consultation.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : consultation.status === "waiting"
-                          ? "bg-orange-100 text-orange-800"
-                          : "bg-gray-100 text-gray-800"
-                      }
-                    >
-                      {consultation.status}
-                    </Badge>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Priority
-                    </label>
-                    <Badge
-                      className={
-                        consultation.urgency === "high"
-                          ? "bg-red-100 text-red-800"
-                          : consultation.urgency === "medium"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }
-                    >
-                      {consultation.urgency}
-                    </Badge>
-                  </div>
+                   <div>
+                     <label className="text-sm font-medium text-gray-600">
+                       Title
+                     </label>
+                     <p className="text-gray-900">{consultation.title}</p>
+                   </div>
+                   <div>
+                     <label className="text-sm font-medium text-gray-600">
+                       Status
+                     </label>
+                     <Badge
+                       className={
+                         consultation.status === "in_progress"
+                           ? "bg-green-100 text-green-800"
+                           : consultation.status === "pending"
+                           ? "bg-orange-100 text-orange-800"
+                           : "bg-gray-100 text-gray-800"
+                       }
+                     >
+                       {consultation.status}
+                     </Badge>
+                   </div>
+                   <div>
+                     <label className="text-sm font-medium text-gray-600">
+                       Priority
+                     </label>
+                     <Badge
+                       className={
+                         consultation.priority === "high"
+                           ? "bg-red-100 text-red-800"
+                           : consultation.priority === "normal"
+                           ? "bg-yellow-100 text-yellow-800"
+                           : "bg-green-100 text-green-800"
+                       }
+                     >
+                       {consultation.priority}
+                     </Badge>
+                   </div>
+                   <div>
+                     <label className="text-sm font-medium text-gray-600">
+                       Created
+                     </label>
+                     <p className="text-gray-900">
+                       {new Date(consultation.created_at!).toLocaleDateString()}
+                     </p>
+                   </div>
                 </div>
               </CardContent>
             </Card>
@@ -287,37 +334,31 @@ const DoctorConsultationDetail = () => {
                 <CardTitle className="text-lg">Medical Details</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Symptoms
-                    </label>
-                    <p className="text-sm text-gray-900">
-                      {consultation.symptoms}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Medical History
-                    </label>
-                    <p className="text-sm text-gray-900">
-                      {consultation.medicalHistory}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Current Medications
-                    </label>
-                    <p className="text-sm text-gray-900">
-                      {consultation.currentMedications}
-                    </p>
-                  </div>
-                </div>
+                 <div className="space-y-4">
+                   <div>
+                     <label className="text-sm font-medium text-gray-600">
+                       Description
+                     </label>
+                     <p className="text-sm text-gray-900 whitespace-pre-line">
+                       {consultation.description || "No description provided"}
+                     </p>
+                   </div>
+                   {consultation.images && consultation.images.length > 0 && (
+                     <div>
+                       <label className="text-sm font-medium text-gray-600">
+                         Images
+                       </label>
+                       <p className="text-sm text-gray-900">
+                         {consultation.images.length} image(s) uploaded
+                       </p>
+                     </div>
+                   )}
+                 </div>
               </CardContent>
             </Card>
 
-            {/* Actions */}
-            {consultation.status === "waiting" && (
+             {/* Actions */}
+             {consultation.status === "pending" && (
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-lg">
