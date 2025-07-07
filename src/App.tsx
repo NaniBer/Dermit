@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import DoctorNotificationToast from "@/components/DoctorNotificationToast";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -23,6 +24,7 @@ import DoctorConsultations from "./pages/DoctorConsultations";
 import DoctorConsultationDetail from "./pages/DoctorConsultationDetail";
 import AdminDoctors from "./pages/AdminDoctors";
 import PatientConsultations from "./pages/PatientConsultation";
+import PatientConsultationChat from "./pages/PatientConsultationChat";
 import Consultations from "./pages/Consultations";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <DoctorNotificationToast />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -51,6 +54,10 @@ const App = () => (
             <Route
               path="/patient/consultations"
               element={<PatientConsultations />}
+            />
+            <Route
+              path="/patient/consultation/:id"
+              element={<PatientConsultationChat />}
             />
 
             {/* Doctor Routes */}
