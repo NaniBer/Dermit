@@ -17,10 +17,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 const DoctorHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { user } = useAuth();
+  const fullname =
+    user.user_metadata?.first_name + " " + user.user_metadata?.last_name;
   const handleLogout = () => {
     navigate("/login");
   };
@@ -89,12 +93,12 @@ const DoctorHeader = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
-                  <Avatar className="w-8 h-8">
+                  <Avatar className="w-8 h-8 md:hidden block">
                     <AvatarImage src="/placeholder-doctor.jpg" />
                     <AvatarFallback>Dr</AvatarFallback>
                   </Avatar>
                   <span className="hidden md:block text-sm font-medium">
-                    Dr. Sarah Johnson
+                    Dr. {fullname}
                   </span>
                   <ChevronDown className="w-4 h-4" />
                 </Button>

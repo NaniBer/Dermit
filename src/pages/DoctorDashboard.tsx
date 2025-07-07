@@ -1,39 +1,20 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Stethoscope,
   MessageSquare,
   FileText,
   Users,
   Clock,
   CheckCircle,
-  AlertCircle,
   Calendar,
-  Bell,
   Activity,
-  ChevronDown,
-  LogOut,
-  Edit,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import DashboardButton from "@/components/doctorDashboard/DashboardButtons";
 import PastDiagnosis from "@/components/patientDashboard/PastDiagnosis";
 import ChatList from "@/components/ChatList";
 import DoctorHeader from "@/components/DoctorHeader";
+import { useAuth } from "@/hooks/useAuth";
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
@@ -128,7 +109,9 @@ const DoctorDashboard = () => {
     completedToday: 5,
     avgResponseTime: "12 min",
   };
-
+  const { user } = useAuth();
+  const fullname =
+    user.user_metadata?.first_name + " " + user.user_metadata?.last_name;
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       {/* Header */}
@@ -138,7 +121,7 @@ const DoctorDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Good morning, Dr. Sarah Johnson!
+            Good morning, Dr. {fullname}!
           </h1>
           <p className="text-gray-600">
             Here's your consultation overview for today
