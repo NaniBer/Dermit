@@ -1,7 +1,12 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Stethoscope } from "lucide-react";
@@ -16,22 +21,25 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Redirect if already logged in
-  if (user) {
-    navigate("/patient/dashboard");
-    return null;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      const { error } = await signIn(email, password);
-      if (!error) {
-        navigate("/patient/dashboard");
+      const { error, role } = await signIn(email, password);
+      console.log(signIn);
+      if (!error && role) {
+        if (role === "patient") {
+          navigate("/patient/dashboard");
+        } else if (role === "doctor") {
+          navigate("/doctor/dashboard");
+        } else if (role === "admin") {
+          navigate("/admin/overview");
+        }
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
@@ -48,12 +56,16 @@ const Login = () => {
             </div>
             <span className="text-2xl font-bold text-gray-900">Dermit</span>
           </Link>
-          <p className="text-gray-600 mt-2">Welcome back! Please sign in to your account</p>
+          <p className="text-gray-600 mt-2">
+            Welcome back! Please sign in to your account
+          </p>
         </div>
 
         <Card className="shadow-xl border-0">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl font-bold text-gray-900">Sign In</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              Sign In
+            </CardTitle>
             <CardDescription className="text-gray-600">
               Enter your credentials to access your account
             </CardDescription>
@@ -82,8 +94,8 @@ const Login = () => {
                   required
                 />
               </div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-2"
                 disabled={loading}
               >
@@ -93,7 +105,10 @@ const Login = () => {
 
             <div className="text-center text-sm text-gray-600 mt-6">
               Don't have an account?{" "}
-              <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
+              <Link
+                to="/register"
+                className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
+              >
                 Sign up
               </Link>
             </div>
