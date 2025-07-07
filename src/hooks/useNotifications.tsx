@@ -51,6 +51,28 @@ export const useNotifications = () => {
     }
   };
 
+  // Mark all notifications as read
+  const markAllAsRead = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+
+      if (error) throw error;
+      
+      setNotifications(prev => 
+        prev.map(n => ({ ...n, is_read: true }))
+      );
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
+
   // Set up real-time subscription
   useEffect(() => {
     if (!user) return;
@@ -90,6 +112,7 @@ export const useNotifications = () => {
     notifications,
     unreadCount,
     markAsRead,
+    markAllAsRead,
     refetch: fetchNotifications,
   };
 };
