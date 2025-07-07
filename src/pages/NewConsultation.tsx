@@ -21,6 +21,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import WaitingForDoctor from "@/components/WaitingForDoctor";
 
 const NewConsultation = () => {
   const { user } = useAuth();
@@ -129,32 +130,7 @@ const NewConsultation = () => {
 
   if (currentStep === 4) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md text-center shadow-xl border-0">
-          <CardContent className="p-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Consultation Requested!</h2>
-            <p className="text-gray-600 mb-6">
-              Your consultation request has been submitted successfully. 
-              A dermatologist will review your case and contact you within 24 hours.
-            </p>
-            <div className="space-y-3">
-              <Link to="/patient/dashboard">
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
-                  Go to Dashboard
-                </Button>
-              </Link>
-              <Link to="/patient/chat">
-                <Button variant="outline" className="w-full">
-                  View Messages
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <WaitingForDoctor />
     );
   }
 
