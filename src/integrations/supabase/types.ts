@@ -188,6 +188,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_consultation: {
+        Args: { consult_id: string; doc_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _user_id: string

@@ -106,12 +106,8 @@ const NotificationDropdown = ({ badgeCount = 0 }: NotificationDropdownProps) => 
             return [consultationWithDetails, ...prev];
           });
 
-          // Show toast for new consultation
-          toast({
-            title: "New Consultation Request",
-            description: chiefComplaint,
-            duration: 8000,
-          });
+          // Live notification already handled by InstantNotificationSystem
+          // Just update the dropdown list
         }
       )
       .on(

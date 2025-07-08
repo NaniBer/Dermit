@@ -12,7 +12,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
 
 interface InstantNotificationProps {
-  onBadgeCountChange: (count: number) => void;
+  onBadgeCountChange: (count: number | ((prev: number) => number)) => void;
 }
 
 const InstantNotificationSystem = ({ onBadgeCountChange }: InstantNotificationProps) => {
@@ -23,30 +23,31 @@ const InstantNotificationSystem = ({ onBadgeCountChange }: InstantNotificationPr
   const channelRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!user || toast === undefined) return;
+    if (!user || !toast) return;
     if (channelRef.current) return; // Already subscribed
 
     const setup = async () => {
       // Check if user is a doctor
-      const { data } = await supabase
+      const { data: doctorCheck } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
         .eq("role", "doctor")
         .single();
 
-      if (!data) return;
+      if (!doctorCheck) return; // Not a doctor
 
-      // Get initial count of pending consultations
-      const { data: pendingConsultations } = await supabase
+      // Get initial pending consultations count
+      const { data: initialConsultations } = await supabase
         .from("consultations")
         .select("id")
         .eq("status", "pending");
       
-      onBadgeCountChange(pendingConsultations?.length || 0);
+      onBadgeCountChange(initialConsultations?.length || 0);
 
+      // Subscribe to live consultation broadcasts
       const channel = supabase
-        .channel("instant-notifications")
+        .channel("live-consultation-alerts")
         .on(
           "postgres_changes",
           {
@@ -57,31 +58,22 @@ const InstantNotificationSystem = ({ onBadgeCountChange }: InstantNotificationPr
           },
           (payload) => {
             const newConsultation = payload.new as Consultation;
+            
+            // Extract chief complaint from description
             const description = newConsultation.description || "";
             const chiefComplaintMatch = description.match(/Chief Complaint: ([^\n]+)/);
-            const chiefComplaint = chiefComplaintMatch
-              ? chiefComplaintMatch[1]
-              : newConsultation.title;
+            const chiefComplaint = chiefComplaintMatch?.[1] || newConsultation.title;
 
-            // Update badge count immediately
-            supabase
-              .from("consultations")
-              .select("id")
-              .eq("status", "pending")
-              .then(({ data }) => {
-                onBadgeCountChange(data?.length || 0);
-              });
+            // Instantly update badge count
+            onBadgeCountChange(prev => prev + 1);
 
-            // Create instant notification with enhanced styling
-            const notificationId = `notification-${newConsultation.id}`;
-            
+            // Show instant live notification - no storage, direct broadcast
             toast({
-              title: "🚨 URGENT: New Patient Request",
+              title: "🚨 LIVE: New Patient Request",
               description: (
                 <Card className="bg-gradient-to-br from-blue-50 via-white to-green-50 border-2 border-blue-300 shadow-2xl">
                   <CardContent className="p-4">
                     <div className="space-y-4">
-                      {/* Patient Info Header */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center animate-pulse">
@@ -93,43 +85,35 @@ const InstantNotificationSystem = ({ onBadgeCountChange }: InstantNotificationPr
                             </div>
                             <div className="flex items-center space-x-2 text-xs text-blue-600">
                               <Clock className="w-3 h-3" />
-                              <span>Just requested consultation</span>
+                              <span>Just requested help</span>
                             </div>
                           </div>
                         </div>
-                        <Badge
-                          className={`animate-bounce font-bold ${
-                            newConsultation.priority === "urgent"
-                              ? "bg-red-500 text-white border-red-300"
-                              : newConsultation.priority === "high"
-                              ? "bg-orange-500 text-white border-orange-300"
-                              : "bg-blue-500 text-white border-blue-300"
-                          }`}
-                        >
-                          {newConsultation.priority?.toUpperCase()} PRIORITY
+                        <Badge className={`animate-bounce font-bold ${
+                          newConsultation.priority === "urgent" 
+                            ? "bg-red-500 text-white" 
+                            : newConsultation.priority === "high"
+                            ? "bg-orange-500 text-white"
+                            : "bg-blue-500 text-white"
+                        }`}>
+                          {newConsultation.priority?.toUpperCase()}
                         </Badge>
                       </div>
 
-                      {/* Chief Complaint */}
                       <div className="bg-white/90 p-4 rounded-lg border-l-4 border-blue-500 shadow-inner">
                         <div className="flex items-center space-x-2 mb-2">
                           <Stethoscope className="w-4 h-4 text-blue-600" />
                           <span className="font-semibold text-blue-900">Chief Complaint:</span>
                         </div>
-                        <p className="text-blue-800 font-medium italic">
-                          "{chiefComplaint}"
-                        </p>
+                        <p className="text-blue-800 font-medium italic">"{chiefComplaint}"</p>
                       </div>
 
-                      {/* Call to Action */}
                       <div className="bg-gradient-to-r from-green-100 to-blue-100 p-3 rounded-lg border border-green-200">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <Bell className="w-5 h-5 text-green-600 animate-bounce" />
-                            <span className="font-semibold text-green-800">
-                              Patient is waiting for your response...
-                            </span>
-                          </div>
+                        <div className="flex items-center space-x-2">
+                          <Bell className="w-5 h-5 text-green-600 animate-bounce" />
+                          <span className="font-semibold text-green-800">
+                            Patient waiting for response...
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -145,28 +129,22 @@ const InstantNotificationSystem = ({ onBadgeCountChange }: InstantNotificationPr
                   🩺 Accept & Start Chat
                 </Button>
               ),
-              duration: 60000, // 1 minute for urgent notifications
+              duration: 0, // Keep visible until manually dismissed
             });
           }
         )
         .on(
           "postgres_changes",
           {
-            event: "UPDATE",
+            event: "UPDATE", 
             schema: "public",
             table: "consultations",
           },
           (payload) => {
             const updatedConsultation = payload.new as Consultation;
             if (updatedConsultation.status !== "pending") {
-              // Update badge count when consultation is no longer pending
-              supabase
-                .from("consultations")
-                .select("id")
-                .eq("status", "pending")
-                .then(({ data }) => {
-                  onBadgeCountChange(data?.length || 0);
-                });
+              // Instantly update badge when consultation no longer pending
+              onBadgeCountChange(prev => Math.max(0, prev - 1));
             }
           }
         )

@@ -26,6 +26,14 @@ const DoctorHeader = () => {
   const currentPath = location.pathname;
   const { user } = useAuth();
   const [notificationBadgeCount, setNotificationBadgeCount] = useState(0);
+  
+  const handleBadgeCountChange = (count: number | ((prev: number) => number)) => {
+    if (typeof count === 'function') {
+      setNotificationBadgeCount(count);
+    } else {
+      setNotificationBadgeCount(count);
+    }
+  };
   const fullname =
     user.user_metadata?.first_name + " " + user.user_metadata?.last_name;
 
@@ -91,7 +99,7 @@ const DoctorHeader = () => {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <InstantNotificationSystem onBadgeCountChange={setNotificationBadgeCount} />
+            <InstantNotificationSystem onBadgeCountChange={handleBadgeCountChange} />
             <NotificationDropdown badgeCount={notificationBadgeCount} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
