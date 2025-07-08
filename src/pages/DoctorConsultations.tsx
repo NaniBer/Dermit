@@ -1,10 +1,7 @@
 import { useState } from "react";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  CardContent
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,7 +81,13 @@ const DoctorConsultations = () => {
         {/* Notifications Badge */}
         {unreadCount > 0 && (
           <div className="mb-6">
-            <Card className="border-blue-200 bg-blue-50">
+            <Card
+              className="border-blue-200 bg-blue-50 cursor-pointer hover:bg-blue-100 transition"
+              onClick={() => navigate("/doctor/consultations")}
+              tabIndex={0}
+              role="button"
+              aria-label="View new notifications"
+            >
               <CardContent className="p-4">
                 <div className="flex items-center space-x-3">
                   <Bell className="h-5 w-5 text-blue-600" />

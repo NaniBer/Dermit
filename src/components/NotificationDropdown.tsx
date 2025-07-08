@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, User, Clock, AlertCircle, Stethoscope } from "lucide-react";
+import { Bell, User, Clock, Stethoscope } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,13 +21,15 @@ interface ConsultationWithDetails extends Consultation {
 }
 
 const NotificationDropdown = () => {
-  const [pendingConsultations, setPendingConsultations] = useState<ConsultationWithDetails[]>([]);
+  const [pendingConsultations, setPendingConsultations] = useState<
+    ConsultationWithDetails[]
+  >([]);
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch pending consultations
+  // Fetch pending consultations from supabase
   const fetchPendingConsultations = async () => {
     if (!user) return;
 
@@ -40,9 +42,11 @@ const NotificationDropdown = () => {
 
       if (error) throw error;
 
-      const consultationsWithDetails = data?.map((consultation) => {
+      const consultationsWithDetails = (data || []).map((consultation) => {
         const description = consultation.description || "";
-        const chiefComplaintMatch = description.match(/Chief Complaint: ([^\n]+)/);
+        const chiefComplaintMatch = description.match(
+          /Chief Complaint: ([^\n]+)/
+        );
         const chiefComplaint = chiefComplaintMatch
           ? chiefComplaintMatch[1]
           : consultation.title;
@@ -51,7 +55,7 @@ const NotificationDropdown = () => {
           ...consultation,
           chiefComplaint,
         };
-      }) || [];
+      });
 
       setPendingConsultations(consultationsWithDetails);
     } catch (error) {
@@ -59,12 +63,13 @@ const NotificationDropdown = () => {
     }
   };
 
-  // Set up real-time subscription for new consultations
   useEffect(() => {
     if (!user) return;
 
+    // Initial fetch to get the current pending consultations
     fetchPendingConsultations();
 
+    // Set up the real-time subscription channel
     const channel = supabase
       .channel("notification-dropdown")
       .on(
@@ -78,7 +83,9 @@ const NotificationDropdown = () => {
         (payload) => {
           const newConsultation = payload.new as Consultation;
           const description = newConsultation.description || "";
-          const chiefComplaintMatch = description.match(/Chief Complaint: ([^\n]+)/);
+          const chiefComplaintMatch = description.match(
+            /Chief Complaint: ([^\n]+)/
+          );
           const chiefComplaint = chiefComplaintMatch
             ? chiefComplaintMatch[1]
             : newConsultation.title;
@@ -88,7 +95,19 @@ const NotificationDropdown = () => {
             chiefComplaint,
           };
 
-          setPendingConsultations((prev) => [consultationWithDetails, ...prev]);
+          setPendingConsultations((prev) => {
+            // Prevent duplicates just in case
+            if (prev.some((c) => c.id === consultationWithDetails.id))
+              return prev;
+            return [consultationWithDetails, ...prev];
+          });
+
+          // Show toast for new consultation
+          toast({
+            title: "New Consultation Request",
+            description: chiefComplaint,
+            duration: 8000,
+          });
         }
       )
       .on(
@@ -109,10 +128,11 @@ const NotificationDropdown = () => {
       )
       .subscribe();
 
+    // Cleanup subscription on unmount
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, toast]);
 
   const handleAccept = async (consultationId: string) => {
     if (!user) return;
@@ -130,12 +150,12 @@ const NotificationDropdown = () => {
 
       toast({
         title: "Consultation Accepted",
-        description: "You have been assigned to this consultation. Redirecting to chat...",
+        description:
+          "You have been assigned to this consultation. Redirecting to chat...",
       });
 
       setIsOpen(false);
 
-      // Redirect to consultation chat
       setTimeout(() => {
         navigate(`/doctor/consultation/${consultationId}`);
       }, 1000);
@@ -163,19 +183,25 @@ const NotificationDropdown = () => {
               className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white"
               variant="destructive"
             >
-              {pendingConsultations.length > 99 ? "99+" : pendingConsultations.length}
+              {pendingConsultations.length > 99
+                ? "99+"
+                : pendingConsultations.length}
             </Badge>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-96 max-h-96 overflow-y-auto p-0">
+      <DropdownMenuContent
+        align="end"
+        className="w-96 max-h-96 overflow-y-auto p-0"
+      >
         <div className="p-4 border-b">
           <h3 className="font-semibold text-gray-900 flex items-center space-x-2">
             <Stethoscope className="w-4 h-4" />
             <span>Consultation Requests</span>
           </h3>
           <p className="text-sm text-gray-600">
-            {pendingConsultations.length} pending request{pendingConsultations.length !== 1 ? "s" : ""}
+            {pendingConsultations.length} pending request
+            {pendingConsultations.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="max-h-80 overflow-y-auto">
@@ -190,6 +216,7 @@ const NotificationDropdown = () => {
                 <Card
                   key={consultation.id}
                   className="border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/doctor/consultation/${consultation.id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="space-y-3">
@@ -214,7 +241,9 @@ const NotificationDropdown = () => {
                       </div>
 
                       <div>
-                        <p className="text-sm font-medium text-blue-900 mb-1">Chief Complaint:</p>
+                        <p className="text-sm font-medium text-blue-900 mb-1">
+                          Chief Complaint:
+                        </p>
                         <p className="text-sm text-blue-700 bg-white/50 p-2 rounded border">
                           {consultation.chiefComplaint}
                         </p>
@@ -224,7 +253,9 @@ const NotificationDropdown = () => {
                         <div className="flex items-center space-x-2">
                           <Clock className="w-3 h-3 text-blue-600" />
                           <span className="text-xs text-blue-600">
-                            {new Date(consultation.created_at!).toLocaleTimeString()}
+                            {new Date(
+                              consultation.created_at!
+                            ).toLocaleTimeString()}
                           </span>
                         </div>
                         <Button
