@@ -26,12 +26,12 @@ import PatientConsultations from "./pages/PatientConsultation";
 import PatientConsultationChat from "./pages/PatientConsultationChat";
 import Consultations from "./pages/Consultations";
 import { useNotifications } from "./hooks/useNotifications";
+import DoctorNotificationToast from "./components/DoctorNotificationToast";
 
 const queryClient = new QueryClient();
 
 const NotificationSetup = () => {
-  const { refetch } = useNotifications();
-  return <ConsultationNotificationToast fetchNotifications={refetch} />;
+  return <DoctorNotificationToast />;
 };
 const App = () => (
   <QueryClientProvider client={queryClient}>

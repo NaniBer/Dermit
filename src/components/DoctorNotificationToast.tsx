@@ -9,14 +9,16 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { Database } from "@/integrations/supabase/types";
 
-type Consultation = Database['public']['Tables']['consultations']['Row'];
+type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
 
 interface ConsultationWithDetails extends Consultation {
   chiefComplaint?: string;
 }
 
 const DoctorNotificationToast = () => {
-  const [pendingConsultations, setPendingConsultations] = useState<ConsultationWithDetails[]>([]);
+  const [pendingConsultations, setPendingConsultations] = useState<
+    ConsultationWithDetails[]
+  >([]);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -27,39 +29,62 @@ const DoctorNotificationToast = () => {
     // Check if user is a doctor
     const checkDoctorRole = async () => {
       const { data } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'doctor')
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "doctor")
         .single();
-      
+
       if (!data) return; // Not a doctor, don't show notifications
 
       // Subscribe to new consultation requests
       const channel = supabase
-        .channel('doctor-notifications')
+        .channel("doctor-notifications")
         .on(
-          'postgres_changes',
+          "postgres_changes",
           {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'consultations',
-            filter: 'status=eq.pending'
+            event: "INSERT",
+            schema: "public",
+            table: "consultations",
+            filter: "status=eq.pending",
           },
           (payload) => {
             const newConsultation = payload.new as Consultation;
-            
-            // Extract chief complaint from description
-            const description = newConsultation.description || '';
-            const chiefComplaintMatch = description.match(/Chief Complaint: ([^\n]+)/);
-            const chiefComplaint = chiefComplaintMatch ? chiefComplaintMatch[1] : newConsultation.title;
-            
+
+            // Extract chief complaint
+            const description = newConsultation.description || "";
+            const chiefComplaintMatch = description.match(
+              /Chief Complaint: ([^\n]+)/
+            );
+            const chiefComplaint = chiefComplaintMatch
+              ? chiefComplaintMatch[1]
+              : newConsultation.title;
+
             const consultationWithDetails: ConsultationWithDetails = {
               ...newConsultation,
-              chiefComplaint
+              chiefComplaint,
             };
-            
-            setPendingConsultations(prev => [consultationWithDetails, ...prev]);
+
+            setPendingConsultations((prev) => {
+              if (prev.some((c) => c.id === consultationWithDetails.id))
+                return prev;
+              return [consultationWithDetails, ...prev];
+            });
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "consultations",
+            filter: "status=neq.pending",
+          },
+          (payload) => {
+            const updatedConsult = payload.new as Consultation;
+            setPendingConsultations((prev) =>
+              prev.filter((c) => c.id !== updatedConsult.id)
+            );
           }
         )
         .subscribe();
@@ -77,32 +102,32 @@ const DoctorNotificationToast = () => {
 
     try {
       const { error } = await supabase
-        .from('consultations')
+        .from("consultations")
         .update({
           doctor_id: user.id,
-          status: 'in_progress'
+          status: "in_progress",
         })
-        .eq('id', consultationId);
+        .eq("id", consultationId);
 
       if (error) throw error;
 
       // Remove from pending list
-      setPendingConsultations(prev => 
-        prev.filter(c => c.id !== consultationId)
+      setPendingConsultations((prev) =>
+        prev.filter((c) => c.id !== consultationId)
       );
 
       toast({
         title: "Consultation Accepted",
-        description: "You have been assigned to this consultation. Redirecting to chat...",
+        description:
+          "You have been assigned to this consultation. Redirecting to chat...",
       });
 
       // Redirect to consultation chat
       setTimeout(() => {
         navigate(`/doctor/consultation/${consultationId}`);
       }, 1000);
-
     } catch (error) {
-      console.error('Error accepting consultation:', error);
+      console.error("Error accepting consultation:", error);
       toast({
         title: "Error",
         description: "Failed to accept consultation. Please try again.",
@@ -112,8 +137,8 @@ const DoctorNotificationToast = () => {
   };
 
   const dismissNotification = (consultationId: string) => {
-    setPendingConsultations(prev => 
-      prev.filter(c => c.id !== consultationId)
+    setPendingConsultations((prev) =>
+      prev.filter((c) => c.id !== consultationId)
     );
   };
 
@@ -122,7 +147,10 @@ const DoctorNotificationToast = () => {
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
       {pendingConsultations.map((consultation) => (
-        <Card key={consultation.id} className="border-blue-200 bg-blue-50 shadow-lg animate-in slide-in-from-right">
+        <Card
+          key={consultation.id}
+          className="border-blue-200 bg-blue-50 shadow-lg animate-in slide-in-from-right"
+        >
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-blue-900 flex items-center space-x-2">
@@ -143,11 +171,15 @@ const DoctorNotificationToast = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <User className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-blue-800">Patient ID: {consultation.patient_id.slice(0, 8)}...</span>
+                <span className="text-sm text-blue-800">
+                  Patient ID: {consultation.patient_id.slice(0, 8)}...
+                </span>
               </div>
-              
+
               <div>
-                <p className="text-sm font-medium text-blue-900 mb-1">Chief Complaint:</p>
+                <p className="text-sm font-medium text-blue-900 mb-1">
+                  Chief Complaint:
+                </p>
                 <p className="text-sm text-blue-700 bg-white/50 p-2 rounded border">
                   {consultation.chiefComplaint || consultation.title}
                 </p>
@@ -160,18 +192,20 @@ const DoctorNotificationToast = () => {
                     {new Date(consultation.created_at!).toLocaleTimeString()}
                   </span>
                 </div>
-                <Badge 
+                <Badge
                   className={
-                    consultation.priority === 'urgent' ? 'bg-red-100 text-red-800' :
-                    consultation.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                    'bg-blue-100 text-blue-800'
+                    consultation.priority === "urgent"
+                      ? "bg-red-100 text-red-800"
+                      : consultation.priority === "high"
+                      ? "bg-orange-100 text-orange-800"
+                      : "bg-blue-100 text-blue-800"
                   }
                 >
                   {consultation.priority}
                 </Badge>
               </div>
 
-              <Button 
+              <Button
                 onClick={() => handleAccept(consultation.id)}
                 className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
                 size="sm"

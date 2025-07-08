@@ -1,65 +1,46 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import type { Database } from '@/integrations/supabase/types';
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-type Consultation = Database['public']['Tables']['consultations']['Row'];
+export function useConsultations(user) {
+  const [consultations, setConsultations] = useState([]);
+  const [popupConsultation, setPopupConsultation] = useState(null);
 
-export const useConsultations = (status?: string) => {
-  const [consultations, setConsultations] = useState<Consultation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-  const { toast } = useToast();
-
-  // Fetch consultations
   const fetchConsultations = async () => {
     if (!user) return;
 
-    try {
-      let query = supabase
-        .from('consultations')
-        .select('*')
-        .order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from("consultations")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
 
-      if (status) {
-        query = query.eq('status', status);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setConsultations(data || []);
-    } catch (error) {
-      console.error('Error fetching consultations:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load consultations",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+    if (error) {
+      console.error("Error fetching consultations:", error);
+      return;
     }
+
+    setConsultations(data);
   };
 
-  // Set up real-time subscription
   useEffect(() => {
     if (!user) return;
 
     fetchConsultations();
 
     const channel = supabase
-      .channel('consultations')
+      .channel("consultations")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'consultations',
+          event: "INSERT",
+          schema: "public",
+          table: "consultations",
+          filter: "status=eq.pending",
         },
         (payload) => {
-          console.log('Consultation update:', payload);
-          fetchConsultations(); // Refetch to get updated data
+          const newConsult = payload.new;
+          setConsultations((prev) => [newConsult, ...prev]);
+          setPopupConsultation(newConsult);
         }
       )
       .subscribe();
@@ -71,7 +52,7 @@ export const useConsultations = (status?: string) => {
 
   return {
     consultations,
-    loading,
-    refetch: fetchConsultations,
+    popupConsultation,
+    setPopupConsultation,
   };
-};
+}
