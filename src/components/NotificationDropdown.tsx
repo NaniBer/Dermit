@@ -20,7 +20,11 @@ interface ConsultationWithDetails extends Consultation {
   chiefComplaint?: string;
 }
 
-const NotificationDropdown = () => {
+interface NotificationDropdownProps {
+  badgeCount?: number;
+}
+
+const NotificationDropdown = ({ badgeCount = 0 }: NotificationDropdownProps) => {
   const [pendingConsultations, setPendingConsultations] = useState<
     ConsultationWithDetails[]
   >([]);
@@ -178,14 +182,14 @@ const NotificationDropdown = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="relative">
           <Bell className="w-4 h-4" />
-          {pendingConsultations.length > 0 && (
+          {(badgeCount > 0 || pendingConsultations.length > 0) && (
             <Badge
-              className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white"
+              className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 text-white animate-pulse shadow-lg"
               variant="destructive"
             >
-              {pendingConsultations.length > 99
+              {Math.max(badgeCount, pendingConsultations.length) > 99
                 ? "99+"
-                : pendingConsultations.length}
+                : Math.max(badgeCount, pendingConsultations.length)}
             </Badge>
           )}
         </Button>

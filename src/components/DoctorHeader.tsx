@@ -18,11 +18,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import NotificationDropdown from "@/components/NotificationDropdown";
+import InstantNotificationSystem from "@/components/InstantNotificationSystem";
+import { useState } from "react";
 const DoctorHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
   const { user } = useAuth();
+  const [notificationBadgeCount, setNotificationBadgeCount] = useState(0);
   const fullname =
     user.user_metadata?.first_name + " " + user.user_metadata?.last_name;
 
@@ -88,7 +91,8 @@ const DoctorHeader = () => {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <NotificationDropdown />
+            <InstantNotificationSystem onBadgeCountChange={setNotificationBadgeCount} />
+            <NotificationDropdown badgeCount={notificationBadgeCount} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
