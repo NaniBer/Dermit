@@ -23,6 +23,8 @@ export function useConsultations(user) {
   };
 
   useEffect(() => {
+    console.log("useConsultations effect triggered");
+    console.log(user);
     if (!user) return;
 
     fetchConsultations();
@@ -39,11 +41,20 @@ export function useConsultations(user) {
         },
         (payload) => {
           const newConsult = payload.new;
+          console.log(
+            "New consultation request from useconsulation:",
+            newConsult
+          );
           setConsultations((prev) => [newConsult, ...prev]);
           setPopupConsultation(newConsult);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("✅ Listening to consultations channel!");
+        }
+      });
+    // console.log("Subscribed to consultations channel:", channel);
 
     return () => {
       supabase.removeChannel(channel);

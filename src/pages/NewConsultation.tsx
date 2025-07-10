@@ -1,21 +1,26 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Upload, 
-  X, 
-  Camera, 
-  FileText, 
-  User, 
+import {
+  Upload,
+  X,
+  Camera,
+  FileText,
+  User,
   ArrowRight,
   CheckCircle,
   AlertCircle,
-  Stethoscope
+  Stethoscope,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,14 +32,14 @@ const NewConsultation = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [formData, setFormData] = useState({
     chiefComplaint: "",
     knownIllnesses: "",
     additionalComments: "",
     doctorCode: "",
   });
-  
+
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -42,11 +47,11 @@ const NewConsultation = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      Array.from(files).forEach(file => {
+      Array.from(files).forEach((file) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           if (e.target?.result) {
-            setUploadedImages(prev => [...prev, e.target!.result as string]);
+            setUploadedImages((prev) => [...prev, e.target!.result as string]);
           }
         };
         reader.readAsDataURL(file);
@@ -55,12 +60,12 @@ const NewConsultation = () => {
   };
 
   const removeImage = (index: number) => {
-    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: "Authentication Required",
@@ -95,12 +100,14 @@ const NewConsultation = () => {
         })
         .select()
         .single();
+      console.log("Consultation data:", data);
 
       if (error) throw error;
 
       toast({
         title: "Consultation Submitted!",
-        description: "Your consultation request has been submitted successfully.",
+        description:
+          "Your consultation request has been submitted successfully.",
       });
 
       setCurrentStep(4); // Show success step
@@ -129,9 +136,7 @@ const NewConsultation = () => {
   };
 
   if (currentStep === 4) {
-    return (
-      <WaitingForDoctor />
-    );
+    return <WaitingForDoctor />;
   }
 
   return (
@@ -140,20 +145,25 @@ const NewConsultation = () => {
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/patient/dashboard" className="flex items-center space-x-2">
+            <Link
+              to="/patient/dashboard"
+              className="flex items-center space-x-2"
+            >
               <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
                 <Stethoscope className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Dermit</span>
             </Link>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Step {currentStep} of 3</span>
+              <span className="text-sm text-gray-600">
+                Step {currentStep} of 3
+              </span>
               <div className="flex space-x-2">
                 {[1, 2, 3].map((step) => (
                   <div
                     key={step}
                     className={`w-2 h-2 rounded-full ${
-                      step <= currentStep ? 'bg-blue-600' : 'bg-gray-300'
+                      step <= currentStep ? "bg-blue-600" : "bg-gray-300"
                     }`}
                   />
                 ))}
@@ -165,9 +175,12 @@ const NewConsultation = () => {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">New Consultation Request</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            New Consultation Request
+          </h1>
           <p className="text-gray-600">
-            Share your skin concern with our certified dermatologists for professional advice
+            Share your skin concern with our certified dermatologists for
+            professional advice
           </p>
         </div>
 
@@ -184,7 +197,8 @@ const NewConsultation = () => {
                       <span>Upload Images (Optional)</span>
                     </CardTitle>
                     <CardDescription>
-                      Upload clear photos of your skin concern for better diagnosis
+                      Upload clear photos of your skin concern for better
+                      diagnosis
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -233,12 +247,16 @@ const NewConsultation = () => {
                     )}
 
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-800 mb-2">Photography Tips:</h4>
+                      <h4 className="font-semibold text-blue-800 mb-2">
+                        Photography Tips:
+                      </h4>
                       <ul className="text-sm text-blue-700 space-y-1">
                         <li>• Use good lighting - natural light works best</li>
                         <li>• Take multiple angles if possible</li>
                         <li>• Keep the camera steady and in focus</li>
-                        <li>• Include surrounding healthy skin for comparison</li>
+                        <li>
+                          • Include surrounding healthy skin for comparison
+                        </li>
                       </ul>
                     </div>
                   </CardContent>
@@ -254,46 +272,71 @@ const NewConsultation = () => {
                       <span>Medical Information</span>
                     </CardTitle>
                     <CardDescription>
-                      Provide details about your skin concern and medical history
+                      Provide details about your skin concern and medical
+                      history
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="chief-complaint" className="text-base font-semibold">
+                      <Label
+                        htmlFor="chief-complaint"
+                        className="text-base font-semibold"
+                      >
                         Chief Complaint *
                       </Label>
                       <Textarea
                         id="chief-complaint"
                         placeholder="Describe your main skin concern (e.g., 'Red, itchy rash on my arms for 2 weeks')"
                         value={formData.chiefComplaint}
-                        onChange={(e) => setFormData({...formData, chiefComplaint: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            chiefComplaint: e.target.value,
+                          })
+                        }
                         className="min-h-[100px]"
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="known-illnesses" className="text-base font-semibold">
+                      <Label
+                        htmlFor="known-illnesses"
+                        className="text-base font-semibold"
+                      >
                         Known Medical Conditions
                       </Label>
                       <Textarea
                         id="known-illnesses"
                         placeholder="List any medical conditions, allergies, or medications you're currently taking"
                         value={formData.knownIllnesses}
-                        onChange={(e) => setFormData({...formData, knownIllnesses: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            knownIllnesses: e.target.value,
+                          })
+                        }
                         className="min-h-[80px]"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="additional-comments" className="text-base font-semibold">
+                      <Label
+                        htmlFor="additional-comments"
+                        className="text-base font-semibold"
+                      >
                         Additional Comments
                       </Label>
                       <Textarea
                         id="additional-comments"
                         placeholder="Any additional information that might be relevant to your case"
                         value={formData.additionalComments}
-                        onChange={(e) => setFormData({...formData, additionalComments: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            additionalComments: e.target.value,
+                          })
+                        }
                         className="min-h-[80px]"
                       />
                     </div>
@@ -302,10 +345,13 @@ const NewConsultation = () => {
                       <div className="flex items-start space-x-2">
                         <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                         <div>
-                          <h4 className="font-semibold text-yellow-800">Important Note</h4>
+                          <h4 className="font-semibold text-yellow-800">
+                            Important Note
+                          </h4>
                           <p className="text-sm text-yellow-700">
-                            This platform is for non-emergency consultations only. 
-                            If you have a medical emergency, please contact emergency services immediately.
+                            This platform is for non-emergency consultations
+                            only. If you have a medical emergency, please
+                            contact emergency services immediately.
                           </p>
                         </div>
                       </div>
@@ -337,12 +383,16 @@ const NewConsultation = () => {
                             className="w-4 h-4 text-blue-600"
                             defaultChecked
                           />
-                          <label htmlFor="auto-assign" className="font-semibold text-blue-800">
+                          <label
+                            htmlFor="auto-assign"
+                            className="font-semibold text-blue-800"
+                          >
                             Automatic Assignment (Recommended)
                           </label>
                         </div>
                         <p className="text-sm text-blue-700 ml-7">
-                          We'll assign you to the next available dermatologist based on your case and their expertise.
+                          We'll assign you to the next available dermatologist
+                          based on your case and their expertise.
                         </p>
                       </div>
 
@@ -354,19 +404,28 @@ const NewConsultation = () => {
                             name="assignment"
                             className="w-4 h-4 text-blue-600"
                           />
-                          <label htmlFor="doctor-code" className="font-semibold text-gray-800">
+                          <label
+                            htmlFor="doctor-code"
+                            className="font-semibold text-gray-800"
+                          >
                             Specific Doctor (Optional)
                           </label>
                         </div>
                         <p className="text-sm text-gray-600 ml-7 mb-3">
-                          If you were referred by a specific doctor, enter their referral code below.
+                          If you were referred by a specific doctor, enter their
+                          referral code below.
                         </p>
                         <div className="ml-7">
                           <Input
                             type="text"
                             placeholder="Enter doctor's referral code"
                             value={formData.doctorCode}
-                            onChange={(e) => setFormData({...formData, doctorCode: e.target.value})}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                doctorCode: e.target.value,
+                              })
+                            }
                             className="max-w-xs"
                           />
                         </div>
@@ -374,11 +433,22 @@ const NewConsultation = () => {
                     </div>
 
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-green-800 mb-2">What happens next?</h4>
+                      <h4 className="font-semibold text-green-800 mb-2">
+                        What happens next?
+                      </h4>
                       <ul className="text-sm text-green-700 space-y-1">
-                        <li>• Your case will be reviewed by a certified dermatologist</li>
-                        <li>• You'll receive a notification when the doctor responds</li>
-                        <li>• A chat session will be opened for direct communication</li>
+                        <li>
+                          • Your case will be reviewed by a certified
+                          dermatologist
+                        </li>
+                        <li>
+                          • You'll receive a notification when the doctor
+                          responds
+                        </li>
+                        <li>
+                          • A chat session will be opened for direct
+                          communication
+                        </li>
                         <li>• You'll receive a diagnosis and treatment plan</li>
                       </ul>
                     </div>
@@ -392,24 +462,44 @@ const NewConsultation = () => {
               {/* Progress Summary */}
               <Card className="shadow-lg">
                 <CardHeader>
-                  <CardTitle className="text-lg">Consultation Summary</CardTitle>
+                  <CardTitle className="text-lg">
+                    Consultation Summary
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Images uploaded</span>
-                    <Badge variant={uploadedImages.length > 0 ? "default" : "secondary"}>
+                    <span className="text-sm text-gray-600">
+                      Images uploaded
+                    </span>
+                    <Badge
+                      variant={
+                        uploadedImages.length > 0 ? "default" : "secondary"
+                      }
+                    >
                       {uploadedImages.length}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Chief complaint</span>
-                    <Badge variant={formData.chiefComplaint ? "default" : "secondary"}>
+                    <span className="text-sm text-gray-600">
+                      Chief complaint
+                    </span>
+                    <Badge
+                      variant={
+                        formData.chiefComplaint ? "default" : "secondary"
+                      }
+                    >
                       {formData.chiefComplaint ? "✓" : "○"}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Medical history</span>
-                    <Badge variant={formData.knownIllnesses ? "default" : "secondary"}>
+                    <span className="text-sm text-gray-600">
+                      Medical history
+                    </span>
+                    <Badge
+                      variant={
+                        formData.knownIllnesses ? "default" : "secondary"
+                      }
+                    >
                       {formData.knownIllnesses ? "✓" : "○"}
                     </Badge>
                   </div>
@@ -419,7 +509,9 @@ const NewConsultation = () => {
               {/* Expected Timeline */}
               <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50">
                 <CardHeader>
-                  <CardTitle className="text-blue-800">Expected Timeline</CardTitle>
+                  <CardTitle className="text-blue-800">
+                    Expected Timeline
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 text-sm">
@@ -429,11 +521,15 @@ const NewConsultation = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-blue-400 rounded-full"></div>
-                      <span className="text-blue-700">Doctor review: Within 24 hours</span>
+                      <span className="text-blue-700">
+                        Doctor review: Within 24 hours
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
-                      <span className="text-gray-600">Initial response: 24-48 hours</span>
+                      <span className="text-gray-600">
+                        Initial response: 24-48 hours
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -452,13 +548,17 @@ const NewConsultation = () => {
             </div>
             <div className="flex items-center space-x-4">
               {currentStep < 3 ? (
-                <Button type="button" onClick={nextStep} className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
+                <Button
+                  type="button"
+                  onClick={nextStep}
+                  className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                >
                   Next Step
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               ) : (
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                   disabled={loading}
                 >

@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import ConsultationNotificationToast from "@/components/ConsultationNotificationToast";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -26,73 +25,91 @@ import PatientConsultations from "./pages/PatientConsultation";
 import PatientConsultationChat from "./pages/PatientConsultationChat";
 import Consultations from "./pages/Consultations";
 import { useNotifications } from "./hooks/useNotifications";
-import DoctorNotificationToast from "./components/DoctorNotificationToast";
+import { useState } from "react";
+import InstantNotificationSystem from "./components/InstantNotificationSystem";
+import AcceptConsultationPage from "./pages/AcceptConsultation";
 
 const queryClient = new QueryClient();
 
 const NotificationSetup = () => {
-  return <DoctorNotificationToast />;
+  const [notificationCount, setNotificationCount] = useState(0);
+  return (
+    <InstantNotificationSystem onBadgeCountChange={setNotificationCount} />
+  );
 };
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
+const App = () => {
+  const [notificationCount, setNotificationCount] = useState(0);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
 
-        <BrowserRouter>
-          <NotificationSetup />
-          {/* <DoctorNotificationToast /> */}
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/consultations" element={<Consultations />} />
-
-            {/* Patient Routes */}
-            <Route path="/patient/dashboard" element={<PatientDashboard />} />
-            <Route
-              path="/patient/new-consultation"
-              element={<NewConsultation />}
-            />
-            <Route path="/patient/chat" element={<PatientChat />} />
-            <Route path="/patient/profile" element={<PatientProfile />} />
-            <Route
-              path="/patient/consultations"
-              element={<PatientConsultations />}
-            />
-            <Route
-              path="/patient/consultation/:id"
-              element={<PatientConsultationChat />}
+          <BrowserRouter>
+            <InstantNotificationSystem
+              onBadgeCountChange={setNotificationCount}
             />
 
-            {/* Doctor Routes */}
-            <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-            <Route
-              path="/doctor/consultations"
-              element={<DoctorConsultations />}
-            />
-            <Route
-              path="/doctor/consultation/:id"
-              element={<DoctorConsultationDetail />}
-            />
-            <Route path="/doctor/patients" element={<DoctorPatients />} />
-            <Route path="/doctor/profile" element={<DoctorProfile />} />
+            {/* <DoctorNotificationToast /> */}
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/consultations" element={<Consultations />} />
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/overview" element={<AdminOverview />} />
-            <Route path="/admin/doctors" element={<AdminDoctors />} />
-            <Route path="/admin/patients" element={<AdminPatients />} />
+              {/* Patient Routes */}
+              <Route path="/patient/dashboard" element={<PatientDashboard />} />
+              <Route
+                path="/patient/new-consultation"
+                element={<NewConsultation />}
+              />
+              <Route path="/patient/chat" element={<PatientChat />} />
+              <Route path="/patient/profile" element={<PatientProfile />} />
+              <Route
+                path="/patient/consultations"
+                element={<PatientConsultations />}
+              />
+              <Route
+                path="/patient/consultation/:id"
+                element={<PatientConsultationChat />}
+              />
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+              {/* Doctor Routes */}
+              <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+              <Route
+                path="/doctor/consultations"
+                element={<DoctorConsultations />}
+              />
+              <Route
+                path="/doctor/consultation/:id"
+                element={<DoctorConsultationDetail />}
+              />
+
+              <Route path="/doctor/patients" element={<DoctorPatients />} />
+              <Route path="/doctor/profile" element={<DoctorProfile />} />
+
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/overview" element={<AdminOverview />} />
+              <Route path="/admin/doctors" element={<AdminDoctors />} />
+              <Route path="/admin/patients" element={<AdminPatients />} />
+
+              {/* Accepting the consultation */}
+              <Route
+                path="/consultation/:consultationId/accept"
+                element={<AcceptConsultationPage />}
+              />
+
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
