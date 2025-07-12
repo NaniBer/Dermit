@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -29,64 +30,121 @@ import {
 } from "@/components/ui/dropdown-menu";
 import DoctorHeader from "@/components/DoctorHeader";
 import DashboardButton from "@/components/doctorDashboard/DashboardButtons";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const DoctorPatients = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [patients, setPatients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleLogout = () => {
     navigate("/login");
   };
 
-  // Mock patient data for the doctor
-  const patients = [
-    {
-      id: 1,
-      name: "John Doe",
-      age: 34,
-      lastConsultation: "2024-06-13",
-      condition: "Atopic Dermatitis",
-      status: "ongoing",
-      consultations: 3,
-      notes:
-        "Patient responding well to topical steroids. Follow-up in 2 weeks.",
-      prescription: "Hydrocortisone cream 1%, apply twice daily",
-    },
-    {
-      id: 2,
-      name: "Sarah Wilson",
-      age: 28,
-      lastConsultation: "2024-06-12",
-      condition: "Contact Dermatitis",
-      status: "completed",
-      consultations: 2,
-      notes:
-        "Allergic reaction to nickel jewelry. Symptoms resolved after avoiding trigger.",
-      prescription: "Topical antihistamine, avoid nickel exposure",
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      age: 45,
-      lastConsultation: "2024-06-10",
-      condition: "Seborrheic Keratosis",
-      status: "monitoring",
-      consultations: 1,
-      notes:
-        "Benign lesion confirmed. Monitoring for any changes in appearance.",
-      prescription: "No treatment required, follow-up in 6 months",
-    },
-    {
-      id: 4,
-      name: "Emma Davis",
-      age: 31,
-      lastConsultation: "2024-06-08",
-      condition: "Psoriasis",
-      status: "ongoing",
-      consultations: 4,
-      notes: "Moderate plaque psoriasis. Patient started on topical treatment.",
-      prescription: "Betamethasone ointment, apply once daily",
-    },
-  ];
+  // Fetch patients for the doctor
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchPatients = async () => {
+      try {
+        // Get all consultations for this doctor and their associated patients
+        const { data: consultations, error } = await supabase
+          .from('consultations')
+          .select(`
+            *,
+            profiles!consultations_patient_id_fkey (
+              id,
+              first_name,
+              last_name,
+              email,
+              created_at
+            )
+          `)
+          .eq('doctor_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Group consultations by patient and create patient objects
+        const patientMap = new Map();
+        
+        consultations?.forEach(consultation => {
+          const patientId = consultation.patient_id;
+          const patient = consultation.profiles;
+          
+          if (!patientMap.has(patientId)) {
+            patientMap.set(patientId, {
+              id: patientId,
+              name: `${patient?.first_name || 'Unknown'} ${patient?.last_name || ''}`,
+              email: patient?.email || '',
+              lastConsultation: consultation.created_at,
+              consultations: [],
+              status: consultation.status,
+              priority: consultation.priority,
+            });
+          }
+          
+          patientMap.get(patientId).consultations.push(consultation);
+        });
+
+        // Convert map to array and calculate stats
+        const patientsArray = Array.from(patientMap.values()).map(patient => {
+          const totalConsultations = patient.consultations.length;
+          const completedConsultations = patient.consultations.filter(c => c.status === 'completed').length;
+          const ongoingConsultations = patient.consultations.filter(c => c.status === 'in_progress').length;
+          
+          // Determine overall status
+          let status = 'completed';
+          if (ongoingConsultations > 0) status = 'ongoing';
+          else if (patient.consultations.some(c => c.status === 'pending')) status = 'pending';
+          
+          return {
+            ...patient,
+            totalConsultations,
+            completedConsultations,
+            ongoingConsultations,
+            status,
+            // Mock data for fields not in current schema
+            age: 0,
+            condition: patient.consultations[0]?.title || 'No condition specified',
+            notes: `Patient has ${totalConsultations} consultation(s) with ${completedConsultations} completed.`,
+            prescription: 'Prescription details would be stored in a separate table.',
+          };
+        });
+
+        setPatients(patientsArray);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, [user]);
+
+  const filteredPatients = patients.filter(patient =>
+    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.condition.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <DoctorHeader />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading patients...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
@@ -108,8 +166,10 @@ const DoctorPatients = () => {
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Search patients by name or condition..."
+                placeholder="Search patients by name, email, or condition..."
                 className="pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </CardContent>
@@ -139,8 +199,8 @@ const DoctorPatients = () => {
           />
 
           <DashboardButton
-            description="Monitoring"
-            value={patients.filter((p) => p.status === "monitoring").length}
+            description="Pending"
+            value={patients.filter((p) => p.status === "pending").length}
             icon={Calendar}
             color="orange"
           />
@@ -159,86 +219,106 @@ const DoctorPatients = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {patients.map((patient) => (
-                <div
-                  key={patient.id}
-                  className="p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarFallback className="bg-green-100 text-green-600">
-                          {patient.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h4 className="font-semibold text-gray-900">
-                          {patient.name}
-                        </h4>
-                        <p className="text-sm text-gray-600">
-                          Age: {patient.age}
-                        </p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="w-3 h-3" />
-                            <span>Last seen: {patient.lastConsultation}</span>
+              {filteredPatients.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg">No patients found</p>
+                  <p className="text-sm">
+                    {searchTerm ? "Try adjusting your search terms" : "Patients will appear here once you have consultations"}
+                  </p>
+                </div>
+              ) : (
+                filteredPatients.map((patient) => (
+                  <div
+                    key={patient.id}
+                    className="p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="w-12 h-12">
+                          <AvatarFallback className="bg-green-100 text-green-600">
+                            {patient.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">
+                            {patient.name}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {patient.email}
+                          </p>
+                          <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                            <div className="flex items-center space-x-1">
+                              <Calendar className="w-3 h-3" />
+                              <span>Last seen: {new Date(patient.lastConsultation).toLocaleDateString()}</span>
+                            </div>
+                            <span>
+                              Total consultations: {patient.totalConsultations}
+                            </span>
                           </div>
-                          <span>
-                            Total consultations: {patient.consultations}
-                          </span>
                         </div>
                       </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge
+                          className={
+                            patient.status === "ongoing"
+                              ? "bg-green-100 text-green-800"
+                              : patient.status === "completed"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-orange-100 text-orange-800"
+                          }
+                        >
+                          {patient.status}
+                        </Badge>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            // Navigate to the most recent consultation
+                            const latestConsultation = patient.consultations[0];
+                            if (latestConsultation) {
+                              navigate(`/doctor/consultation/${latestConsultation.id}`);
+                            }
+                          }}
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Badge
-                        className={
-                          patient.status === "ongoing"
-                            ? "bg-green-100 text-green-800"
-                            : patient.status === "completed"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-orange-100 text-orange-800"
-                        }
-                      >
-                        {patient.status}
-                      </Badge>
-                      <Button variant="ghost" size="sm">
-                        <MessageCircle className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
 
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div className="grid md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">
+                          Latest Condition
+                        </h5>
+                        <p className="text-sm text-gray-700">
+                          {patient.condition}
+                        </p>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-gray-900 mb-2">
+                          Consultation Status
+                        </h5>
+                        <p className="text-sm text-gray-700">
+                          {patient.ongoingConsultations} ongoing, {patient.completedConsultations} completed
+                        </p>
+                      </div>
+                    </div>
+
                     <div>
                       <h5 className="font-medium text-gray-900 mb-2">
-                        Condition
+                        Clinical Notes
                       </h5>
-                      <p className="text-sm text-gray-700">
-                        {patient.condition}
-                      </p>
-                    </div>
-                    <div>
-                      <h5 className="font-medium text-gray-900 mb-2">
-                        Prescription
-                      </h5>
-                      <p className="text-sm text-gray-700">
-                        {patient.prescription}
+                      <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
+                        {patient.notes}
                       </p>
                     </div>
                   </div>
-
-                  <div>
-                    <h5 className="font-medium text-gray-900 mb-2">
-                      Clinical Notes
-                    </h5>
-                    <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-md">
-                      {patient.notes}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>

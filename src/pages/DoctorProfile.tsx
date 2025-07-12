@@ -1,50 +1,35 @@
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Camera,
-  User,
-  Edit,
-  X,
-  LogOut,
-  ChevronDown,
-  Stethoscope,
-  Lock,
-} from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Camera, User, Edit, X, Lock, Stethoscope } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import DoctorHeader from "@/components/DoctorHeader";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const DoctorProfile = () => {
   const navigate = useNavigate();
+  const user = useAuth();
+
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const [profileData, setProfileData] = useState({
-    firstName: "Sarah",
-    lastName: "Johnson",
-    email: "sarah.johnson@dermit.com",
-    phone: "+1 (555) 123-4567",
-    specialty: "Dermatology",
-    licenseNumber: "DRM-2024-001",
-    yearsOfExperience: "8",
-    education: "MD from Johns Hopkins University",
-    certifications: "Board Certified Dermatologist, FAAD",
-    bio: "Experienced dermatologist specializing in medical and cosmetic dermatology with over 8 years of practice.",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    specialty: "",
+    licenseNumber: "",
+    yearsOfExperience: "",
+    education: "",
+    certifications: "",
+    bio: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -53,20 +38,66 @@ const DoctorProfile = () => {
     confirmPassword: "",
   });
 
-  const handleLogout = () => {
-    navigate("/login");
-  };
+  // Fetch doctor profile on mount
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsEditing(false);
-    alert("Profile updated successfully!");
-  };
+    const fetchDoctorProfile = async () => {
+      setLoading(true);
+      console.log(user);
+      try {
+        const { data, error } = await supabase
+          .from("doctors_info")
+          .select(
+            `
+            specialty,
+            license_number,
+            years_of_experience,
+            education,
+            certifications,
+            bio,
+            profiles (
+              first_name,
+              last_name,
+              email,
+              phone
+            )
+          `
+          )
+          .eq("profiles.id", user.user.id)
+          .single();
+        console.log(user);
+        console.log(data);
 
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
+        if (error) throw error;
 
+        if (data) {
+          setProfileData({
+            firstName: data.profiles.first_name || "",
+            lastName: data.profiles.last_name || "",
+            email: data.profiles.email || "",
+            phone: data.profiles.phone || "",
+            specialty: data.specialty || "",
+            licenseNumber: data.license_number || "",
+            yearsOfExperience: data.years_of_experience?.toString() || "",
+            education: data.education || "",
+            certifications: data.certifications || "",
+            bio: data.bio || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error loading doctor profile:", error);
+        alert("Failed to load profile data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctorProfile();
+  }, [user, navigate]);
   const handlePasswordChange = (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -89,6 +120,18 @@ const DoctorProfile = () => {
     setShowPasswordChange(false);
   };
 
+  const handleLogout = () => {
+    navigate("/login");
+  };
+  // ... Your existing handlers (handleLogout, handleSave, handleCancel, handlePasswordChange) remain the same.
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600 text-lg">Loading profile...</p>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       {/* Header */}
@@ -151,7 +194,7 @@ const DoctorProfile = () => {
                       {profileData.yearsOfExperience} years
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  {/* <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">
                       Total Patients
                     </span>
@@ -164,7 +207,7 @@ const DoctorProfile = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Rating</span>
                     <span className="font-medium">4.8/5.0</span>
-                  </div>
+                  </div> */}
                 </div>
               </CardContent>
             </Card>
@@ -255,129 +298,40 @@ const DoctorProfile = () => {
             {/* Personal Information */}
             <Card className="shadow-lg">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center space-x-2">
-                    <User className="w-5 h-5 text-blue-600" />
-                    <span>Personal Information</span>
-                  </CardTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditing(!isEditing)}
-                  >
-                    {isEditing ? (
-                      <X className="w-4 h-4" />
-                    ) : (
-                      <Edit className="w-4 h-4" />
-                    )}
-                    {isEditing ? "Cancel" : "Edit"}
-                  </Button>
-                </div>
+                <CardTitle className="flex items-center space-x-2">
+                  <User className="w-5 h-5 text-blue-600" />
+                  <span>Personal Information</span>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                {isEditing ? (
-                  <form onSubmit={handleSave} className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input
-                          id="firstName"
-                          value={profileData.firstName}
-                          onChange={(e) =>
-                            setProfileData({
-                              ...profileData,
-                              firstName: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input
-                          id="lastName"
-                          value={profileData.lastName}
-                          onChange={(e) =>
-                            setProfileData({
-                              ...profileData,
-                              lastName: e.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={profileData.email}
-                        onChange={(e) =>
-                          setProfileData({
-                            ...profileData,
-                            email: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        value={profileData.phone}
-                        onChange={(e) =>
-                          setProfileData({
-                            ...profileData,
-                            phone: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="flex space-x-3">
-                      <Button
-                        type="submit"
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        Save Changes
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleCancel}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">
-                          First Name
-                        </label>
-                        <p className="text-gray-900">{profileData.firstName}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-600">
-                          Last Name
-                        </label>
-                        <p className="text-gray-900">{profileData.lastName}</p>
-                      </div>
+                      <label className="text-sm font-medium text-gray-600">
+                        First Name
+                      </label>
+                      <p className="text-gray-900">{profileData.firstName}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600">
-                        Email
+                        Last Name
                       </label>
-                      <p className="text-gray-900">{profileData.email}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">
-                        Phone
-                      </label>
-                      <p className="text-gray-900">{profileData.phone}</p>
+                      <p className="text-gray-900">{profileData.lastName}</p>
                     </div>
                   </div>
-                )}
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">
+                      Email
+                    </label>
+                    <p className="text-gray-900">{profileData.email}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">
+                      Phone
+                    </label>
+                    <p className="text-gray-900">{profileData.phone}</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 

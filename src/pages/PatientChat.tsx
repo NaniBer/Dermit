@@ -13,7 +13,7 @@ import {
   FileText,
   Image as ImageIcon,
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import FileUpload from "@/components/FileUpload";
 import EmptyState from "@/components/EmptyState";
 import PatientHeader from "@/components/PatientHeader";
@@ -22,7 +22,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 const PatientChat = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const activeConversationId = searchParams.get("conversation") || "";
   const [message, setMessage] = useState("");
   const [conversations, setConversations] = useState<any[]>([]);
@@ -72,10 +73,7 @@ const PatientChat = () => {
   };
 
   const selectConversation = (conversationId: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("conversation", conversationId);
-    window.history.pushState({}, "", url.toString());
-    window.location.reload();
+    setSearchParams({ conversation: conversationId });
   };
 
   useEffect(() => {
@@ -247,14 +245,21 @@ const PatientChat = () => {
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       className="flex-1"
+                      disabled={activeConversation.status === "completed"}
                     />
                     <Button
                       onClick={handleSendMessage}
                       className="bg-blue-600 hover:bg-blue-700"
+                      disabled={activeConversation.status === "completed"}
                     >
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>
+                  {activeConversation.status === "completed" && (
+                    <p className="text-xs text-gray-500 mt-2 text-center">
+                      This consultation is closed. No new messages can be sent.
+                    </p>
+                  )}
                 </div>
               </Card>
             ) : (

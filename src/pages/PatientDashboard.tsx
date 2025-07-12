@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,9 +19,64 @@ import DailyTips from "@/components/patientDashboard/DailyTips";
 import PatientHeader from "@/components/PatientHeader";
 import NewConsultationButton from "@/components/buttons/NewConsultationButton";
 import ChatList from "@/components/ChatList";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [consultations, setConsultations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user's consultations
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchConsultations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('consultations')
+          .select(`
+            *,
+            profiles!consultations_doctor_id_fkey (
+              first_name,
+              last_name
+            )
+          `)
+          .eq('patient_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setConsultations(data || []);
+      } catch (error) {
+        console.error('Error fetching consultations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConsultations();
+  }, [user]);
+
+  // Transform consultations for ChatList component
+  const recentChats = consultations.map((consultation) => ({
+    id: consultation.id,
+    conversationId: consultation.id,
+    doctor: consultation.profiles?.first_name && consultation.profiles?.last_name 
+      ? `Dr. ${consultation.profiles.first_name} ${consultation.profiles.last_name}`
+      : "Doctor Assigned",
+    specialty: "Dermatology",
+    lastMessage: consultation.description || "No description available",
+    time: new Date(consultation.created_at).toLocaleDateString(),
+    unread: consultation.status === "pending",
+    avatar: consultation.profiles?.first_name?.[0] || "D",
+  }));
+
+  const handleChatClick = (conversationId: string) => {
+    navigate(`/patient/chat?conversation=${conversationId}`);
+  };
+
+  // Mock past diagnoses - in a real app, this would come from a diagnoses table
   const pastDiagnoses = [
     {
       id: 1,
@@ -74,34 +129,19 @@ const PatientDashboard = () => {
     },
   ];
 
-  const recentChats = [
-    {
-      id: 1,
-      conversationId: "1",
-      doctor: "Dr. Sarah Johnson",
-      specialty: "Dermatology",
-      lastMessage:
-        "Based on the image you shared, this appears to be a mild case of eczema. I recommend starting with a gentle moisturizer twice daily...",
-      time: "2 hours ago",
-      unread: true,
-      avatar: "SJ",
-    },
-    {
-      id: 2,
-      conversationId: "2",
-      doctor: "Dr. Michael Chen",
-      specialty: "Pediatric Dermatology",
-      lastMessage:
-        "Your skin condition has improved significantly. Continue with the current treatment plan and we'll reassess in two weeks...",
-      time: "1 day ago",
-      unread: false,
-      avatar: "MC",
-    },
-  ];
-
-  const handleChatClick = (conversationId: string) => {
-    navigate(`/patient/chat?conversation=${conversationId}`);
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+        <PatientHeader />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -112,7 +152,7 @@ const PatientDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, John!
+            Welcome back, {user?.user_metadata?.first_name || 'User'}!
           </h1>
           <p className="text-gray-600">
             Manage your skin health consultations and track your progress with
@@ -153,24 +193,37 @@ const PatientDashboard = () => {
             <UpcomingConsultations />
 
             {/* Recent Messages */}
-            <ChatList
-              title="Recent Messages"
-              description="Latest communications with your doctors"
-              icon={MessageCircle}
-              items={recentChats.map((chat) => ({
-                ...chat,
-                id: chat.id.toString(),
-              }))}
-              type="patient"
-              onClick={handleChatClick}
-            />
+            {recentChats.length > 0 ? (
+              <ChatList
+                title="Recent Messages"
+                description="Latest communications with your doctors"
+                icon={MessageCircle}
+                items={recentChats.map((chat) => ({
+                  ...chat,
+                  id: chat.id.toString(),
+                }))}
+                type="patient"
+                onClick={handleChatClick}
+              />
+            ) : (
+              <Card className="shadow-lg">
+                <CardContent className="p-8 text-center">
+                  <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No consultations yet
+                  </h3>
+                  <p className="text-gray-600">
+                    Start your first consultation to begin chatting with doctors
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Past Diagnoses */}
-
-            <PastDiagnosis pastDiagnosesList={pastDiagnoses} />
+            {/* <PastDiagnosis pastDiagnosesList={pastDiagnoses} /> */}
 
             {/* Health Tips */}
             <DailyTips />

@@ -1,30 +1,32 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useConsultations(user) {
+export function useConsultations(user: any) {
   const [consultations, setConsultations] = useState([]);
   const [popupConsultation, setPopupConsultation] = useState(null);
 
   const fetchConsultations = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from("consultations")
-      .select("*")
-      .eq("status", "pending")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("consultations")
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching consultations:", error);
-      return;
+      if (error) {
+        console.error("Error fetching consultations:", error);
+        return;
+      }
+
+      setConsultations(data || []);
+    } catch (error) {
+      console.error("Error in fetchConsultations:", error);
     }
-
-    setConsultations(data);
   };
 
   useEffect(() => {
-    console.log("useConsultations effect triggered");
-    console.log(user);
     if (!user) return;
 
     fetchConsultations();
@@ -42,11 +44,28 @@ export function useConsultations(user) {
         (payload) => {
           const newConsult = payload.new;
           console.log(
-            "New consultation request from useconsulation:",
+            "New consultation request from useConsultations:",
             newConsult
           );
           setConsultations((prev) => [newConsult, ...prev]);
           setPopupConsultation(newConsult);
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "consultations",
+        },
+        (payload) => {
+          const updatedConsultation = payload.new;
+          // Remove from pending list if status changed
+          if (updatedConsultation.status !== "pending") {
+            setConsultations((prev) =>
+              prev.filter((c) => c.id !== updatedConsultation.id)
+            );
+          }
         }
       )
       .subscribe((status) => {
@@ -54,7 +73,6 @@ export function useConsultations(user) {
           console.log("✅ Listening to consultations channel!");
         }
       });
-    // console.log("Subscribed to consultations channel:", channel);
 
     return () => {
       supabase.removeChannel(channel);
@@ -65,5 +83,6 @@ export function useConsultations(user) {
     consultations,
     popupConsultation,
     setPopupConsultation,
+    refetch: fetchConsultations,
   };
 }

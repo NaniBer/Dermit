@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -7,7 +8,6 @@ import {
   Clock,
   CheckCircle,
   Calendar,
-  Activity,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import DashboardButton from "@/components/doctorDashboard/DashboardButtons";
@@ -15,38 +15,85 @@ import PastDiagnosis from "@/components/patientDashboard/PastDiagnosis";
 import ChatList from "@/components/ChatList";
 import DoctorHeader from "@/components/DoctorHeader";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [consultations, setConsultations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalConsultations: 0,
+    pendingReviews: 0,
+    completedToday: 0,
+  });
 
-  const handleConsultationClick = (consultationId: number) => {
+  // Fetch consultations for the doctor
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchConsultations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('consultations')
+          .select(`
+            *,
+            profiles!consultations_patient_id_fkey (
+              first_name,
+              last_name
+            )
+          `)
+          .eq('doctor_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setConsultations(data || []);
+
+        // Calculate stats
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const totalConsultations = data?.length || 0;
+        const pendingReviews = data?.filter(c => c.status === 'pending').length || 0;
+        const completedToday = data?.filter(c => {
+          const consultationDate = new Date(c.created_at);
+          return c.status === 'completed' && consultationDate >= today;
+        }).length || 0;
+
+        setStats({
+          totalConsultations,
+          pendingReviews,
+          completedToday,
+        });
+      } catch (error) {
+        console.error('Error fetching consultations:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConsultations();
+  }, [user]);
+
+  const handleConsultationClick = (consultationId: string) => {
     navigate(`/doctor/consultation/${consultationId}`);
   };
 
-  // Mock data - in real app this would come from API
-  const activeConsultations = [
-    {
-      id: 1,
-      patient: "John Doe",
-      age: 34,
-      lastMessage: "Thank you for the diagnosis. When should I follow up?",
-      time: "5 minutes ago",
-      condition: "Atopic Dermatitis",
-      status: "active",
-      urgency: "medium",
-    },
-    {
-      id: 2,
-      patient: "Sarah Wilson",
-      age: 28,
-      lastMessage: "I've attached the new photos as requested",
-      time: "2 hours ago",
-      condition: "Pending Diagnosis",
-      status: "waiting",
-      urgency: "high",
-    },
-  ];
+  // Transform consultations for ChatList component
+  const activeConsultations = consultations
+    .filter(consultation => consultation.status === 'in_progress' || consultation.status === 'pending')
+    .map(consultation => ({
+      id: consultation.id,
+      patient: `${consultation.profiles?.first_name || 'Patient'} ${consultation.profiles?.last_name || ''}`,
+      age: 0, // We don't have age in the current schema
+      lastMessage: consultation.description || "No description available",
+      time: new Date(consultation.created_at).toLocaleDateString(),
+      condition: consultation.title,
+      status: consultation.status,
+      urgency: consultation.priority || "normal",
+    }));
 
+  // Mock recent diagnoses - in a real app, this would come from a diagnoses table
   const recentDiagnoses = [
     {
       id: 1,
@@ -99,15 +146,23 @@ const DoctorDashboard = () => {
     },
   ];
 
-  const todayStats = {
-    totalConsultations: 8,
-    pendingReviews: 3,
-    completedToday: 5,
-    avgResponseTime: "12 min",
-  };
-  const { user } = useAuth();
   const fullname =
-    user.user_metadata?.first_name + " " + user.user_metadata?.last_name;
+    user?.user_metadata?.first_name + " " + user?.user_metadata?.last_name;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+        <DoctorHeader />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       {/* Header */}
@@ -125,30 +180,24 @@ const DoctorDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           <DashboardButton
             description="Total Consultations"
-            value={todayStats.totalConsultations}
+            value={stats.totalConsultations}
             icon={Users}
             color="blue"
           />
           <DashboardButton
             description="Pending Reviews"
-            value={todayStats.pendingReviews}
+            value={stats.pendingReviews}
             icon={Clock}
             color="orange"
           />
           <DashboardButton
             description="Completed Today"
-            value={todayStats.completedToday}
+            value={stats.completedToday}
             icon={CheckCircle}
             color="green"
-          />
-          <DashboardButton
-            description="Avg Response"
-            value={todayStats.avgResponseTime}
-            icon={Activity}
-            color="purple"
           />
         </div>
 
@@ -164,16 +213,16 @@ const DoctorDashboard = () => {
                 id: chat.id.toString(),
               }))}
               type="doctor"
-              onClick={(id) => handleConsultationClick(Number(id))}
+              onClick={(id) => handleConsultationClick(id)}
             />
           </div>
 
           {/* Right Column - Recent Diagnoses */}
           <div>
-            <PastDiagnosis pastDiagnosesList={recentDiagnoses} />
+            {/* <PastDiagnosis pastDiagnosesList={recentDiagnoses} /> */}
 
             {/* Quick Actions */}
-            <Card className="shadow-lg mt-6 bg-gradient-to-r from-green-50 to-blue-50">
+            {/* <Card className="shadow-lg mt-6 bg-gradient-to-r from-green-50 to-blue-50">
               <CardHeader>
                 <CardTitle className="text-green-800">Quick Actions</CardTitle>
               </CardHeader>
@@ -193,7 +242,7 @@ const DoctorDashboard = () => {
                   </Button>
                 </Link>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>
