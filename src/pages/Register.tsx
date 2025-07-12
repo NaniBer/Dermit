@@ -25,12 +25,6 @@ const Register = () => {
   const { signUp, user } = useAuth();
   const { toast } = useToast();
 
-  // Redirect if already logged in
-  if (user) {
-    navigate("/patient/dashboard");
-    return null;
-  }
-
   // Patient form state
   const [patientData, setPatientData] = useState<{
     firstName: string;
@@ -56,23 +50,13 @@ const Register = () => {
     consentDataStorage: false,
   });
 
-  // Doctor form state
-  const [doctorData, setDoctorData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    phone: "",
-    licenseNumber: "",
-    specialization: "",
-    experience: "",
-    bio: "",
-    consentAiTraining: false,
-    consentDataStorage: false,
-  });
-
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in
+  if (user) {
+    navigate("/patient/dashboard");
+    return null;
+  }
 
   const handlePatientRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,73 +102,14 @@ const Register = () => {
           });
 
           // Update profile with consent information
-          await supabase.from("profiles").update({
-            consent_ai_training: patientData.consentAiTraining,
-            consent_data_storage: patientData.consentDataStorage,
-            consent_timestamp: new Date().toISOString(),
-          }).eq("id", userData.user.id);
-        }
-        toast({
-          title: "Account Created Successfully",
-          description: "Please sign in to access your account",
-        });
-        navigate("/login");
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDoctorRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (doctorData.password !== doctorData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords don't match",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate consent checkboxes
-    if (!doctorData.consentAiTraining || !doctorData.consentDataStorage) {
-      toast({
-        title: "Consent Required",
-        description: "You must agree to all consent terms to create an account",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { error } = await signUp(
-        doctorData.email,
-        doctorData.password,
-        doctorData.firstName,
-        doctorData.lastName,
-        "doctor"
-      );
-
-      if (!error) {
-        // Add doctor role and consent data
-        const { data: userData } = await supabase.auth.getUser();
-        if (userData.user) {
-          await supabase.from("user_roles").insert({
-            user_id: userData.user.id,
-            role: "doctor",
-          });
-
-          // Update profile with consent information
-          await supabase.from("profiles").update({
-            consent_ai_training: doctorData.consentAiTraining,
-            consent_data_storage: doctorData.consentDataStorage,
-            consent_timestamp: new Date().toISOString(),
-          }).eq("id", userData.user.id);
+          await supabase
+            .from("profiles")
+            .update({
+              consent_ai_training: patientData.consentAiTraining,
+              consent_data_storage: patientData.consentDataStorage,
+              consent_timestamp: new Date().toISOString(),
+            })
+            .eq("id", userData.user.id);
         }
         toast({
           title: "Account Created Successfully",
@@ -226,20 +151,13 @@ const Register = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <Tabs defaultValue={defaultTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsList className="grid w-full grid-cols-1 mb-6">
                 <TabsTrigger
                   value="patient"
                   className="flex items-center space-x-2"
                 >
                   <User className="w-4 h-4" />
                   <span>Patient</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="doctor"
-                  className="flex items-center space-x-2"
-                >
-                  <UserCheck className="w-4 h-4" />
-                  <span>Doctor</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -329,7 +247,7 @@ const Register = () => {
                       />
                     </div>
                   </div>
-                  
+
                   {/* Consent Agreement Section */}
                   <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
                     <div className="flex items-center space-x-2 mb-4">
@@ -338,17 +256,23 @@ const Register = () => {
                         Your Privacy & Consent Matter to Us
                       </h3>
                     </div>
-                    
+
                     <div className="space-y-4 text-sm text-gray-700">
                       <div className="space-y-3">
                         <p className="font-medium text-gray-900">
                           Helping You While Improving Care for Everyone
                         </p>
                         <p>
-                          When you share images of your skin condition with us, you're not just getting personalized care—you're also helping us build better AI tools that can serve people in your region more accurately.
+                          When you share images of your skin condition with us,
+                          you're not just getting personalized care—you're also
+                          helping us build better AI tools that can serve people
+                          in your region more accurately.
                         </p>
                         <p>
-                          Your images may be used to train our AI models, which helps us provide more precise and culturally-relevant healthcare insights for your local community. This is an essential part of how our service works.
+                          Your images may be used to train our AI models, which
+                          helps us provide more precise and culturally-relevant
+                          healthcare insights for your local community. This is
+                          an essential part of how our service works.
                         </p>
                       </div>
 
@@ -360,7 +284,13 @@ const Register = () => {
                               Where Your Data Lives
                             </p>
                             <p>
-                              We want to be completely transparent: your data is stored on secure servers that may be located outside your country's borders. However, we take your privacy seriously—all your information is encrypted and anonymized, meaning no personal details can be directly traced back to your images.
+                              We want to be completely transparent: your data is
+                              stored on secure servers that may be located
+                              outside your country's borders. However, we take
+                              your privacy seriously—all your information is
+                              encrypted and anonymized, meaning no personal
+                              details can be directly traced back to your
+                              images.
                             </p>
                           </div>
                         </div>
@@ -385,7 +315,10 @@ const Register = () => {
                           htmlFor="patient-consent-ai"
                           className="text-sm text-gray-700 leading-relaxed cursor-pointer"
                         >
-                          I understand and consent to my uploaded images being used to train AI models for improving healthcare services. I acknowledge that this is required to use the platform.
+                          I understand and consent to my uploaded images being
+                          used to train AI models for improving healthcare
+                          services. I acknowledge that this is required to use
+                          the platform.
                         </Label>
                       </div>
 
@@ -405,13 +338,17 @@ const Register = () => {
                           htmlFor="patient-consent-storage"
                           className="text-sm text-gray-700 leading-relaxed cursor-pointer"
                         >
-                          I understand that my data may be stored on servers outside my country, and I consent to this arrangement knowing that my data has been anonymized and encrypted.
+                          I understand that my data may be stored on servers
+                          outside my country, and I consent to this arrangement
+                          knowing that my data has been anonymized and
+                          encrypted.
                         </Label>
                       </div>
 
                       <div className="pt-3 border-t border-gray-200">
                         <p className="text-sm font-medium text-gray-900">
-                          By signing up, I confirm I have read and agree to these terms.
+                          By signing up, I confirm I have read and agree to
+                          these terms.
                         </p>
                       </div>
                     </div>
@@ -420,272 +357,13 @@ const Register = () => {
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-2"
-                    disabled={loading || !patientData.consentAiTraining || !patientData.consentDataStorage}
+                    disabled={
+                      loading ||
+                      !patientData.consentAiTraining ||
+                      !patientData.consentDataStorage
+                    }
                   >
                     {loading ? "Creating Account..." : "Create Patient Account"}
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="doctor">
-                <form onSubmit={handleDoctorRegister} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="doctor-firstName">First Name</Label>
-                      <Input
-                        id="doctor-firstName"
-                        placeholder="Enter first name"
-                        value={doctorData.firstName}
-                        onChange={(e) =>
-                          setDoctorData({
-                            ...doctorData,
-                            firstName: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="doctor-lastName">Last Name</Label>
-                      <Input
-                        id="doctor-lastName"
-                        placeholder="Enter last name"
-                        value={doctorData.lastName}
-                        onChange={(e) =>
-                          setDoctorData({
-                            ...doctorData,
-                            lastName: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="doctor-email">Email</Label>
-                    <Input
-                      id="doctor-email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={doctorData.email}
-                      onChange={(e) =>
-                        setDoctorData({ ...doctorData, email: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="doctor-password">Password</Label>
-                      <Input
-                        id="doctor-password"
-                        type="password"
-                        placeholder="Create password"
-                        value={doctorData.password}
-                        onChange={(e) =>
-                          setDoctorData({
-                            ...doctorData,
-                            password: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="doctor-confirmPassword">
-                        Confirm Password
-                      </Label>
-                      <Input
-                        id="doctor-confirmPassword"
-                        type="password"
-                        placeholder="Confirm password"
-                        value={doctorData.confirmPassword}
-                        onChange={(e) =>
-                          setDoctorData({
-                            ...doctorData,
-                            confirmPassword: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="doctor-phone">Phone</Label>
-                      <Input
-                        id="doctor-phone"
-                        type="tel"
-                        placeholder="Enter phone number"
-                        value={doctorData.phone}
-                        onChange={(e) =>
-                          setDoctorData({
-                            ...doctorData,
-                            phone: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="doctor-license">License Number</Label>
-                      <Input
-                        id="doctor-license"
-                        placeholder="Medical license number"
-                        value={doctorData.licenseNumber}
-                        onChange={(e) =>
-                          setDoctorData({
-                            ...doctorData,
-                            licenseNumber: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="doctor-specialization">
-                        Specialization
-                      </Label>
-                      <Input
-                        id="doctor-specialization"
-                        placeholder="e.g., Dermatology"
-                        value={doctorData.specialization}
-                        onChange={(e) =>
-                          setDoctorData({
-                            ...doctorData,
-                            specialization: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="doctor-experience">
-                        Years of Experience
-                      </Label>
-                      <Input
-                        id="doctor-experience"
-                        type="number"
-                        placeholder="Years"
-                        value={doctorData.experience}
-                        onChange={(e) =>
-                          setDoctorData({
-                            ...doctorData,
-                            experience: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="doctor-bio">Professional Bio</Label>
-                    <Textarea
-                      id="doctor-bio"
-                      placeholder="Brief description of your background and expertise"
-                      value={doctorData.bio}
-                      onChange={(e) =>
-                        setDoctorData({ ...doctorData, bio: e.target.value })
-                      }
-                      className="min-h-[100px]"
-                    />
-                  </div>
-                  
-                  {/* Consent Agreement Section */}
-                  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Shield className="w-5 h-5 text-blue-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Your Privacy & Consent Matter to Us
-                      </h3>
-                    </div>
-                    
-                    <div className="space-y-4 text-sm text-gray-700">
-                      <div className="space-y-3">
-                        <p className="font-medium text-gray-900">
-                          Professional Participation in AI Healthcare Development
-                        </p>
-                        <p>
-                          As a healthcare professional on our platform, your expertise contributes to advancing AI-driven medical tools. Patient images and your diagnostic insights may be used to train AI models, helping create more accurate and regionally-relevant healthcare solutions.
-                        </p>
-                        <p>
-                          This collaborative approach is essential to our mission of improving healthcare access and quality through technology.
-                        </p>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-start space-x-2">
-                          <Globe className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="font-medium text-gray-900 mb-1">
-                              Data Security & Location
-                            </p>
-                            <p>
-                              Your professional data and patient information may be stored on secure servers outside your country's borders. All data is encrypted, anonymized, and handled in compliance with healthcare privacy standards to protect both you and your patients.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Consent Checkboxes */}
-                    <div className="space-y-3 pt-4 border-t border-gray-200">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id="doctor-consent-ai"
-                          checked={doctorData.consentAiTraining}
-                          onCheckedChange={(checked) =>
-                            setDoctorData({
-                              ...doctorData,
-                              consentAiTraining: checked as boolean,
-                            })
-                          }
-                          className="mt-1"
-                        />
-                        <Label
-                          htmlFor="doctor-consent-ai"
-                          className="text-sm text-gray-700 leading-relaxed cursor-pointer"
-                        >
-                          I understand and consent to patient data and diagnostic information being used to train AI models for improving healthcare services. I acknowledge that this is required to participate in the platform.
-                        </Label>
-                      </div>
-
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id="doctor-consent-storage"
-                          checked={doctorData.consentDataStorage}
-                          onCheckedChange={(checked) =>
-                            setDoctorData({
-                              ...doctorData,
-                              consentDataStorage: checked as boolean,
-                            })
-                          }
-                          className="mt-1"
-                        />
-                        <Label
-                          htmlFor="doctor-consent-storage"
-                          className="text-sm text-gray-700 leading-relaxed cursor-pointer"
-                        >
-                          I understand that data may be stored on servers outside my country, and I consent to this arrangement knowing that all information has been anonymized and encrypted according to healthcare privacy standards.
-                        </Label>
-                      </div>
-
-                      <div className="pt-3 border-t border-gray-200">
-                        <p className="text-sm font-medium text-gray-900">
-                          By signing up, I confirm I have read and agree to these terms as a healthcare professional.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-2"
-                    disabled={loading || !doctorData.consentAiTraining || !doctorData.consentDataStorage}
-                  >
-                    {loading ? "Creating Account..." : "Create Doctor Account"}
                   </Button>
                 </form>
               </TabsContent>

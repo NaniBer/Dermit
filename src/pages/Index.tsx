@@ -1,8 +1,22 @@
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Shield, Clock, Users, ArrowRight, Stethoscope, Camera, MessageCircle } from "lucide-react";
+import {
+  Heart,
+  Shield,
+  Clock,
+  Users,
+  ArrowRight,
+  Stethoscope,
+  Camera,
+  MessageCircle,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -20,7 +34,10 @@ const Index = () => {
             </div>
             <div className="flex items-center space-x-4">
               <Link to="/login">
-                <Button variant="ghost" className="text-gray-600 hover:text-gray-900">
+                <Button
+                  variant="ghost"
+                  className="text-gray-600 hover:text-gray-900"
+                >
                   Sign In
                 </Button>
               </Link>
@@ -46,24 +63,32 @@ const Index = () => {
                 <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Expert Skin Care
                   <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                    {" "}Consultations
+                    {" "}
+                    Consultations
                   </span>
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  Connect with certified dermatologists from the comfort of your home. 
-                  Get professional skin care advice, diagnosis, and treatment plans through 
-                  our secure telemedicine platform.
+                  Connect with certified dermatologists from the comfort of your
+                  home. Get professional skin care advice, diagnosis, and
+                  treatment plans through our secure telemedicine platform.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/register?type=patient">
-                  <Button size="lg" className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-3 text-lg">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-3 text-lg"
+                  >
                     Book Consultation
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
-                <Link to="/register?type=doctor">
-                  <Button size="lg" variant="outline" className="border-2 border-gray-200 hover:border-blue-300 px-8 py-3 text-lg">
+                <Link to="https://forms.gle/1QxJq1Hn91JoM2vX7">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-gray-200 hover:border-blue-300 px-8 py-3 text-lg"
+                  >
                     Join as Doctor
                   </Button>
                 </Link>
@@ -78,7 +103,9 @@ const Index = () => {
                       <Camera className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Upload Photo</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        Upload Photo
+                      </h3>
                       <p className="text-gray-600">Share your skin concern</p>
                     </div>
                   </div>
@@ -87,8 +114,12 @@ const Index = () => {
                       <MessageCircle className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Expert Review</h3>
-                      <p className="text-gray-600">Get professional diagnosis</p>
+                      <h3 className="font-semibold text-gray-900">
+                        Expert Review
+                      </h3>
+                      <p className="text-gray-600">
+                        Get professional diagnosis
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
@@ -96,7 +127,9 @@ const Index = () => {
                       <Heart className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">Treatment Plan</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        Treatment Plan
+                      </h3>
                       <p className="text-gray-600">Receive personalized care</p>
                     </div>
                   </div>
@@ -111,9 +144,12 @@ const Index = () => {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="text-4xl font-bold text-gray-900">Why Choose Dermit?</h2>
+            <h2 className="text-4xl font-bold text-gray-900">
+              Why Choose Dermit?
+            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience the future of dermatology with our secure, convenient, and professional platform
+              Experience the future of dermatology with our secure, convenient,
+              and professional platform
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -126,7 +162,8 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-gray-600">
-                  HIPAA-compliant platform ensuring your medical information stays confidential
+                  HIPAA-compliant platform ensuring your medical information
+                  stays confidential
                 </CardDescription>
               </CardContent>
             </Card>
@@ -183,11 +220,15 @@ const Index = () => {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of patients who trust Dermit for their skin care needs. 
-            Book your consultation today and take the first step towards healthier skin.
+            Join thousands of patients who trust Dermit for their skin care
+            needs. Book your consultation today and take the first step towards
+            healthier skin.
           </p>
           <Link to="/register?type=patient">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-3 text-lg font-semibold">
+            <Button
+              size="lg"
+              className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-3 text-lg font-semibold"
+            >
               Start Your Consultation
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
