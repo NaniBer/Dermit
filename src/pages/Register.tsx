@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Stethoscope, User, UserCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Stethoscope, User, UserCheck, Shield, Globe } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +41,8 @@ const Register = () => {
     phone: string;
     dateOfBirth: string;
     role: "patient";
+    consentAiTraining: boolean;
+    consentDataStorage: boolean;
   }>({
     firstName: "",
     lastName: "",
@@ -49,6 +52,8 @@ const Register = () => {
     phone: "",
     dateOfBirth: "",
     role: "patient",
+    consentAiTraining: false,
+    consentDataStorage: false,
   });
 
   // Doctor form state
@@ -63,6 +68,8 @@ const Register = () => {
     specialization: "",
     experience: "",
     bio: "",
+    consentAiTraining: false,
+    consentDataStorage: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -74,6 +81,16 @@ const Register = () => {
       toast({
         title: "Error",
         description: "Passwords don't match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate consent checkboxes
+    if (!patientData.consentAiTraining || !patientData.consentDataStorage) {
+      toast({
+        title: "Consent Required",
+        description: "You must agree to all consent terms to create an account",
         variant: "destructive",
       });
       return;
@@ -91,7 +108,7 @@ const Register = () => {
       );
 
       if (!error) {
-        // Add patient role
+        // Add patient role and consent data
         const { data: userData } = await supabase.auth.getUser();
         console.log("User data after sign up:", userData);
         if (userData.user) {
@@ -99,7 +116,18 @@ const Register = () => {
             user_id: userData.user.id,
             role: "patient",
           });
+
+          // Update profile with consent information
+          await supabase.from("profiles").update({
+            consent_ai_training: patientData.consentAiTraining,
+            consent_data_storage: patientData.consentDataStorage,
+            consent_timestamp: new Date().toISOString(),
+          }).eq("id", userData.user.id);
         }
+        toast({
+          title: "Account Created Successfully",
+          description: "Please sign in to access your account",
+        });
         navigate("/login");
       }
     } catch (error) {
@@ -121,6 +149,16 @@ const Register = () => {
       return;
     }
 
+    // Validate consent checkboxes
+    if (!doctorData.consentAiTraining || !doctorData.consentDataStorage) {
+      toast({
+        title: "Consent Required",
+        description: "You must agree to all consent terms to create an account",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -133,14 +171,25 @@ const Register = () => {
       );
 
       if (!error) {
-        // Add doctor role
+        // Add doctor role and consent data
         const { data: userData } = await supabase.auth.getUser();
         if (userData.user) {
           await supabase.from("user_roles").insert({
             user_id: userData.user.id,
             role: "doctor",
           });
+
+          // Update profile with consent information
+          await supabase.from("profiles").update({
+            consent_ai_training: doctorData.consentAiTraining,
+            consent_data_storage: doctorData.consentDataStorage,
+            consent_timestamp: new Date().toISOString(),
+          }).eq("id", userData.user.id);
         }
+        toast({
+          title: "Account Created Successfully",
+          description: "Please sign in to access your account",
+        });
         navigate("/login");
       }
     } catch (error) {
@@ -280,10 +329,98 @@ const Register = () => {
                       />
                     </div>
                   </div>
+                  
+                  {/* Consent Agreement Section */}
+                  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Shield className="w-5 h-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Your Privacy & Consent Matter to Us
+                      </h3>
+                    </div>
+                    
+                    <div className="space-y-4 text-sm text-gray-700">
+                      <div className="space-y-3">
+                        <p className="font-medium text-gray-900">
+                          Helping You While Improving Care for Everyone
+                        </p>
+                        <p>
+                          When you share images of your skin condition with us, you're not just getting personalized care—you're also helping us build better AI tools that can serve people in your region more accurately.
+                        </p>
+                        <p>
+                          Your images may be used to train our AI models, which helps us provide more precise and culturally-relevant healthcare insights for your local community. This is an essential part of how our service works.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-start space-x-2">
+                          <Globe className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="font-medium text-gray-900 mb-1">
+                              Where Your Data Lives
+                            </p>
+                            <p>
+                              We want to be completely transparent: your data is stored on secure servers that may be located outside your country's borders. However, we take your privacy seriously—all your information is encrypted and anonymized, meaning no personal details can be directly traced back to your images.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Consent Checkboxes */}
+                    <div className="space-y-3 pt-4 border-t border-gray-200">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="patient-consent-ai"
+                          checked={patientData.consentAiTraining}
+                          onCheckedChange={(checked) =>
+                            setPatientData({
+                              ...patientData,
+                              consentAiTraining: checked as boolean,
+                            })
+                          }
+                          className="mt-1"
+                        />
+                        <Label
+                          htmlFor="patient-consent-ai"
+                          className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                        >
+                          I understand and consent to my uploaded images being used to train AI models for improving healthcare services. I acknowledge that this is required to use the platform.
+                        </Label>
+                      </div>
+
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="patient-consent-storage"
+                          checked={patientData.consentDataStorage}
+                          onCheckedChange={(checked) =>
+                            setPatientData({
+                              ...patientData,
+                              consentDataStorage: checked as boolean,
+                            })
+                          }
+                          className="mt-1"
+                        />
+                        <Label
+                          htmlFor="patient-consent-storage"
+                          className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                        >
+                          I understand that my data may be stored on servers outside my country, and I consent to this arrangement knowing that my data has been anonymized and encrypted.
+                        </Label>
+                      </div>
+
+                      <div className="pt-3 border-t border-gray-200">
+                        <p className="text-sm font-medium text-gray-900">
+                          By signing up, I confirm I have read and agree to these terms.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-2"
-                    disabled={loading}
+                    disabled={loading || !patientData.consentAiTraining || !patientData.consentDataStorage}
                   >
                     {loading ? "Creating Account..." : "Create Patient Account"}
                   </Button>
@@ -455,10 +592,98 @@ const Register = () => {
                       className="min-h-[100px]"
                     />
                   </div>
+                  
+                  {/* Consent Agreement Section */}
+                  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Shield className="w-5 h-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Your Privacy & Consent Matter to Us
+                      </h3>
+                    </div>
+                    
+                    <div className="space-y-4 text-sm text-gray-700">
+                      <div className="space-y-3">
+                        <p className="font-medium text-gray-900">
+                          Professional Participation in AI Healthcare Development
+                        </p>
+                        <p>
+                          As a healthcare professional on our platform, your expertise contributes to advancing AI-driven medical tools. Patient images and your diagnostic insights may be used to train AI models, helping create more accurate and regionally-relevant healthcare solutions.
+                        </p>
+                        <p>
+                          This collaborative approach is essential to our mission of improving healthcare access and quality through technology.
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-start space-x-2">
+                          <Globe className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="font-medium text-gray-900 mb-1">
+                              Data Security & Location
+                            </p>
+                            <p>
+                              Your professional data and patient information may be stored on secure servers outside your country's borders. All data is encrypted, anonymized, and handled in compliance with healthcare privacy standards to protect both you and your patients.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Consent Checkboxes */}
+                    <div className="space-y-3 pt-4 border-t border-gray-200">
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="doctor-consent-ai"
+                          checked={doctorData.consentAiTraining}
+                          onCheckedChange={(checked) =>
+                            setDoctorData({
+                              ...doctorData,
+                              consentAiTraining: checked as boolean,
+                            })
+                          }
+                          className="mt-1"
+                        />
+                        <Label
+                          htmlFor="doctor-consent-ai"
+                          className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                        >
+                          I understand and consent to patient data and diagnostic information being used to train AI models for improving healthcare services. I acknowledge that this is required to participate in the platform.
+                        </Label>
+                      </div>
+
+                      <div className="flex items-start space-x-3">
+                        <Checkbox
+                          id="doctor-consent-storage"
+                          checked={doctorData.consentDataStorage}
+                          onCheckedChange={(checked) =>
+                            setDoctorData({
+                              ...doctorData,
+                              consentDataStorage: checked as boolean,
+                            })
+                          }
+                          className="mt-1"
+                        />
+                        <Label
+                          htmlFor="doctor-consent-storage"
+                          className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                        >
+                          I understand that data may be stored on servers outside my country, and I consent to this arrangement knowing that all information has been anonymized and encrypted according to healthcare privacy standards.
+                        </Label>
+                      </div>
+
+                      <div className="pt-3 border-t border-gray-200">
+                        <p className="text-sm font-medium text-gray-900">
+                          By signing up, I confirm I have read and agree to these terms as a healthcare professional.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white py-2"
-                    disabled={loading}
+                    disabled={loading || !doctorData.consentAiTraining || !doctorData.consentDataStorage}
                   >
                     {loading ? "Creating Account..." : "Create Doctor Account"}
                   </Button>

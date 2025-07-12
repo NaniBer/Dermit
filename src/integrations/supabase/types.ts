@@ -196,6 +196,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          consent_ai_training: boolean | null
+          consent_data_storage: boolean | null
+          consent_timestamp: string | null
           created_at: string
           email: string
           first_name: string | null
@@ -205,6 +208,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          consent_ai_training?: boolean | null
+          consent_data_storage?: boolean | null
+          consent_timestamp?: string | null
           created_at?: string
           email: string
           first_name?: string | null
@@ -214,6 +220,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          consent_ai_training?: boolean | null
+          consent_data_storage?: boolean | null
+          consent_timestamp?: string | null
           created_at?: string
           email?: string
           first_name?: string | null
