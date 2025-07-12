@@ -96,7 +96,7 @@ const AcceptConsultationPage = () => {
 
         // Success! Redirect to chat
         navigate(`/consultation/${consultationId}/chat`);
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message || "Failed to accept consultation.");
         setLoading(false);
       }
@@ -116,8 +116,8 @@ const AcceptConsultationPage = () => {
       },
     ]);
 
-    if (error) {
-      console.error("Failed to create chat:", error.message);
+    if (chatError) {
+      console.error("Failed to create chat:", chatError);
       // Optionally toast this or show error somewhere
     } else {
       console.log("✅ Chat created for consultation:", consultation.id);

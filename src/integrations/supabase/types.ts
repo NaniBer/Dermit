@@ -14,6 +14,58 @@ export type Database = {
   }
   public: {
     Tables: {
+      chats: {
+        Row: {
+          consultation_id: string
+          created_at: string
+          doctor_id: string
+          id: string
+          patient_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          consultation_id: string
+          created_at?: string
+          doctor_id: string
+          id?: string
+          patient_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          consultation_id?: string
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          patient_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chats_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultations: {
         Row: {
           created_at: string | null
@@ -55,6 +107,7 @@ export type Database = {
       }
       messages: {
         Row: {
+          chat_id: string | null
           consultation_id: string
           content: string
           created_at: string | null
@@ -64,6 +117,7 @@ export type Database = {
           sender_id: string
         }
         Insert: {
+          chat_id?: string | null
           consultation_id: string
           content: string
           created_at?: string | null
@@ -73,6 +127,7 @@ export type Database = {
           sender_id: string
         }
         Update: {
+          chat_id?: string | null
           consultation_id?: string
           content?: string
           created_at?: string | null
@@ -82,6 +137,13 @@ export type Database = {
           sender_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_consultation_id_fkey"
             columns: ["consultation_id"]
@@ -159,6 +221,27 @@ export type Database = {
           last_name?: string | null
           phone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      telegramBotSubscribers: {
+        Row: {
+          chat_id: string | null
+          created_at: string
+          id: number
+          user_id: string
+        }
+        Insert: {
+          chat_id?: string | null
+          created_at?: string
+          id?: number
+          user_id: string
+        }
+        Update: {
+          chat_id?: string | null
+          created_at?: string
+          id?: number
+          user_id?: string
         }
         Relationships: []
       }

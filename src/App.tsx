@@ -28,6 +28,8 @@ import { useNotifications } from "./hooks/useNotifications";
 import { useState } from "react";
 import InstantNotificationSystem from "./components/InstantNotificationSystem";
 import AcceptConsultationPage from "./pages/AcceptConsultation";
+import DoctorChatPage from "./pages/DoctorChatPage";
+import PatientChatPage from "./pages/PatientChatPage";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +90,8 @@ const App = () => {
 
               <Route path="/doctor/patients" element={<DoctorPatients />} />
               <Route path="/doctor/profile" element={<DoctorProfile />} />
+              <Route path="/doctor/chat/:chatId" element={<DoctorChatPage />} />
+              <Route path="/patient/chat/:chatId" element={<PatientChatPage />} />
 
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />

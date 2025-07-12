@@ -184,7 +184,8 @@ const InstantNotificationSystem = ({
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      // 1. Update consultation status and assign doctor
+      const { error: consultationError } = await supabase
         .from("consultations")
         .update({
           doctor_id: user.id,
@@ -192,18 +193,40 @@ const InstantNotificationSystem = ({
         })
         .eq("id", consultationId);
 
-      if (error) throw error;
+      if (consultationError) throw consultationError;
+
+      // 2. Get consultation details for chat creation
+      const { data: consultation } = await supabase
+        .from("consultations")
+        .select("patient_id, doctor_id")
+        .eq("id", consultationId)
+        .single();
+
+      if (!consultation) throw new Error("Consultation not found");
+
+      // 3. Create a new chat entry
+      const { data: chatData, error: chatError } = await supabase
+        .from("chats")
+        .insert({
+          consultation_id: consultationId,
+          doctor_id: user.id,
+          patient_id: consultation.patient_id,
+          status: "active",
+        })
+        .select()
+        .single();
+
+      if (chatError) throw chatError;
 
       toast({
         title: "✅ Consultation Accepted!",
-        description:
-          "You've been assigned to this patient. Opening chat interface...",
+        description: "You've been assigned to this patient. Opening chat interface...",
         duration: 3000,
       });
 
-      // Immediate redirect to chat
+      // Immediate redirect to chat using chat_id
       setTimeout(() => {
-        navigate(`/doctor/consultation/${consultationId}`);
+        navigate(`/doctor/chat/${chatData.id}`);
       }, 500);
     } catch (error) {
       console.error("Error accepting consultation:", error);
