@@ -57,6 +57,7 @@ const AcceptConsultationPage = () => {
           .select("id, doctor_id, status")
           .eq("id", consultationId)
           .maybeSingle();
+        console.log(consultation, consultError);
 
         if (consultError) throw consultError;
 
@@ -91,6 +92,7 @@ const AcceptConsultationPage = () => {
           setLoading(false);
           return;
         }
+        await createChat(data);
 
         // Success! Redirect to chat
         navigate(`/consultation/${consultationId}/chat`);
@@ -100,6 +102,27 @@ const AcceptConsultationPage = () => {
       }
     })();
   }, [user, authLoading, consultationId, navigate]);
+  const createChat = async (consultation: {
+    id: string;
+    doctor_id: string;
+    patient_id: string;
+  }) => {
+    const { error: chatError } = await supabase.from("chats").insert([
+      {
+        consultation_id: consultation.id,
+        doctor_id: user.id,
+        patient_id: consultation.patient_id,
+        status: "active", // or "open", "in_progress", whatever fits your logic
+      },
+    ]);
+
+    if (error) {
+      console.error("Failed to create chat:", error.message);
+      // Optionally toast this or show error somewhere
+    } else {
+      console.log("✅ Chat created for consultation:", consultation.id);
+    }
+  };
 
   if (loading || authLoading) {
     return (
@@ -140,7 +163,7 @@ const AcceptConsultationPage = () => {
           You have already accepted this consultation.
         </h2>
         <Button
-          onClick={() => navigate(`/consultation/${consultationId}/chat`)}
+          onClick={() => navigate(`/dcotor/consultation/${consultationId}`)}
           className="mt-4"
         >
           Go to Chat

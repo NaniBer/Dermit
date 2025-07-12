@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from "react";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import PatientHeader from "@/components/PatientHeader";
+import { supabase } from "@/integrations/supabase/client";
 
 const PatientConsultationChat = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +17,36 @@ const PatientConsultationChat = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, loading, sendMessage } = useChat(id!);
   const { user } = useAuth();
+  const [doctorName, setDoctorName] = useState<string | null>(null);
+  const getDoctorNameFromConsultation = async (consultationId: string) => {
+    // 1️⃣ Fetch consultation to get doctor_id
+    const { data: consultation, error: consultError } = await supabase
+      .from("consultations")
+      .select("doctor_id")
+      .eq("id", consultationId)
+      .maybeSingle();
+
+    if (consultError || !consultation?.doctor_id) {
+      console.error("Failed to fetch consultation or doctor ID:", consultError);
+      return null;
+    }
+
+    const doctorId = consultation.doctor_id;
+
+    // 2️⃣ Fetch doctor's profile
+    const { data: doctor, error: doctorError } = await supabase
+      .from("profiles")
+      .select("first_name") // or "name", "first_name", etc., based on your schema
+      .eq("id", doctorId)
+      .maybeSingle();
+
+    if (doctorError || !doctor) {
+      console.error("Failed to fetch doctor profile:", doctorError);
+      return null;
+    }
+
+    return doctor.first_name; // 🧠 Or whatever field you use for name
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,6 +55,16 @@ const PatientConsultationChat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchDoctorName = async () => {
+      const name = await getDoctorNameFromConsultation(id);
+      setDoctorName(name);
+    };
+
+    fetchDoctorName();
+  }, [id]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +77,7 @@ const PatientConsultationChat = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <PatientHeader />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Chat Header */}
         <Card className="shadow-lg mb-6">
@@ -49,9 +90,11 @@ const PatientConsultationChat = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <CardTitle className="text-lg">Dr. Smith</CardTitle>
+                  <CardTitle className="text-lg">Dr. {doctorName}</CardTitle>
                   <div className="flex items-center space-x-2">
-                    <Badge className="bg-green-100 text-green-800">Online</Badge>
+                    <Badge className="bg-green-100 text-green-800">
+                      Online
+                    </Badge>
                     <span className="text-sm text-gray-600">Dermatologist</span>
                   </div>
                 </div>
@@ -82,14 +125,18 @@ const PatientConsultationChat = () => {
                 </div>
               ) : messages.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-600">No messages yet. Start the conversation!</p>
+                  <p className="text-gray-600">
+                    No messages yet. Start the conversation!
+                  </p>
                 </div>
               ) : (
                 messages.map((msg) => (
                   <div
                     key={msg.id}
                     className={`flex ${
-                      msg.sender_id === user?.id ? "justify-end" : "justify-start"
+                      msg.sender_id === user?.id
+                        ? "justify-end"
+                        : "justify-start"
                     }`}
                   >
                     <div
@@ -115,7 +162,7 @@ const PatientConsultationChat = () => {
               )}
               <div ref={messagesEndRef} />
             </div>
-            
+
             {/* Message Input */}
             <div className="border-t p-4">
               <form onSubmit={handleSendMessage} className="flex space-x-2">
