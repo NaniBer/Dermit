@@ -25,16 +25,12 @@ export interface Patient {
 }
 interface PatientListProps {
   patients: Patient[];
-  onEdit: (id: number) => void;
-  onToggleStatus: (id: number) => void;
   onClearSearch: () => void;
   searchTerm: string;
 }
 
 const PatientList: React.FC<PatientListProps> = ({
   patients,
-  onEdit,
-  onToggleStatus,
   onClearSearch,
   searchTerm,
 }) => {
