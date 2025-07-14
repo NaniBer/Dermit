@@ -44,25 +44,30 @@ const NewConsultation = () => {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
+  const [assignmentType, setAssignmentType] = useState<'auto' | 'code'>('auto');
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      // Loop through files sequentially or in parallel
-      for (const file of Array.from(files)) {
-        // Upload to drive and get URL
-        try {
-          const url = await uploadToDrive(file);
-          // Add URL to state instead of base64
-          setUploadedImages((prev) => [...prev, url]);
-        } catch (err) {
-          console.error("Failed to upload image:", err);
-          toast({
-            title: "Upload Error",
-            description: "Failed to upload one of your images. Try again.",
-            variant: "destructive",
-          });
+      setImageUploading(true);
+      try {
+        for (const file of Array.from(files)) {
+          // Upload to drive and get URL
+          try {
+            const url = await uploadToDrive(file);
+            setUploadedImages((prev) => [...prev, url]);
+          } catch (err) {
+            console.error("Failed to upload image:", err);
+            toast({
+              title: "Upload Error",
+              description: "Failed to upload one of your images. Try again.",
+              variant: "destructive",
+            });
+          }
         }
+      } finally {
+        setImageUploading(false);
       }
     }
   };
@@ -248,6 +253,15 @@ const NewConsultation = () => {
                           Supports: JPG, PNG, WebP (Max 5MB each)
                         </p>
                       </label>
+                      {imageUploading && (
+                        <div className="flex flex-col items-center mt-4">
+                          <svg className="animate-spin h-6 w-6 text-blue-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                          </svg>
+                          <span className="text-blue-600 text-sm">Uploading image(s)...</span>
+                        </div>
+                      )}
                     </div>
 
                     {uploadedImages.length > 0 && (
@@ -406,7 +420,11 @@ const NewConsultation = () => {
                             id="auto-assign"
                             name="assignment"
                             className="w-4 h-4 text-blue-600"
-                            defaultChecked
+                            checked={assignmentType === 'auto'}
+                            onChange={() => {
+                              setAssignmentType('auto');
+                              setFormData((prev) => ({ ...prev, doctorCode: '' }));
+                            }}
                           />
                           <label
                             htmlFor="auto-assign"
@@ -428,6 +446,8 @@ const NewConsultation = () => {
                             id="doctor-code"
                             name="assignment"
                             className="w-4 h-4 text-blue-600"
+                            checked={assignmentType === 'code'}
+                            onChange={() => setAssignmentType('code')}
                           />
                           <label
                             htmlFor="doctor-code"
@@ -452,6 +472,7 @@ const NewConsultation = () => {
                               })
                             }
                             className="max-w-xs"
+                            disabled={assignmentType !== 'code'}
                           />
                         </div>
                       </div>

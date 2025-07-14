@@ -1,33 +1,36 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Consultation } from "@/types/models";
+import { ConsultationStatus, ConsultationPriority } from "@/types/models";
 
-export function useConsultations(user: any) {
-  const [consultations, setConsultations] = useState([]);
-  const [popupConsultation, setPopupConsultation] = useState(null);
+export function useConsultations({ userId, doctorId, status }: { userId?: string; doctorId?: string; status?: string }) {
+  const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [popupConsultation, setPopupConsultation] = useState<Consultation | null>(null);
 
   const fetchConsultations = async () => {
-    if (!user) return;
-
+    let query = supabase.from("consultations").select("*");
+    if (userId) query = query.eq("patient_id", userId);
+    if (doctorId) query = query.eq("doctor_id", doctorId);
+    if (status) query = query.eq("status", status);
+    query = query.order("created_at", { ascending: false });
     try {
-      const { data, error } = await supabase
-        .from("consultations")
-        .select("*")
-        .eq("status", "pending")
-        .order("created_at", { ascending: false });
-
+      const { data, error } = await query;
       if (error) {
         console.error("Error fetching consultations:", error);
         return;
       }
-
-      setConsultations(data || []);
+      setConsultations((data || []).map((c: any) => ({
+        ...c,
+        status: c.status as ConsultationStatus,
+        priority: c.priority as ConsultationPriority,
+      })));
     } catch (error) {
       console.error("Error in fetchConsultations:", error);
     }
   };
 
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
 
     fetchConsultations();
 
@@ -47,8 +50,19 @@ export function useConsultations(user: any) {
             "New consultation request from useConsultations:",
             newConsult
           );
-          setConsultations((prev) => [newConsult, ...prev]);
-          setPopupConsultation(newConsult);
+          setConsultations((prev) => [
+            {
+              ...newConsult,
+              status: newConsult.status as ConsultationStatus,
+              priority: newConsult.priority as ConsultationPriority,
+            } as Consultation,
+            ...prev,
+          ]);
+          setPopupConsultation({
+            ...newConsult,
+            status: newConsult.status as ConsultationStatus,
+            priority: newConsult.priority as ConsultationPriority,
+          } as Consultation);
         }
       )
       .on(
@@ -77,7 +91,7 @@ export function useConsultations(user: any) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [userId, doctorId, status]);
 
   return {
     consultations,

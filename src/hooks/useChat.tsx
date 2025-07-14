@@ -3,10 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import type { Database } from '@/integrations/supabase/types';
-
-type Message = Database['public']['Tables']['messages']['Row'];
-type MessageInsert = Database['public']['Tables']['messages']['Insert'];
+import { Consultation, Message, MessageInsert, MessageType } from "@/types/models";
 
 export const useChat = (consultationId: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -26,7 +23,10 @@ export const useChat = (consultationId: string) => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      setMessages((data || []).map((msg: any) => ({
+        ...msg,
+        message_type: msg.message_type as MessageType,
+      })));
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
