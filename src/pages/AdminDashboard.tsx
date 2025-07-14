@@ -3,35 +3,81 @@ import AdminHeader from "@/components/AdminHeader";
 import DashboardButton from "@/components/adminDashboard/DashboardButtons";
 import AddNewUsers from "@/components/adminDashboard/AddNewUsers";
 import ExistingUser from "@/components/adminDashboard/ExistingUsers";
+import { supabase } from "@/integrations/supabase/client";
+import { use, useEffect, useState } from "react";
+
+interface Doctor {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+}
 
 const AdminDashboard = () => {
-  // Mock data for existing doctors
-  const doctors = [
-    {
-      id: 1,
-      name: "Dr. Sarah Johnson",
-      email: "sarah.johnson@dermit.com",
-      specialty: "General Dermatology",
-      licenseNumber: "MD12345",
-      experience: "8 years",
-      status: "active",
-      consultations: 156,
-      joinDate: "2023-01-15",
-      licenseExpiry: "2025-12-31",
-    },
-    {
-      id: 2,
-      name: "Dr. Michael Chen",
-      email: "michael.chen@dermit.com",
-      specialty: "Pediatric Dermatology",
-      licenseNumber: "MD67890",
-      experience: "12 years",
-      status: "active",
-      consultations: 203,
-      joinDate: "2023-03-22",
-      licenseExpiry: "2024-08-15",
-    },
-  ];
+  const [doctors, setDoctors] = useState([]);
+ const [items, setItems] = useState([]);
+ const [itemAdmin, setItemAdmin] = useState([]);
+   const addItem = (newItem) => {
+    setItems(prevItems => [...prevItems, newItem]);
+    // setDoctors(prevItems => [...prevItems, newItem]);
+  };
+
+  const [consultationsNo, setConsultationsNo] = useState(0);
+  const [patientsNo, setPatientsNo] = useState(0);
+   // Just for demonstration: adding stuff automatically when component mounts
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      const { data, error } = await supabase.from("doctor_profiles").select("*");
+      if (error) {
+        console.error("Error fetching doctors:", error);
+      } else {
+        addItem(data)
+        // setDoctors(data || []);
+      
+      }
+    };
+        const fetchAdmins = async () => {
+      const { data, error } = await supabase.from("admin_profiles").select("*");
+      if (error) {
+        console.error("Error fetching doctors:", error);
+      } else {
+        setItemAdmin(data)
+        // setDoctors(data || []);
+      
+      }
+    };
+       const fetchConsultationsNo = async () => {
+    const { data, count, error } = await supabase
+  .from('consultations')
+  .select('*', { count: 'exact' });
+      if (error) {
+        console.error("Error fetching consultations:", error);
+      } else {
+        // setItemAdmin(data)
+        // setDoctors(data || []);
+        // console.log(count)
+        setConsultationsNo(count)
+      
+      }
+    };
+    const fetchPatientsNo = async () => {
+      const { data, count, error } = await supabase
+  .from('patient_profiles')
+  .select('*', { count: 'exact' });
+    if (error) {
+        console.error("Error fetching patients:", error);
+      } else {
+        setPatientsNo(count)
+      }
+    }
+
+    fetchDoctors();
+    fetchAdmins();
+    fetchConsultationsNo();
+    fetchPatientsNo();
+  }, []);
 
   // Mock data for existing admins
   const admins = [
@@ -65,7 +111,7 @@ const AdminDashboard = () => {
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <DashboardButton
             description="Total Doctors"
-            value={doctors.length}
+            value={items.length}
             icon={UserCheck}
             color="purple"
           />
@@ -78,15 +124,15 @@ const AdminDashboard = () => {
           />
 
           <DashboardButton
-            description="Active Consultations"
-            value={27}
+            description="Consultations"
+            value={consultationsNo}
             icon={Stethoscope}
             color="green"
           />
 
           <DashboardButton
             description="Total Patients"
-            value={"1,234"}
+            value={patientsNo}
             icon={Users}
             color="blue"
           />
@@ -97,7 +143,7 @@ const AdminDashboard = () => {
           <AddNewUsers />
 
           {/* Right Column - Existing Users */}
-          <ExistingUser doctors={doctors} admins={admins} />
+          <ExistingUser doctors={items} admins={itemAdmin} />
         </div>
       </div>
     </div>

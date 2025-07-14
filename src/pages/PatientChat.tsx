@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,17 +33,17 @@ const PatientChat = () => {
   // Fetch user's consultations
   useEffect(() => {
     if (!user) return;
-    
+
     const fetchConsultations = async () => {
       const { data } = await supabase
-        .from('consultations')
-        .select('*')
-        .eq('patient_id', user.id)
-        .order('created_at', { ascending: false });
-      
+        .from("consultations")
+        .select("*")
+        .eq("patient_id", user.id)
+        .order("created_at", { ascending: false });
+
       setConversations(data || []);
     };
-    
+
     fetchConsultations();
   }, [user]);
 
@@ -61,11 +60,20 @@ const PatientChat = () => {
 
   const handleFileSelect = (file: File, type: "image" | "file" | "camera") => {
     if (activeConversationId) {
-      sendMessage(`📎 ${file.name}`, type === "image" || type === "camera" ? "image" : "file");
+      sendMessage(
+        `📎 ${file.name}`,
+        type === "image" || type === "camera" ? "image" : "file"
+      );
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -79,6 +87,10 @@ const PatientChat = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+  useEffect(() => {
+    console.log("Fetching messages for", activeConversationId);
+    // fetch messages logic
+  }, [activeConversationId]);
 
   if (!user) {
     return <div>Please log in to access chat.</div>;
@@ -122,7 +134,9 @@ const PatientChat = () => {
                             </p>
                             <div className="flex items-center justify-between mt-2">
                               <span className="text-xs text-gray-400">
-                                {new Date(conversation.created_at).toLocaleDateString()}
+                                {new Date(
+                                  conversation.created_at
+                                ).toLocaleDateString()}
                               </span>
                               <Badge
                                 className={`text-xs ${
@@ -168,24 +182,15 @@ const PatientChat = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
-                        <Phone className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Video className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </div>
                   </div>
                 </CardHeader>
 
                 {/* Messages */}
                 <CardContent className="flex-1 overflow-y-auto p-6 space-y-4">
                   {loading ? (
-                    <div className="flex justify-center">Loading messages...</div>
+                    <div className="flex justify-center">
+                      Loading messages...
+                    </div>
                   ) : (
                     messages.map((msg) => (
                       <div
@@ -244,6 +249,7 @@ const PatientChat = () => {
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
+                      onKeyDown={handleKeyDown}
                       className="flex-1"
                       disabled={activeConversation.status === "completed"}
                     />

@@ -73,7 +73,7 @@ const NewConsultation = () => {
     formData.append("file", file);
     formData.append("filename", myUuid);
 
-    const res = await fetch("http://localhost:3000/upload-image", {
+    const res = await fetch("https://dermitconsultalertbot-cdezn.sevalla.app/upload-image", {
       method: "POST",
       body: formData, // NO content-type header! The browser adds it automatically with boundary
     });

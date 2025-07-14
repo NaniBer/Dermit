@@ -95,7 +95,7 @@ const AcceptConsultationPage = () => {
         await createChat(data);
 
         // Success! Redirect to chat
-        navigate(`doctor/consultation/${consultationId}/`);
+        navigate(`/doctor/consultation/${consultationId}/`);
       } catch (err: any) {
         setError(err.message || "Failed to accept consultation.");
         setLoading(false);

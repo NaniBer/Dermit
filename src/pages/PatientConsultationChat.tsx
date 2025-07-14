@@ -14,8 +14,9 @@ import { supabase } from "@/integrations/supabase/client";
 const PatientConsultationChat = () => {
   const { id } = useParams<{ id: string }>();
   const [message, setMessage] = useState("");
+  const [chatReady, setChatReady] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { messages, loading, sendMessage } = useChat(id!);
+  const { messages, loading, sendMessage } = useChat(chatReady ? id : "");
   const { user } = useAuth();
   const [doctorName, setDoctorName] = useState<string | null>(null);
   const getDoctorNameFromConsultation = async (consultationId: string) => {
@@ -65,6 +66,9 @@ const PatientConsultationChat = () => {
 
     fetchDoctorName();
   }, [id]);
+  useEffect(() => {
+    if (id) setChatReady(true);
+  }, [id]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,17 +102,6 @@ const PatientConsultationChat = () => {
                     <span className="text-sm text-gray-600">Dermatologist</span>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                  <Phone className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Video className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="sm">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
               </div>
             </div>
           </CardHeader>
@@ -166,9 +159,9 @@ const PatientConsultationChat = () => {
             {/* Message Input */}
             <div className="border-t p-4">
               <form onSubmit={handleSendMessage} className="flex space-x-2">
-                <Button type="button" variant="outline" size="sm">
+                {/* <Button type="button" variant="outline" size="sm">
                   <Paperclip className="w-4 h-4" />
-                </Button>
+                </Button> */}
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}

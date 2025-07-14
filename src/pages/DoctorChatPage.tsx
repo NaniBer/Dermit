@@ -4,7 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Paperclip, Phone, Video, MoreVertical, User } from "lucide-react";
+import {
+  Send,
+  Paperclip,
+  Phone,
+  Video,
+  MoreVertical,
+  User,
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useOptimizedChat } from "@/hooks/useOptimizedChat";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,13 +45,21 @@ const DoctorChatPage = () => {
         .maybeSingle();
 
       if (patient) {
-        setPatientName(`${patient.first_name || ''} ${patient.last_name || ''}`.trim() || 'Patient');
+        setPatientName(
+          `${patient.first_name || ""} ${patient.last_name || ""}`.trim() ||
+            "Patient"
+        );
       }
     };
 
     fetchPatientName();
   }, [chat?.patient_id]);
-
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -123,7 +138,11 @@ const DoctorChatPage = () => {
                         msg.sender_id === user?.id
                           ? "bg-blue-600 text-white shadow-md"
                           : "bg-gray-100 text-gray-900 shadow-sm"
-                      } ${msg.id.startsWith('temp-') ? 'opacity-70' : 'opacity-100'}`}
+                      } ${
+                        msg.id.startsWith("temp-")
+                          ? "opacity-70"
+                          : "opacity-100"
+                      }`}
                     >
                       <p className="break-words">{msg.content}</p>
                       <p
@@ -151,13 +170,14 @@ const DoctorChatPage = () => {
                 <Input
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Type your message to the patient..."
                   className="flex-1 bg-white"
                   disabled={loading}
                 />
-                <Button 
-                  type="submit" 
-                  size="sm" 
+                <Button
+                  type="submit"
+                  size="sm"
                   disabled={!message.trim() || loading}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
