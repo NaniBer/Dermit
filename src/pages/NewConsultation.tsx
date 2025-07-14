@@ -27,6 +27,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import WaitingForDoctor from "@/components/WaitingForDoctor";
+import { v4 as uuidv4 } from "uuid";
 
 const NewConsultation = () => {
   const { user } = useAuth();
@@ -44,19 +45,43 @@ const NewConsultation = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target?.result) {
-            setUploadedImages((prev) => [...prev, e.target!.result as string]);
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+      // Loop through files sequentially or in parallel
+      for (const file of Array.from(files)) {
+        // Upload to drive and get URL
+        try {
+          const url = await uploadToDrive(file);
+          // Add URL to state instead of base64
+          setUploadedImages((prev) => [...prev, url]);
+        } catch (err) {
+          console.error("Failed to upload image:", err);
+          toast({
+            title: "Upload Error",
+            description: "Failed to upload one of your images. Try again.",
+            variant: "destructive",
+          });
+        }
+      }
     }
+  };
+  const uploadToDrive = async (file): Promise<string> => {
+    const myUuid = uuidv4();
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("filename", myUuid);
+
+    const res = await fetch("http://localhost:3000/upload-image", {
+      method: "POST",
+      body: formData, // NO content-type header! The browser adds it automatically with boundary
+    });
+
+    if (!res.ok) throw new Error("Upload failed");
+
+    const { url } = await res.json();
+    return url;
   };
 
   const removeImage = (index: number) => {
