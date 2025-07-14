@@ -132,7 +132,7 @@ const ExistingUser = ({ doctors, admins }) => {
                           <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                             <div className="flex items-center space-x-1">
                               <Mail className="w-3 h-3" />
-                              <span>{admin?.email}</span>
+                              <span>{admin[0]?.email}</span>
                             </div>
                           </div>
                           <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
