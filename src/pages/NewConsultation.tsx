@@ -41,42 +41,36 @@ const NewConsultation = () => {
     doctorCode: "",
   });
 
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      // Loop through files sequentially or in parallel
       for (const file of Array.from(files)) {
-        // Upload to drive and get URL
-        try {
-          const url = await uploadToDrive(file);
-          // Add URL to state instead of base64
-          setUploadedImages((prev) => [...prev, url]);
-        } catch (err) {
-          console.error("Failed to upload image:", err);
-          toast({
-            title: "Upload Error",
-            description: "Failed to upload one of your images. Try again.",
-            variant: "destructive",
-          });
-        }
+        setUploadedImages((prev) => [...prev, file]);
       }
     }
   };
-  const uploadToDrive = async (file): Promise<string> => {
+
+  const uploadToDrive = async (image, consultationId): Promise<string> => {
     const myUuid = uuidv4();
     const formData = new FormData();
 
-    formData.append("file", file);
+    formData.append("file", image);
     formData.append("filename", myUuid);
+    formData.append("consultation_id", consultationId);
+    // "https://dermitconsultalertbot-cdezn.sevalla.app/upload-image",
 
-    const res = await fetch("https://dermitconsultalertbot-cdezn.sevalla.app/upload-image", {
-      method: "POST",
-      body: formData, // NO content-type header! The browser adds it automatically with boundary
-    });
+    const res = await fetch(
+      "http://localhost:3000/upload-image",
+
+      {
+        method: "POST",
+        body: formData, // NO content-type header! The browser adds it automatically with boundary
+      }
+    );
 
     if (!res.ok) throw new Error("Upload failed");
 
@@ -125,6 +119,10 @@ const NewConsultation = () => {
         })
         .select()
         .single();
+      for (const images of uploadedImages) {
+        const url = await uploadToDrive(images, data.id);
+      }
+
       console.log("Consultation data:", data);
 
       if (error) throw error;
@@ -255,7 +253,7 @@ const NewConsultation = () => {
                         {uploadedImages.map((image, index) => (
                           <div key={index} className="relative group">
                             <img
-                              src={image}
+                              src={URL.createObjectURL(image)}
                               alt={`Upload ${index + 1}`}
                               className="w-full h-32 object-cover rounded-lg"
                             />
