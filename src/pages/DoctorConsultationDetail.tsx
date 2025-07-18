@@ -395,7 +395,7 @@ const DoctorConsultationDetail = () => {
                       Description
                     </label>
                     <p className="text-sm text-gray-900 whitespace-pre-line">
-                      {consultation.description || "No description provided"}
+                      {consultation.description || "No description provided. "}
                     </p>
                   </div>
                   {consultation.images && consultation.images.length > 0 && (
