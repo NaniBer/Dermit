@@ -57,6 +57,29 @@ const Register = () => {
     navigate("/patient/dashboard");
     return null;
   }
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin, // Redirect to the same origin after login
+          // You can add redirect URL here if needed, e.g. redirectTo: 'https://yourapp.com/dashboard'
+        },
+      });
+      if (error) throw error;
+      // Supabase redirects user to Google OAuth flow automatically.
+      // After successful login, Supabase will redirect back to your app.
+    } catch (error) {
+      toast({
+        title: "Authentication Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePatientRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,42 +106,66 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { error } = await signUp(
-        patientData.email,
-        patientData.password,
-        patientData.firstName,
-        patientData.lastName,
-        patientData.role
-      );
-
-      if (!error) {
-        // Add patient role and consent data
-        const { data: userData } = await supabase.auth.getUser();
-        console.log("User data after sign up:", userData);
-        if (userData.user) {
-          await supabase.from("user_roles").insert({
-            user_id: userData.user.id,
-            role: "patient",
-          });
-
-          // Update profile with consent information
-          await supabase
-            .from("profiles")
-            .update({
-              consent_ai_training: patientData.consentAiTraining,
-              consent_data_storage: patientData.consentDataStorage,
-              consent_timestamp: new Date().toISOString(),
-            })
-            .eq("id", userData.user.id);
-        }
-        toast({
-          title: "Account Created Successfully",
-          description: "Please sign in to access your account",
+      const { data: signUpData, error: signUpError } =
+        await supabase.auth.signUp({
+          email: patientData.email,
+          password: patientData.password,
         });
-        navigate("/login");
+
+      if (signUpError) throw signUpError;
+
+      // signUpData.user will exist here
+      if (!signUpData.user?.email_confirmed_at) {
+        // Email NOT confirmed yet, so NO auto sign-in
+        toast({
+          title: "Please Confirm Your Email",
+          description:
+            "Check your inbox for a confirmation email before signing in.",
+          variant: "destructive",
+        });
+        setLoading(false);
+        return; // exit the function so no auto sign-in happens
       }
+
+      // If email is confirmed (unlikely at sign-up), auto sign-in:
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: patientData.email,
+        password: patientData.password,
+      });
+      if (signInError) throw signInError;
+
+      // Add roles and consent after sign-in
+      const {
+        data: { user: signedInUser },
+      } = await supabase.auth.getUser();
+
+      if (signedInUser) {
+        await supabase.from("user_roles").insert({
+          user_id: signedInUser.id,
+          role: "patient",
+        });
+
+        await supabase
+          .from("profiles")
+          .update({
+            consent_ai_training: patientData.consentAiTraining,
+            consent_data_storage: patientData.consentDataStorage,
+            consent_timestamp: new Date().toISOString(),
+          })
+          .eq("id", signedInUser.id);
+      }
+
+      toast({
+        title: "Welcome aboard!",
+        description: "You have successfully signed up and logged in.",
+      });
+      navigate("/patient/dashboard");
     } catch (error) {
-      console.error("Registration error:", error);
+      toast({
+        title: "Oops!",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -364,6 +411,21 @@ const Register = () => {
                     }
                   >
                     {loading ? "Creating Account..." : "Create Patient Account"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full mb-4 flex items-center justify-center space-x-2"
+                    onClick={handleGoogleSignIn}
+                    disabled={loading}
+                  >
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                      alt="Google logo"
+                      className="w-5 h-5"
+                    />
+                    <span>
+                      {loading ? "Redirecting..." : "Sign in with Google"}
+                    </span>
                   </Button>
                 </form>
               </TabsContent>

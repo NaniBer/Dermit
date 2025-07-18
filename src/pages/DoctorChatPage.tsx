@@ -34,6 +34,12 @@ const DoctorChatPage = () => {
     scrollToBottom();
   }, [messages]);
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
   useEffect(() => {
     if (!chat?.patient_id) return;
 
@@ -54,12 +60,7 @@ const DoctorChatPage = () => {
 
     fetchPatientName();
   }, [chat?.patient_id]);
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
