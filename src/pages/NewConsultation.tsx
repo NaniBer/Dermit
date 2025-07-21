@@ -147,6 +147,15 @@ const NewConsultation = () => {
   };
 
   const nextStep = () => {
+    if (currentStep == 2 && !formData.chiefComplaint.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please describe your chief complaint.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
@@ -158,7 +167,7 @@ const NewConsultation = () => {
     }
   };
 
-  if (currentStep === 4) {
+  if (currentStep === 3) {
     return <WaitingForDoctor />;
   }
 
@@ -172,7 +181,7 @@ const NewConsultation = () => {
               to="/patient/dashboard"
               className="flex items-center space-x-2"
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
                 <Stethoscope className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Dermit</span>
@@ -216,7 +225,7 @@ const NewConsultation = () => {
                 <Card className="shadow-xl border-0">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
-                      <Camera className="w-5 h-5 text-blue-600" />
+                      <Camera className="w-5 h-5 text-brand-text-secondary" />
                       <span>Upload Images (Optional)</span>
                     </CardTitle>
                     <CardDescription>
@@ -270,10 +279,10 @@ const NewConsultation = () => {
                     )}
 
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-800 mb-2">
+                      <h4 className="font-semibold text-brand-text-secondary mb-2">
                         Photography Tips:
                       </h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
+                      <ul className="text-sm text-brand-text-secondary space-y-1">
                         <li>• Use good lighting - natural light works best</li>
                         <li>• Take multiple angles if possible</li>
                         <li>• Keep the camera steady and in focus</li>
@@ -384,7 +393,7 @@ const NewConsultation = () => {
               )}
 
               {/* Step 3: Doctor Assignment */}
-              {currentStep === 3 && (
+              {/* {currentStep === 3 && (
                 <Card className="shadow-xl border-0">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -477,7 +486,7 @@ const NewConsultation = () => {
                     </div>
                   </CardContent>
                 </Card>
-              )}
+              )} */}
             </div>
 
             {/* Sidebar */}
@@ -532,26 +541,28 @@ const NewConsultation = () => {
               {/* Expected Timeline */}
               <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50">
                 <CardHeader>
-                  <CardTitle className="text-blue-800">
+                  <CardTitle className="text-brand-text-secondary">
                     Expected Timeline
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="text-blue-700">Submit request: Now</span>
+                      <CheckCircle className="w-4 h-4 text-brand-primary" />
+                      <span className="text-brand-primary">
+                        Submit request: Now
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-blue-400 rounded-full"></div>
-                      <span className="text-blue-700">
-                        Doctor review: Within 24 hours
+                      <div className="w-4 h-4 border-2 border-brand-secondary rounded-full"></div>
+                      <span className="text-brand-secondary">
+                        Doctor review: Soon
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
                       <span className="text-gray-600">
-                        Initial response: 24-48 hours
+                        Initial response: 30 mins
                       </span>
                     </div>
                   </div>
@@ -574,7 +585,7 @@ const NewConsultation = () => {
                 <Button
                   type="button"
                   onClick={nextStep}
-                  className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                  className="bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-primary"
                 >
                   Next Step
                   <ArrowRight className="ml-2 w-4 h-4" />
@@ -582,7 +593,7 @@ const NewConsultation = () => {
               ) : (
                 <Button
                   type="submit"
-                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                  className="bg-gradient-to-r from-brand-secondary to-brand-primary hover:from-brand-secondary hover:to-brand-primary"
                   disabled={loading}
                 >
                   {loading ? "Submitting..." : "Submit Consultation Request"}

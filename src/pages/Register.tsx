@@ -178,7 +178,7 @@ const Register = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">Dermit</span>
@@ -420,7 +420,7 @@ const Register = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-2"
+                    className="w-full bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-primary text-white py-2"
                     disabled={
                       loading ||
                       !patientData.consentPrivacy ||

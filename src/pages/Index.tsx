@@ -27,22 +27,33 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <Stethoscope className="w-5 h-5 text-white" />
+              <div className="w-32 h-13 rounded-lg flex items-center justify-center">
+                <img
+                  src="/DermitLong.png"
+                  alt="Dermit Logo"
+                  // className="w-5 h-5"
+                />
+                {/* <Stethoscope className="w-5 h-5 text-white" /> */}
               </div>
-              <span className="text-xl font-bold text-gray-900">Dermit</span>
+              {/* <span className="text-xl font-bold text-gray-900">Dermit</span> */}
             </div>
             <div className="flex items-center space-x-4">
               <Link to="/login">
                 <Button
                   variant="ghost"
-                  className="text-gray-600 hover:text-gray-900"
+                  className="brand-text-primary hover:text-gray-900 "
                 >
                   Sign In
                 </Button>
               </Link>
               <Link to="/register">
-                <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white">
+                <Button
+                  className="
+    bg-gradient-to-r from-brand-primary to-brand-secondary
+    hover:from-brand-primary-hover hover:to-brand-secondary
+    text-white transition-colors
+  "
+                >
                   Get Started
                 </Button>
               </Link>
@@ -62,7 +73,7 @@ const Index = () => {
                 </Badge>
                 <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Expert Skin Care
-                  <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent">
                     {" "}
                     Consultations
                   </span>
@@ -77,7 +88,7 @@ const Index = () => {
                 <Link to="/register?type=patient">
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-3 text-lg"
+                    className="bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-primary text-white px-8 py-3 text-lg"
                   >
                     Book Consultation
                     <ArrowRight className="ml-2 w-5 h-5" />
@@ -95,11 +106,11 @@ const Index = () => {
               </div>
             </div>
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-400 rounded-3xl transform rotate-3 opacity-20"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-brand-secondary to-brand-primary rounded-3xl transform rotate-3 opacity-20"></div>
               <div className="relative bg-white rounded-3xl shadow-2xl p-8">
                 <div className="space-y-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full flex items-center justify-center">
                       <Camera className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -110,7 +121,7 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-brand-secondary to-brand-primary  rounded-full flex items-center justify-center">
                       <MessageCircle className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -123,7 +134,7 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full flex items-center justify-center">
                       <Heart className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -214,7 +225,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-blue-600 to-green-600">
+      <section className="py-24 bg-gradient-to-r from-brand-primary to-brand-secondary">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Get Started?
@@ -227,7 +238,7 @@ const Index = () => {
           <Link to="/register?type=patient">
             <Button
               size="lg"
-              className="bg-white text-blue-600 hover:bg-gray-50 px-8 py-3 text-lg font-semibold"
+              className="bg-white text-brand-text-primary hover:bg-gray-50 px-8 py-3 text-lg font-semibold"
             >
               Start Your Consultation
               <ArrowRight className="ml-2 w-5 h-5" />
@@ -241,7 +252,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
                 <Stethoscope className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold">Dermit</span>

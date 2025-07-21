@@ -26,9 +26,11 @@ const DoctorHeader = () => {
   const currentPath = location.pathname;
   const { user } = useAuth();
   const [notificationBadgeCount, setNotificationBadgeCount] = useState(0);
-  
-  const handleBadgeCountChange = (count: number | ((prev: number) => number)) => {
-    if (typeof count === 'function') {
+
+  const handleBadgeCountChange = (
+    count: number | ((prev: number) => number)
+  ) => {
+    if (typeof count === "function") {
       setNotificationBadgeCount(count);
     } else {
       setNotificationBadgeCount(count);
@@ -47,10 +49,15 @@ const DoctorHeader = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-green-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <Stethoscope className="w-5 h-5 text-white" />
+              <div className="w-32 h-13 rounded-lg flex items-center justify-center">
+                <img
+                  src="/DermitLong.png"
+                  alt="Dermit Logo"
+                  // className="w-5 h-5"
+                />
+                {/* <Stethoscope className="w-5 h-5 text-white" /> */}
               </div>
-              <span className="text-xl font-bold text-gray-900">Dermit</span>
+              {/* <span className="text-xl font-bold text-gray-900">Dermit</span> */}
               <Badge variant="secondary" className="ml-2">
                 Doctor
               </Badge>
@@ -99,7 +106,9 @@ const DoctorHeader = () => {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <InstantNotificationSystem onBadgeCountChange={handleBadgeCountChange} />
+            <InstantNotificationSystem
+              onBadgeCountChange={handleBadgeCountChange}
+            />
             <NotificationDropdown badgeCount={notificationBadgeCount} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

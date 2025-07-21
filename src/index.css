@@ -51,6 +51,15 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --brand-primary: 172 54% 51%; /* #3BC4B2 - Teal Green (Primary Buttons) */
+    --brand-primary-hover: 172 54% 61%; /* Lighter teal for hover */
+    --brand-secondary: 186 96% 16%; /* #024C52 - Deep Sea Blue (Secondary Buttons, links) */
+    --brand-bg: 0 0% 100%; /* #FFFFFF - Background */
+    --brand-text-primary: 0 0% 11%; /* #1C1C1C - Charcoal Black (Headlines, main content) */
+    --brand-text-secondary: 186 96% 16%; /* #024C52 - Deep Sea Blue (Links, subtle emphasis) */
+    --brand-error: 354 77% 57%; /* #E63946 - Warm Red (Errors & Alerts) */
+    --brand-neutral-bg: 172 54% 89%; /* #E0F4F3 - Light Teal Tint (Cards, modals, sections) */
   }
 
   .dark {

@@ -36,21 +36,23 @@ const PatientConsultations = () => {
     const fetchConsultations = async () => {
       try {
         const { data, error } = await supabase
-          .from('consultations')
-          .select(`
+          .from("consultations")
+          .select(
+            `
             *,
             profiles!consultations_doctor_id_fkey (
               first_name,
               last_name
             )
-          `)
-          .eq('patient_id', user.id)
-          .order('created_at', { ascending: false });
+          `
+          )
+          .eq("patient_id", user.id)
+          .order("created_at", { ascending: false });
 
         if (error) throw error;
         setConsultations(data || []);
       } catch (error) {
-        console.error('Error fetching consultations:', error);
+        console.error("Error fetching consultations:", error);
       } finally {
         setLoading(false);
       }
@@ -137,7 +139,7 @@ const PatientConsultations = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <PatientHeader />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Section 1: Start a New Consultation */}
         <Card className="border-2 border-dashed border-blue-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg bg-gradient-to-r from-blue-50 to-white mb-8">
@@ -148,7 +150,7 @@ const PatientConsultations = () => {
           </CardHeader>
           <CardContent className="space-y-4 flex flex-col items-center mt-3">
             <Link to="/patient/new-consultation">
-              <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
+              <Button className="bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-primary">
                 <Plus className="w-4 h-4 mr-2" />
                 Schedule Consultation
               </Button>
@@ -182,21 +184,25 @@ const PatientConsultations = () => {
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            {new Date(consultation.created_at).toLocaleDateString()}
+                            {new Date(
+                              consultation.created_at
+                            ).toLocaleDateString()}
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
-                            {new Date(consultation.created_at).toLocaleTimeString()}
+                            {new Date(
+                              consultation.created_at
+                            ).toLocaleTimeString()}
                           </div>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-blue-600" />
                           <span className="font-medium text-gray-900">
-                            {consultation.profiles?.first_name && consultation.profiles?.last_name 
+                            {consultation.profiles?.first_name &&
+                            consultation.profiles?.last_name
                               ? `Dr. ${consultation.profiles.first_name} ${consultation.profiles.last_name}`
-                              : "Doctor Assigned"
-                            }
+                              : "Doctor Assigned"}
                           </span>
                         </div>
 
@@ -208,7 +214,9 @@ const PatientConsultations = () => {
                             {consultation.description}
                           </p>
                           <div className="flex items-center gap-2">
-                            {getPriorityBadge(consultation.priority || "normal")}
+                            {getPriorityBadge(
+                              consultation.priority || "normal"
+                            )}
                             {getStatusBadge(consultation.status || "pending")}
                           </div>
                         </div>
@@ -225,7 +233,9 @@ const PatientConsultations = () => {
                           }}
                         >
                           <MessageCircle className="w-4 h-4 mr-1" />
-                          {consultation.status === "completed" ? "View Chat" : "Continue Chat"}
+                          {consultation.status === "completed"
+                            ? "View Chat"
+                            : "Continue Chat"}
                         </Button>
                       </div>
                     </div>

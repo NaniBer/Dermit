@@ -30,10 +30,14 @@ const AdminHeader = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Stethoscope className="w-5 h-5 text-white" />
+              <div className="w-32 h-13 rounded-lg flex items-center justify-center">
+                <img
+                  src="/DermitLong.png"
+                  alt="Dermit Logo"
+                  // className="w-5 h-5"
+                />
+                {/* <Stethoscope className="w-5 h-5 text-white" /> */}
               </div>
-              <span className="text-xl font-bold text-gray-900">Dermit</span>
               <Badge
                 variant="secondary"
                 className="ml-2 bg-purple-100 text-purple-800"

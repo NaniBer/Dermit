@@ -7,7 +7,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 const WaitingForDoctor = () => {
-  const [consultationStatus, setConsultationStatus] = useState<'looking' | 'found'>('looking');
+  const [consultationStatus, setConsultationStatus] = useState<
+    "looking" | "found"
+  >("looking");
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -16,20 +18,20 @@ const WaitingForDoctor = () => {
 
     // Subscribe to consultation updates for this user
     const channel = supabase
-      .channel('consultation-updates')
+      .channel("consultation-updates")
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'consultations',
-          filter: `patient_id=eq.${user.id}`
+          event: "UPDATE",
+          schema: "public",
+          table: "consultations",
+          filter: `patient_id=eq.${user.id}`,
         },
         (payload) => {
           const consultation = payload.new;
-          if (consultation.doctor_id && consultation.status === 'in_progress') {
-            setConsultationStatus('found');
-            
+          if (consultation.doctor_id && consultation.status === "in_progress") {
+            setConsultationStatus("found");
+
             // Redirect to chat after 2 seconds
             setTimeout(() => {
               navigate(`/patient/consultation/${consultation.id}`);
@@ -44,7 +46,7 @@ const WaitingForDoctor = () => {
     };
   }, [user, navigate]);
 
-  if (consultationStatus === 'found') {
+  if (consultationStatus === "found") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md text-center shadow-xl border-0">
@@ -56,11 +58,11 @@ const WaitingForDoctor = () => {
               Congratulations! We found your doctor.
             </h2>
             <p className="text-gray-600 mb-6">
-              A dermatologist has accepted your consultation request. 
-              You'll be redirected to the chat shortly.
+              A dermatologist has accepted your consultation request. You'll be
+              redirected to the chat shortly.
             </p>
             <div className="animate-pulse">
-              <div className="w-8 h-1 bg-gradient-to-r from-blue-600 to-green-600 rounded mx-auto"></div>
+              <div className="w-8 h-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded mx-auto"></div>
             </div>
           </CardContent>
         </Card>
@@ -72,23 +74,23 @@ const WaitingForDoctor = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md text-center shadow-xl border-0">
         <CardContent className="p-8">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full flex items-center justify-center mx-auto mb-6">
             <Loader2 className="w-8 h-8 text-white animate-spin" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
             Looking for available doctors...
           </h2>
           <p className="text-gray-600 mb-6">
-            We're notifying our dermatologists about your consultation request. 
+            We're notifying our dermatologists about your consultation request.
             This usually takes just a few minutes.
           </p>
           <div className="space-y-3">
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse"></div>
               <span>Sending notifications to doctors</span>
             </div>
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse animation-delay-200"></div>
+              <div className="w-2 h-2 bg-brand-secondary rounded-full animate-pulse animation-delay-200"></div>
               <span>Waiting for response</span>
             </div>
           </div>

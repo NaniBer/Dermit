@@ -35,21 +35,23 @@ const PatientDashboard = () => {
     const fetchConsultations = async () => {
       try {
         const { data, error } = await supabase
-          .from('consultations')
-          .select(`
+          .from("consultations")
+          .select(
+            `
             *,
             profiles!consultations_doctor_id_fkey (
               first_name,
               last_name
             )
-          `)
-          .eq('patient_id', user.id)
-          .order('created_at', { ascending: false });
+          `
+          )
+          .eq("patient_id", user.id)
+          .order("created_at", { ascending: false });
 
         if (error) throw error;
         setConsultations(data || []);
       } catch (error) {
-        console.error('Error fetching consultations:', error);
+        console.error("Error fetching consultations:", error);
       } finally {
         setLoading(false);
       }
@@ -62,9 +64,10 @@ const PatientDashboard = () => {
   const recentChats = consultations.map((consultation) => ({
     id: consultation.id,
     conversationId: consultation.id,
-    doctor: consultation.profiles?.first_name && consultation.profiles?.last_name 
-      ? `Dr. ${consultation.profiles.first_name} ${consultation.profiles.last_name}`
-      : "Doctor Assigned",
+    doctor:
+      consultation.profiles?.first_name && consultation.profiles?.last_name
+        ? `Dr. ${consultation.profiles.first_name} ${consultation.profiles.last_name}`
+        : "Doctor Assigned",
     specialty: "Dermatology",
     lastMessage: consultation.description || "No description available",
     time: new Date(consultation.created_at).toLocaleDateString(),
@@ -152,7 +155,12 @@ const PatientDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back, {user?.user_metadata?.first_name || 'User'}!
+            Welcome back,{" "}
+            {user?.user_metadata?.first_name ||
+              (user?.user_metadata?.full_name
+                ? user.user_metadata.full_name.split(" ")[0]
+                : "User")}
+            !
           </h1>
           <p className="text-gray-600">
             Manage your skin health consultations and track your progress with
@@ -167,7 +175,7 @@ const PatientDashboard = () => {
           <Link to="/patient/chat">
             <Card className="shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer">
               <CardContent className="p-6 text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-brand-secondary to-brand-primary rounded-full flex items-center justify-center mx-auto mb-4">
                   <MessageCircle className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">

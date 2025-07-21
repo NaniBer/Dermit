@@ -6,7 +6,7 @@ const TermsOfService = () => {
       <main className="flex-1 flex items-center justify-center py-16">
         <div className="max-w-3xl w-full bg-white rounded-xl shadow-lg p-8">
           <div className="flex items-center space-x-3 mb-8">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
               <Stethoscope className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold text-gray-900">Dermit</span>
@@ -220,7 +220,7 @@ const TermsOfService = () => {
       <footer className="bg-gray-900 text-white py-8 mt-12">
         <div className="max-w-3xl mx-auto flex items-center justify-between px-4">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
               <Stethoscope className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold">Dermit</span>
