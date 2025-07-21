@@ -181,10 +181,14 @@ const NewConsultation = () => {
               to="/patient/dashboard"
               className="flex items-center space-x-2"
             >
-              <div className="w-8 h-8 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
-                <Stethoscope className="w-5 h-5 text-white" />
+              <div className="w-32 h-13 rounded-lg flex items-center justify-center">
+                <img
+                  src="/DermitLong.png"
+                  alt="Dermit Logo"
+                  // className="w-5 h-5"
+                />
+                {/* <Stethoscope className="w-5 h-5 text-white" /> */}
               </div>
-              <span className="text-xl font-bold text-gray-900">Dermit</span>
             </Link>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">

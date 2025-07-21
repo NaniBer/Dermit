@@ -234,7 +234,7 @@ const PatientDashboard = () => {
             {/* <PastDiagnosis pastDiagnosesList={pastDiagnoses} /> */}
 
             {/* Health Tips */}
-            <DailyTips />
+            {/* <DailyTips /> */}
           </div>
         </div>
       </div>

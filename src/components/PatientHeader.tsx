@@ -21,6 +21,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
+import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 const PatientHeader = () => {
   const navigate = useNavigate();
@@ -28,6 +31,37 @@ const PatientHeader = () => {
   const currentPath = location.pathname;
   const { user, signOut } = useAuth();
   const { unreadCount } = useNotifications();
+  useEffect(() => {
+    const fetchOrCreateRole = async () => {
+      const userId = user?.id;
+      if (!userId) return;
+
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (!roleData || roleError) {
+        if (roleError) {
+          console.error("Error fetching user role:", roleError);
+        } else if (!roleData?.role) {
+          console.warn(
+            "No role found for user, inserting default 'patient' role."
+          );
+          const { error: insertError } = await supabase
+            .from("user_roles")
+            .insert({ user_id: userId, role: "patient" });
+
+          if (insertError) {
+            console.error("Error inserting default role:", insertError);
+          }
+        }
+      }
+    };
+
+    fetchOrCreateRole(); // run the async function inside useEffect
+  }, [user?.id]);
 
   const handleLogout = async () => {
     await signOut();
