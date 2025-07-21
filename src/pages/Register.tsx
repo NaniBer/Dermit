@@ -18,7 +18,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ConsentCheckboxes from "@/components/consentCheckboxes";
-import { s } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
