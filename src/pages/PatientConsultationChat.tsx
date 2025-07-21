@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,11 @@ const PatientConsultationChat = () => {
   const [message, setMessage] = useState("");
   const [chatReady, setChatReady] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { messages, loading, sendMessage } = useChat(chatReady ? id : "");
+  const { messages, loading, sendMessage, status } = useChat(
+    chatReady ? id : ""
+  );
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [doctorName, setDoctorName] = useState<string | null>(null);
   const getDoctorNameFromConsultation = async (consultationId: string) => {
     // 1️⃣ Fetch consultation to get doctor_id
@@ -48,6 +51,12 @@ const PatientConsultationChat = () => {
 
     return doctor.first_name; // 🧠 Or whatever field you use for name
   };
+  useEffect(() => {
+    console.log(status);
+    if (status === "completed") {
+      navigate("/patient/feedback");
+    }
+  }, [status, navigate]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

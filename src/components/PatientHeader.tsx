@@ -23,7 +23,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
-import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 const PatientHeader = () => {
   const navigate = useNavigate();
@@ -67,7 +66,6 @@ const PatientHeader = () => {
     await signOut();
     navigate("/login");
   };
-  console.log("User:", user);
 
   const userInitials =
     user?.user_metadata?.first_name && user?.user_metadata?.last_name

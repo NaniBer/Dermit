@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +24,7 @@ const Register = () => {
   const navigate = useNavigate();
   const defaultTab = searchParams.get("type") || "patient";
   const { signUp, user, signInWithGoogle } = useAuth();
+
   const { toast } = useToast();
 
   // Patient form state

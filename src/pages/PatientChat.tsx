@@ -28,8 +28,10 @@ const PatientChat = () => {
   const [conversations, setConversations] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
-  const { messages, loading, sendMessage } = useChat(activeConversationId);
+  const { messages, loading, sendMessage, status } =
+    useChat(activeConversationId);
 
+  console.log("hello");
   // Fetch user's consultations
   useEffect(() => {
     if (!user) return;
@@ -46,6 +48,12 @@ const PatientChat = () => {
 
     fetchConsultations();
   }, [user]);
+  useEffect(() => {
+    console.log(status);
+    if (status === "completed") {
+      navigate("/patient/feedback");
+    }
+  }, [status, navigate]);
 
   const activeConversation = conversations.find(
     (conv) => conv.id === activeConversationId

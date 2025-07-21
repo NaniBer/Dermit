@@ -32,6 +32,9 @@ import DoctorChatPage from "./pages/DoctorChatPage";
 import PatientChatPage from "./pages/PatientChatPage";
 import TermsoFService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Consent from "./pages/Consent";
+import PatientFeedback from "./pages/PatientFeedback";
 
 const queryClient = new QueryClient();
 
@@ -65,7 +68,17 @@ const App = () => {
               <Route path="/privacy" element={<PrivacyPolicy />} />
 
               {/* Patient Routes */}
-              <Route path="/patient/dashboard" element={<PatientDashboard />} />
+
+              {/* <Route path="/patient/dashboard" element={<PatientDashboard />} /> */}
+              <Route
+                path="/patient/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <PatientDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/consent" element={<Consent />} />
               <Route
                 path="/patient/new-consultation"
                 element={<NewConsultation />}
@@ -76,6 +89,7 @@ const App = () => {
                 path="/patient/consultations"
                 element={<PatientConsultations />}
               />
+              <Route path="/patient/feedback" element={<PatientFeedback />} />
               <Route
                 path="/patient/consultation/:id"
                 element={<PatientConsultationChat />}

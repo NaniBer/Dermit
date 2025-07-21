@@ -4,7 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Paperclip, Phone, Video, MoreVertical, Stethoscope } from "lucide-react";
+import {
+  Send,
+  Paperclip,
+  Phone,
+  Video,
+  MoreVertical,
+  Stethoscope,
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useOptimizedChat } from "@/hooks/useOptimizedChat";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +33,7 @@ const PatientChatPage = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+  console.log("hello");
 
   useEffect(() => {
     if (!chat?.doctor_id) return;
@@ -38,7 +46,10 @@ const PatientChatPage = () => {
         .maybeSingle();
 
       if (doctor) {
-        setDoctorName(`Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim() || 'Doctor');
+        setDoctorName(
+          `Dr. ${doctor.first_name || ""} ${doctor.last_name || ""}`.trim() ||
+            "Doctor"
+        );
       }
     };
 
@@ -56,7 +67,7 @@ const PatientChatPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <PatientHeader />
-
+      <p>fghjk</p>
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Chat Header */}
         <Card className="shadow-lg mb-6">
@@ -105,7 +116,8 @@ const PatientChatPage = () => {
               ) : messages.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-600">
-                    Your doctor will respond shortly. Feel free to share any additional details!
+                    Your doctor will respond shortly. Feel free to share any
+                    additional details!
                   </p>
                 </div>
               ) : (
@@ -123,7 +135,11 @@ const PatientChatPage = () => {
                         msg.sender_id === user?.id
                           ? "bg-blue-600 text-white shadow-md"
                           : "bg-gray-100 text-gray-900 shadow-sm"
-                      } ${msg.id.startsWith('temp-') ? 'opacity-70' : 'opacity-100'}`}
+                      } ${
+                        msg.id.startsWith("temp-")
+                          ? "opacity-70"
+                          : "opacity-100"
+                      }`}
                     >
                       <p className="break-words">{msg.content}</p>
                       <p
@@ -155,9 +171,9 @@ const PatientChatPage = () => {
                   className="flex-1 bg-white"
                   disabled={loading}
                 />
-                <Button 
-                  type="submit" 
-                  size="sm" 
+                <Button
+                  type="submit"
+                  size="sm"
                   disabled={!message.trim() || loading}
                   className="bg-blue-600 hover:bg-blue-700"
                 >

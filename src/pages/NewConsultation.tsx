@@ -133,7 +133,7 @@ const NewConsultation = () => {
           "Your consultation request has been submitted successfully.",
       });
 
-      setCurrentStep(4); // Show success step
+      setCurrentStep(3); // Show success step
     } catch (error) {
       console.error("Error submitting consultation:", error);
       toast({
@@ -158,12 +158,14 @@ const NewConsultation = () => {
 
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" }); // <-- Add this line
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" }); // <-- Add this line
     }
   };
 
@@ -585,7 +587,7 @@ const NewConsultation = () => {
               )}
             </div>
             <div className="flex items-center space-x-4">
-              {currentStep < 3 ? (
+              {currentStep < 2 ? (
                 <Button
                   type="button"
                   onClick={nextStep}
