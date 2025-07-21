@@ -12,13 +12,15 @@ import { Label } from "@/components/ui/label";
 import { Stethoscope } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn, user } = useAuth();
+  const { signIn, user, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Redirect if already logged in
 
@@ -42,6 +44,21 @@ const Login = () => {
       console.error("Login error:", error);
     } finally {
       setLoading(false);
+    }
+  };
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+      console.log("Google sign-in successful", signInWithGoogle);
+    } catch (error) {
+      toast({
+        title: "Google Sign-In Error",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false); // don't forget to turn off the spinner
     }
   };
 
@@ -100,6 +117,21 @@ const Login = () => {
                 disabled={loading}
               >
                 {loading ? "Signing In..." : "Sign In"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full mb-4 flex items-center justify-center space-x-2"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+              >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                  alt="Google logo, a red 'G' with a blue, yellow, and green tail"
+                  className="w-5 h-5"
+                />
+                <span>
+                  {loading ? "Redirecting..." : "Sign in with Google"}
+                </span>
               </Button>
             </form>
 

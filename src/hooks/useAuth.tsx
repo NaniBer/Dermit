@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface AuthContextType {
   user: User | null;
+  role: string | null;
   session: Session | null;
   loading: boolean;
   signUp: (
@@ -25,6 +26,7 @@ interface AuthContextType {
     password: string
   ) => Promise<{ error: any; role?: string }>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +45,7 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -164,8 +167,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     const userId = authData?.user?.id;
-    console.log("User ID after sign in:", authData);
-
     if (!userId) {
       toast({
         title: "Oops!",
@@ -175,13 +176,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return { error: new Error("User ID not found") };
     }
 
-    // 🕵🏽 Fetch the user's role from your user_roles table
     const { data: roleData, error: roleError } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
       .maybeSingle();
-    console.log("Role data fetched:", roleData);
+
     if (roleError || !roleData) {
       toast({
         title: "Role Fetch Error",
@@ -194,6 +194,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const role = roleData.role;
     const name = authData.user?.user_metadata?.first_name || "User";
 
+    // 💾 Update context state manually!
+    setUser(authData.user);
+    setSession(authData.session); // optional: can also do supabase.auth.getSession()
+    setRole(role);
+
     toast({
       title: `Welcome back, ${name}!`,
       description: `You are signed in as a ${role}.`,
@@ -201,6 +206,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return { error: null, role };
   };
+
+  const signInWithGoogle = async () => {
+    const redirectUrl = `${window.location.origin}/patient/dashboard`; // or add /dashboard, etc.
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: redirectUrl,
+      },
+    });
+
+    if (error) {
+      toast({
+        title: "Google Sign-In Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -214,11 +239,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const value = {
     user,
+    role,
     session,
     loading,
     signUp,
     signIn,
     signOut,
+    signInWithGoogle,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

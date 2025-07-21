@@ -17,12 +17,14 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import ConsentCheckboxes from "@/components/consentCheckboxes";
+import { s } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const defaultTab = searchParams.get("type") || "patient";
-  const { signUp, user } = useAuth();
+  const { signUp, user, signInWithGoogle } = useAuth();
   const { toast } = useToast();
 
   // Patient form state
@@ -35,8 +37,10 @@ const Register = () => {
     phone: string;
     dateOfBirth: string;
     role: "patient";
-    consentAiTraining: boolean;
-    consentDataStorage: boolean;
+    // consentAiTraining: boolean;
+    // consentDataStorage: boolean;
+    constentTerms: boolean;
+    consentPrivacy: boolean;
   }>({
     firstName: "",
     lastName: "",
@@ -46,8 +50,10 @@ const Register = () => {
     phone: "",
     dateOfBirth: "",
     role: "patient",
-    consentAiTraining: false,
-    consentDataStorage: false,
+    // consentAiTraining: false,
+    // consentDataStorage: false,
+    constentTerms: false,
+    consentPrivacy: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -57,29 +63,6 @@ const Register = () => {
     navigate("/patient/dashboard");
     return null;
   }
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.origin, // Redirect to the same origin after login
-          // You can add redirect URL here if needed, e.g. redirectTo: 'https://yourapp.com/dashboard'
-        },
-      });
-      if (error) throw error;
-      // Supabase redirects user to Google OAuth flow automatically.
-      // After successful login, Supabase will redirect back to your app.
-    } catch (error) {
-      toast({
-        title: "Authentication Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePatientRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +77,7 @@ const Register = () => {
     }
 
     // Validate consent checkboxes
-    if (!patientData.consentAiTraining || !patientData.consentDataStorage) {
+    if (!patientData.constentTerms || !patientData.constentTerms) {
       toast({
         title: "Consent Required",
         description: "You must agree to all consent terms to create an account",
@@ -148,8 +131,10 @@ const Register = () => {
         await supabase
           .from("profiles")
           .update({
-            consent_ai_training: patientData.consentAiTraining,
-            consent_data_storage: patientData.consentDataStorage,
+            // consent_ai_training: patientData.consentAiTraining,
+            // consent_data_storage: patientData.consentDataStorage,
+            consent_terms: patientData.constentTerms,
+            consent_privacy: patientData.consentPrivacy,
             consent_timestamp: new Date().toISOString(),
           })
           .eq("id", signedInUser.id);
@@ -168,6 +153,22 @@ const Register = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+      console.log("Google sign-in successful", signInWithGoogle);
+    } catch (error) {
+      toast({
+        title: "Google Sign-In Error",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false); // don't forget to turn off the spinner
     }
   };
 
@@ -297,13 +298,13 @@ const Register = () => {
 
                   {/* Consent Agreement Section */}
                   <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
-                    <div className="flex items-center space-x-2 mb-4">
+                    {/* <div className="flex items-center space-x-2 mb-4">
                       <Shield className="w-5 h-5 text-blue-600" />
                       <h3 className="text-lg font-semibold text-gray-900">
                         Your Privacy & Consent Matter to Us
                       </h3>
-                    </div>
-
+                    </div> */}
+                    {/* 
                     <div className="space-y-4 text-sm text-gray-700">
                       <div className="space-y-3">
                         <p className="font-medium text-gray-900">
@@ -342,10 +343,10 @@ const Register = () => {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Consent Checkboxes */}
-                    <div className="space-y-3 pt-4 border-t border-gray-200">
+                    {/* <div className="space-y-3 pt-4 border-t border-gray-200">
                       <div className="flex items-start space-x-3">
                         <Checkbox
                           id="patient-consent-ai"
@@ -398,7 +399,23 @@ const Register = () => {
                           these terms.
                         </p>
                       </div>
-                    </div>
+                    </div> */}
+                    <ConsentCheckboxes
+                      consentPrivacy={patientData.consentPrivacy}
+                      consentTerms={patientData.constentTerms}
+                      setConsentPrivacy={(checked) =>
+                        setPatientData((prev) => ({
+                          ...prev,
+                          consentPrivacy: checked,
+                        }))
+                      }
+                      setConsentTerms={(checked) =>
+                        setPatientData((prev) => ({
+                          ...prev,
+                          constentTerms: checked,
+                        }))
+                      }
+                    />
                   </div>
 
                   <Button
@@ -406,8 +423,8 @@ const Register = () => {
                     className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-2"
                     disabled={
                       loading ||
-                      !patientData.consentAiTraining ||
-                      !patientData.consentDataStorage
+                      !patientData.consentPrivacy ||
+                      !patientData.constentTerms
                     }
                   >
                     {loading ? "Creating Account..." : "Create Patient Account"}
@@ -416,7 +433,11 @@ const Register = () => {
                     variant="outline"
                     className="w-full mb-4 flex items-center justify-center space-x-2"
                     onClick={handleGoogleSignIn}
-                    disabled={loading}
+                    disabled={
+                      loading ||
+                      !patientData.consentPrivacy ||
+                      !patientData.constentTerms
+                    }
                   >
                     <img
                       src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
@@ -424,7 +445,7 @@ const Register = () => {
                       className="w-5 h-5"
                     />
                     <span>
-                      {loading ? "Redirecting..." : "Sign in with Google"}
+                      {loading ? "Redirecting..." : "Sign up with Google"}
                     </span>
                   </Button>
                 </form>

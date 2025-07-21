@@ -1,4 +1,3 @@
-
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Plus,
@@ -34,14 +33,26 @@ const PatientHeader = () => {
     await signOut();
     navigate("/login");
   };
+  console.log("User:", user);
 
-  const userInitials = user?.user_metadata?.first_name && user?.user_metadata?.last_name
-    ? `${user.user_metadata.first_name[0]}${user.user_metadata.last_name[0]}`
-    : user?.email?.[0]?.toUpperCase() || "U";
+  const userInitials =
+    user?.user_metadata?.first_name && user?.user_metadata?.last_name
+      ? `${user.user_metadata.first_name[0]}${user.user_metadata.last_name[0]}`
+      : user?.user_metadata?.full_name
+      ? user.user_metadata.full_name
+          .split(" ")
+          .map((n: string) => n[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase()
+      : user?.email?.[0]?.toUpperCase() || "U";
 
-  const userName = user?.user_metadata?.first_name && user?.user_metadata?.last_name
-    ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
-    : user?.email || "User";
+  const userName =
+    user?.user_metadata?.first_name && user?.user_metadata?.last_name
+      ? `${user.user_metadata.first_name} ${user.user_metadata.last_name}`
+      : user?.user_metadata?.full_name
+      ? user.user_metadata.full_name
+      : user?.email || "User";
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
@@ -101,8 +112,11 @@ const PatientHeader = () => {
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <Badge variant="destructive" className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0 flex items-center justify-center text-xs">
-                  {unreadCount > 9 ? '9+' : unreadCount}
+                <Badge
+                  variant="destructive"
+                  className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </Badge>
               )}
             </Button>
