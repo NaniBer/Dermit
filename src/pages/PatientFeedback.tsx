@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "react-router-dom";
+import SaveAsPDF from "./pdfViewer";
 
 const PatientFeedback = () => {
   const { user } = useAuth();
@@ -33,20 +34,56 @@ const PatientFeedback = () => {
   >("");
   const [contactValue, setContactValue] = useState("");
   const [consultation, setConsultation] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    patientName: "",
+    // age: "",
+    // gender: "",
+    doctorName: "",
+    date: "",
+    observations: "",
+    diagnosis: "",
+    treatmentPlan: "",
+    // notes: "",
+  });
 
   useEffect(() => {
     const fetchConsultation = async () => {
       const { data, error } = await supabase
         .from("consultations")
-        .select("observations, diagnosis, treatment_plan")
+        .select("observations, diagnosis, treatment_plan, created_at,doctor_id")
         .eq("id", id)
         .maybeSingle();
-      console.log(data);
+      console.log(user);
 
       if (error) {
         console.error("Failed to fetch consultation summary", error);
       } else {
         setConsultation(data);
+        console.log(consultation.doctor_id);
+        const { data: fetchDoctorData, error: fetchDoctorError } =
+          await supabase
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("id", consultation.doctor_id)
+            .maybeSingle();
+
+        const doctorName =
+          fetchDoctorData.first_name + " " + fetchDoctorData.last_name;
+        console.log(name);
+        setFormData((prev) => ({
+          ...prev,
+          patientName:
+            user?.user_metadata?.name ||
+            user?.user_metadata.first_name +
+              " " +
+              user?.user_metadata?.last_name,
+          doctorName:
+            fetchDoctorData.first_name + " " + fetchDoctorData.last_name,
+          date: consultation.date,
+          observations: consultation.observations,
+          diagnosis: consultation.diagnosis,
+          treatmentPlan: consultation.treatment_plan,
+        }));
       }
       setLoading(false);
     };
@@ -141,6 +178,7 @@ const PatientFeedback = () => {
               </>
             )}
           </CardContent>
+          <SaveAsPDF data={{ ...formData }} />
         </Card>
 
         {/* Right: Feedback Form */}

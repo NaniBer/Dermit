@@ -32,6 +32,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Consent from "./pages/Consent";
 import PatientFeedback from "./pages/PatientFeedback";
 import DoctorThankyou from "./pages/DoctorThankyou";
+import PdfViewer from "./pages/pdfViewer";
 
 const queryClient = new QueryClient();
 
@@ -121,6 +122,7 @@ const App = () => {
                 path="/consultation/:consultationId/accept"
                 element={<AcceptConsultationPage />}
               />
+              <Route path="/pdf" element={<PdfViewer />} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
