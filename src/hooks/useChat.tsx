@@ -26,7 +26,14 @@ export const useChat = (consultationId: string) => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
+
       setMessages(data || []);
+
+      const { data: statusData, error: statusErrot } = await supabase
+        .from("consultations")
+        .select("status")
+        .eq("id", consultationId);
+      setStatus(statusData[0].status);
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast({

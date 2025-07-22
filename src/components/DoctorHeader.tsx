@@ -37,7 +37,7 @@ const DoctorHeader = () => {
     }
   };
   const fullname =
-    user.user_metadata?.first_name + " " + user.user_metadata?.last_name;
+    user?.user_metadata?.first_name + " " + user?.user_metadata?.last_name;
 
   const handleLogout = () => {
     navigate("/login");

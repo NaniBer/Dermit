@@ -13,7 +13,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminOverview from "./pages/AdminOverview";
 import AdminPatients from "./pages/AdminPatients";
 import NewConsultation from "./pages/NewConsultation";
-import PatientChat from "./pages/PatientChat";
 import PatientProfile from "./pages/PatientProfile";
 import DoctorPatients from "./pages/DoctorPatients";
 import DoctorProfile from "./pages/DoctorProfile";
@@ -24,17 +23,15 @@ import AdminDoctors from "./pages/AdminDoctors";
 import PatientConsultations from "./pages/PatientConsultation";
 import PatientConsultationChat from "./pages/PatientConsultationChat";
 import Consultations from "./pages/Consultations";
-import { useNotifications } from "./hooks/useNotifications";
 import { useState } from "react";
 import InstantNotificationSystem from "./components/InstantNotificationSystem";
 import AcceptConsultationPage from "./pages/AcceptConsultation";
-import DoctorChatPage from "./pages/DoctorChatPage";
-import PatientChatPage from "./pages/PatientChatPage";
 import TermsoFService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Consent from "./pages/Consent";
 import PatientFeedback from "./pages/PatientFeedback";
+import DoctorThankyou from "./pages/DoctorThankyou";
 
 const queryClient = new QueryClient();
 
@@ -83,7 +80,6 @@ const App = () => {
                 path="/patient/new-consultation"
                 element={<NewConsultation />}
               />
-              <Route path="/patient/chat" element={<PatientChat />} />
               <Route path="/patient/profile" element={<PatientProfile />} />
               <Route
                 path="/patient/consultations"
@@ -105,14 +101,10 @@ const App = () => {
                 path="/doctor/consultation/:id"
                 element={<DoctorConsultationDetail />}
               />
+              <Route path="/doctor/thank-you" element={<DoctorThankyou />} />
 
               <Route path="/doctor/patients" element={<DoctorPatients />} />
               <Route path="/doctor/profile" element={<DoctorProfile />} />
-              <Route path="/doctor/chat/:chatId" element={<DoctorChatPage />} />
-              <Route
-                path="/patient/chat/:chatId"
-                element={<PatientChatPage />}
-              />
 
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />

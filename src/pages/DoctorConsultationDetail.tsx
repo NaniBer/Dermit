@@ -15,9 +15,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   ArrowLeft,
@@ -55,7 +55,8 @@ const DoctorConsultationDetail = () => {
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showImagesModal, setShowImagesModal] = useState(false);
-
+  const [showEndDialog, setShowEndDialog] = useState(false);
+  const [isChatClosed, setIsChatClosed] = useState(false);
   // Use real-time chat
   const { messages, sendMessage } = useChat(id || "");
 
@@ -111,6 +112,27 @@ const DoctorConsultationDetail = () => {
       await sendMessage(newMessage);
       setNewMessage("");
     }
+  };
+  const endConsultation = async () => {
+    const { data: updateData, error: updateError } = await supabase
+      .from("consultations")
+      .update({ status: "completed" })
+      .eq("id", id);
+    if (updateError) {
+      console.error("Error updating consultation status:", updateError);
+      toast({
+        title: "Consultation End Error",
+        description: updateError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChatClosed(true);
+
+    // Optionally, redirect or show success message
+    setShowEndDialog(false);
+    navigate("/doctor/thank-you");
   };
 
   const handleAcceptConsultation = async () => {
@@ -240,16 +262,43 @@ const DoctorConsultationDetail = () => {
                       </CardDescription>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Phone className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Video className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="destructive"
+                    className="ml-4"
+                    onClick={() => setShowEndDialog(true)}
+                  >
+                    End Consultation
+                  </Button>
                 </div>
               </CardHeader>
+              <Dialog open={showEndDialog} onOpenChange={setShowEndDialog}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>End Consultation?</DialogTitle>
+                  </DialogHeader>
+                  <p>
+                    Are you sure you want to end this consultation? This action
+                    cannot be undone.
+                  </p>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowEndDialog(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        setShowEndDialog(false);
+                        endConsultation();
+                      }}
+                    >
+                      Yes, End Consultation
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
 
               {/* Messages */}
               <CardContent className="flex-1 overflow-y-auto">
@@ -266,7 +315,7 @@ const DoctorConsultationDetail = () => {
                       <div
                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                           message.sender_id === user?.id
-                            ? "bg-blue-600 text-white"
+                            ? "bg-brand-primary text-white"
                             : "bg-gray-100 text-gray-900"
                         }`}
                       >
@@ -295,22 +344,19 @@ const DoctorConsultationDetail = () => {
               {/* Message Input */}
               <div className="p-4 border-t">
                 <div className="flex space-x-2">
-                  {/* <Textarea
-                    placeholder="Type your message..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="flex-1 min-h-[60px]"
-                  /> */}
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Type your message to the patient..."
                     className="flex-1 bg-white"
-                    disabled={loading}
+                    disabled={loading || isChatClosed}
                   />
-                  <Button onClick={handleSendMessage} className="self-end">
+                  <Button
+                    onClick={handleSendMessage}
+                    className="self-end"
+                    disabled={loading || isChatClosed}
+                  >
                     <Send className="w-4 h-4" />
                   </Button>
                 </div>

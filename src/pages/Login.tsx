@@ -30,7 +30,6 @@ const Login = () => {
 
     try {
       const { error, role } = await signIn(email, password);
-      console.log(signIn);
       if (!error && role) {
         if (role === "patient") {
           navigate("/patient/dashboard");

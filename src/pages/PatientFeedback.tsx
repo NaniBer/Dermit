@@ -16,11 +16,13 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useParams } from "react-router-dom";
 
 const PatientFeedback = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { consultationId } = useParams();
 
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -48,10 +50,11 @@ const PatientFeedback = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from("feedback").insert({
+      const { error } = await supabase.from("patient_feedback").insert({
         user_id: user?.id ?? null,
         rating,
-        consultation_id: null, // add logic if needed
+        consultation_id: consultationId, // add logic if needed
+        feedback_message: feedbackMessage,
         allow_contact: allowContact,
         contact_method: contactMethod || null,
         contact_value: contactValue || null,
@@ -105,12 +108,20 @@ const PatientFeedback = () => {
                       onClick={() => setRating(num)}
                       className={`transition-colors hover:scale-105 ${
                         rating && rating >= num
-                          ? "text-yellow-400"
+                          ? "text-brand-primary"
                           : "text-gray-300"
                       }`}
                       aria-label={`Rate ${num} star${num > 1 ? "s" : ""}`}
                     >
-                      <Star className="w-7 h-7" />
+                      <Star
+                        className="w-7 h-7 "
+                        fill={rating && rating >= num ? "currentColor" : "none"}
+                        color={
+                          rating && rating >= num
+                            ? "hsl(var(--brand-primary))"
+                            : "#D1D5DB"
+                        }
+                      />
                     </button>
                   ))}
                 </div>
@@ -120,13 +131,13 @@ const PatientFeedback = () => {
               <div>
                 <Label
                   htmlFor="feedback-message"
-                  className="block mb-1 text-gray-700 font-medium"
+                  className="block mb-2 text-gray-700 font-medium"
                 >
                   Comments or suggestions
                 </Label>
                 <Textarea
                   id="feedback-message"
-                  placeholder="Be honest... we can take it 😅"
+                  placeholder="How was your experience? What can we improve?"
                   rows={5}
                   value={feedbackMessage}
                   onChange={(e) => setFeedbackMessage(e.target.value)}
@@ -142,13 +153,13 @@ const PatientFeedback = () => {
                   onCheckedChange={(checked) =>
                     setAllowContact(checked as boolean)
                   }
+                  className="mt-1"
                 />
                 <Label
                   htmlFor="allow-contact"
                   className="text-sm leading-relaxed text-gray-700 cursor-pointer"
                 >
-                  <span className="flex items-center gap-1">
-                    <Mail className="w-4 h-4 text-blue-500" />
+                  <span className="">
                     I’m open to being contacted for follow-up.
                   </span>
                 </Label>
@@ -199,7 +210,7 @@ const PatientFeedback = () => {
               {/* Submit */}
               <Button
                 type="submit"
-                className="w-full bg-brand-primary hover:bg-brand-primary-hover text-white font-semibold"
+                className="w-full   bg-gradient-to-r from-brand-primary to-brand-secondary hover:bg-brand-primary-hover text-white font-semibold"
                 disabled={loading}
               >
                 {loading ? "Submitting..." : "Submit Feedback"}

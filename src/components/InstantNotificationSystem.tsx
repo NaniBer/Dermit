@@ -227,7 +227,7 @@ const InstantNotificationSystem = ({
 
       // Immediate redirect to chat using chat_id
       setTimeout(() => {
-        navigate(`/doctor/chat/${chatData.id}`);
+        navigate(`/doctor/consultation/${consultationId}`);
       }, 500);
     } catch (error) {
       console.error("Error accepting consultation:", error);
