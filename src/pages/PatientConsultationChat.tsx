@@ -54,7 +54,7 @@ const PatientConsultationChat = () => {
   useEffect(() => {
     console.log(status);
     if (status === "completed") {
-      navigate("/patient/feedback");
+      navigate(`/patient/feedback/${id}`);
     }
   }, [status, navigate]);
 

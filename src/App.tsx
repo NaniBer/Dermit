@@ -85,7 +85,10 @@ const App = () => {
                 path="/patient/consultations"
                 element={<PatientConsultations />}
               />
-              <Route path="/patient/feedback" element={<PatientFeedback />} />
+              <Route
+                path="/patient/feedback/:id"
+                element={<PatientFeedback />}
+              />
               <Route
                 path="/patient/consultation/:id"
                 element={<PatientConsultationChat />}

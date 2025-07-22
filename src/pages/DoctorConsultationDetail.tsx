@@ -39,6 +39,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Input } from "@/components/ui/input";
+import { ConsultationSummaryCard } from "@/components/doctorChat/ConsultationSummaryCard";
 // import Image from "next/image";
 
 // import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
@@ -511,6 +512,12 @@ const DoctorConsultationDetail = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Consultation Summary Card */}
+            <ConsultationSummaryCard
+              consultation={consultation}
+              setConsultation={setConsultation}
+            />
 
             {/* Quick Actions */}
             <Card className="shadow-lg">
