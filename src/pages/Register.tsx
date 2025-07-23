@@ -59,10 +59,11 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   // Redirect if already logged in
-  if (user) {
-    navigate("/patient/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate("/patient/dashboard");
+    }
+  }, [user, navigate]);
 
   const handlePatientRegister = async (e: React.FormEvent) => {
     e.preventDefault();
