@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,7 +23,11 @@ const Login = () => {
   const { toast } = useToast();
 
   // Redirect if already logged in
-
+  useEffect(() => {
+    if (user) {
+      navigate("/patient/dashboard");
+    }
+  }, [user, navigate]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

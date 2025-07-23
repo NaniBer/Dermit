@@ -35,17 +35,22 @@ const PatientConsultations = () => {
 
     const fetchConsultations = async () => {
       try {
+        // const { data, error } = await supabase
+        //   .from("consultations")
+        //   .select(
+        //     `
+        //     *,
+        //     profiles!consultations_doctor_id_fkey (
+        //       first_name,
+        //       last_name
+        //     )
+        //   `
+        //   )
+        //   .eq("patient_id", user.id)
+        //   .order("created_at", { ascending: false });
         const { data, error } = await supabase
           .from("consultations")
-          .select(
-            `
-            *,
-            profiles!consultations_doctor_id_fkey (
-              first_name,
-              last_name
-            )
-          `
-          )
+          .select("*")
           .eq("patient_id", user.id)
           .order("created_at", { ascending: false });
 
@@ -60,6 +65,10 @@ const PatientConsultations = () => {
 
     fetchConsultations();
   }, [user]);
+
+  useEffect(() => {
+    console.log(consultations);
+  }, [consultations]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -115,7 +124,7 @@ const PatientConsultations = () => {
   };
 
   const handleConsultationClick = (consultationId: string) => {
-    navigate(`/patient/chat?conversation=${consultationId}`);
+    navigate(`/patient/consultation/${consultationId}`);
   };
 
   const handleStartConsultation = () => {
