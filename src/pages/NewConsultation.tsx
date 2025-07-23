@@ -61,11 +61,12 @@ const NewConsultation = () => {
     formData.append("file", image);
     formData.append("filename", myUuid);
     formData.append("consultation_id", consultationId);
-    // "https://dermitconsultalertbot-cdezn.sevalla.app/upload-image",
+    const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/upload-image";
 
     const res = await fetch(
-      "http://localhost:3000/upload-image",
+      // "http://localhost:3000/upload-image",
 
+      URL,
       {
         method: "POST",
         body: formData, // NO content-type header! The browser adds it automatically with boundary
@@ -77,7 +78,6 @@ const NewConsultation = () => {
     const { url } = await res.json();
     return url;
   };
-
   const removeImage = (index: number) => {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   };
