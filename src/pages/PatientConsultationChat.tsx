@@ -1,10 +1,23 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Paperclip, Phone, Video, MoreVertical } from "lucide-react";
+import {
+  Send,
+  Paperclip,
+  Phone,
+  Video,
+  MoreVertical,
+  Star,
+} from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +35,7 @@ const PatientConsultationChat = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [doctorName, setDoctorName] = useState<string | null>(null);
+  const [feedbackData, setFeedbackData] = useState(null);
   const getDoctorNameFromConsultation = async (consultationId: string) => {
     // 1️⃣ Fetch consultation to get doctor_id
     const { data: consultation, error: consultError } = await supabase
@@ -52,11 +66,39 @@ const PatientConsultationChat = () => {
     return doctor.first_name; // 🧠 Or whatever field you use for name
   };
   useEffect(() => {
-    console.log(status);
+    const fetchFeedback = async () => {
+      try {
+        const { data: fetchedFeedbackData, error } = await supabase
+          .from("patient_feedback")
+          .select(
+            "allow_contact, contact_method, contact_value, feedback_message,rating"
+          )
+          .eq("consultation_id", id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching feedback:", error);
+          return;
+        }
+
+        if (fetchedFeedbackData) {
+          setFeedbackData(fetchedFeedbackData);
+          console.log("Feedback data:", fetchedFeedbackData);
+        } else navigate(`/patient/feedback/${id}`);
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    };
     if (status === "completed") {
-      navigate(`/patient/feedback/${id}`);
+      fetchFeedback();
     }
-  }, [status, navigate]);
+  }, [status, id]);
+  // useEffect(() => {
+  //   console.log(status);
+  //   if (status === "completed") {
+  //     navigate(`/patient/feedback/${id}`);
+  //   }
+  // }, [status, navigate]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -166,24 +208,61 @@ const PatientConsultationChat = () => {
             </div>
 
             {/* Message Input */}
-            <div className="border-t p-4">
-              <form onSubmit={handleSendMessage} className="flex space-x-2">
-                {/* <Button type="button" variant="outline" size="sm">
-                  <Paperclip className="w-4 h-4" />
-                </Button> */}
-                <Input
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1"
-                />
-                <Button type="submit" size="sm">
-                  <Send className="w-4 h-4" />
-                </Button>
-              </form>
-            </div>
+            {status === "completed" ? (
+              <div className="border-t p-4 text-center text-sm text-gray-500 italic">
+                💬 This chat has ended. Thank you for your message!
+              </div>
+            ) : (
+              <div className="border-t p-4">
+                <form onSubmit={handleSendMessage} className="flex space-x-2">
+                  <Input
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    className="flex-1"
+                  />
+                  <Button type="submit" size="sm">
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </form>
+              </div>
+            )}
           </CardContent>
         </Card>
+        {feedbackData && (
+          <Card className="shadow-lg mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Feedback</CardTitle>
+              <CardDescription className="mt-2 text-sm text-gray-600">
+                {feedbackData.feedback_message || "No feedback provided."}
+              </CardDescription>
+
+              {/* Read-only Star Rating */}
+              <div className="mt-4 flex gap-1">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <Star
+                    key={num}
+                    className={`w-5 h-5 transition-transform hover:scale-105 ${
+                      feedbackData.rating && feedbackData.rating >= num
+                        ? "text-brand-primary"
+                        : "text-gray-300"
+                    }`}
+                    fill={
+                      feedbackData.rating && feedbackData.rating >= num
+                        ? "#3BC4B2"
+                        : "white"
+                    }
+                    color={
+                      feedbackData.rating && feedbackData.rating >= num
+                        ? "hsl(var(--brand-primary))"
+                        : "#D1D5DB"
+                    }
+                  />
+                ))}
+              </div>
+            </CardHeader>
+          </Card>
+        )}
       </div>
     </div>
   );

@@ -27,6 +27,7 @@ interface AuthContextType {
   ) => Promise<{ error: any; role?: string }>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  getRole: (userId) => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -237,6 +238,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const getRole = async (userId) => {
+    const { data: roleData, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const role = roleData.role;
+    return { role, roleError };
+  };
+
   const value = {
     user,
     role,
@@ -246,6 +258,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signIn,
     signOut,
     signInWithGoogle,
+    getRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

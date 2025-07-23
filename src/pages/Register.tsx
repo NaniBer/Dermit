@@ -178,11 +178,19 @@ const Register = () => {
       <div className="w-full max-w-2xl">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
-              <Stethoscope className="w-6 h-6 text-white" />
+          <Link
+            to="/"
+            className="flex items-center justify-center space-x-2 w-full  "
+          >
+            <div className="w-32 h-13 rounded-lg flex items-center justify-center">
+              <img
+                src="/DermitLong.png"
+                alt="Dermit Logo"
+                // className="w-5 h-5"
+              />
+              {/* <Stethoscope className="w-5 h-5 text-white" /> */}
             </div>
-            <span className="text-2xl font-bold text-gray-900">Dermit</span>
+            {/* <span className="text-xl font-bold text-gray-900">Dermit</span> */}
           </Link>
           <p className="text-gray-600 mt-2">
             Create your account to get started

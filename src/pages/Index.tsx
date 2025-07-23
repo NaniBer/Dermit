@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Heart,
   Shield,
@@ -17,9 +18,36 @@ import {
   Camera,
   MessageCircle,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user, getRole } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkUserRoleAndRedirect = async () => {
+      if (!user) return;
+
+      try {
+        const role = await getRole(user.id);
+        console.log("User Role:", role);
+        const realRole = role?.role;
+        console.log(realRole);
+
+        if (realRole === "doctor") {
+          navigate("/doctor/dashboard");
+        } else if (realRole === "patient") {
+          navigate("/patient/dashboard");
+        }
+      } catch (error) {
+        console.error("Error fetching role:", error);
+      }
+    };
+
+    checkUserRoleAndRedirect();
+  }, [user, navigate]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Navigation */}
@@ -68,9 +96,6 @@ const Index = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="space-y-4">
-                <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                  🏥 Teledermatology Platform
-                </Badge>
                 <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Expert Skin Care
                   <span className="bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent">

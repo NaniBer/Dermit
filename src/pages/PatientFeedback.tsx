@@ -93,20 +93,21 @@ const PatientFeedback = () => {
 
   const handleFeedbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (
-      !feedbackMessage ||
+      rating === null || // 👈 No stars, no service
       (allowContact && (!contactMethod || !contactValue))
     ) {
       toast({
         title: "Missing info",
-        description: "Please fill in all required fields.",
+        description:
+          "Please give a rating and fill in any required contact info.",
         variant: "destructive",
       });
       return;
     }
 
     setLoading(true);
+
     try {
       const { error } = await supabase.from("patient_feedback").insert({
         user_id: user?.id ?? null,
@@ -140,46 +141,6 @@ const PatientFeedback = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-10">
-      {/* Left: Summary Card */}
-      {/* <Card className="shadow-lg w-full lg:w-1/2">
-          <CardHeader>
-            <CardTitle className="text-lg text-center lg:text-left">
-              Your Consultation Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {loading ? (
-              <div className="flex justify-center">
-                <Loader2 className="w-8 h-8 text-white animate-spin" />
-              </div>
-            ) : (
-              <>
-                <div>
-                  <p className="font-medium mb-1">Observations / Findings</p>
-                  <p className="text-gray-700 whitespace-pre-wrap">
-                    {consultation?.observations || "Not provided"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="font-medium mb-1">Diagnosis / Impression</p>
-                  <p className="text-gray-700 whitespace-pre-wrap">
-                    {consultation?.diagnosis || "Not provided"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="font-medium mb-1">Treatment Plan / Advice</p>
-                  <p className="text-gray-700 whitespace-pre-wrap">
-                    {consultation?.treatment_plan || "Not provided"}
-                  </p>
-                </div>
-              </>
-            )}
-          </CardContent>
-          
-        </Card> */}
-
       {/* Right: Feedback Form */}
       <div className="w-full lg:w-1/2">
         <Card className="shadow-xl border-none rounded-2xl">
@@ -240,7 +201,6 @@ const PatientFeedback = () => {
                   rows={5}
                   value={feedbackMessage}
                   onChange={(e) => setFeedbackMessage(e.target.value)}
-                  required
                 />
               </div>
 
@@ -280,7 +240,6 @@ const PatientFeedback = () => {
                       )
                     }
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                    required
                   >
                     <option value="">Select method</option>
                     <option value="telegram">Telegram</option>
@@ -299,7 +258,6 @@ const PatientFeedback = () => {
                         ? "+251911223344"
                         : "you@example.com"
                     }
-                    required
                   />
                 </div>
               )}
