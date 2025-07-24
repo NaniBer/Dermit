@@ -18,16 +18,26 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn, user, signInWithGoogle } = useAuth();
+  const { signIn, user, signInWithGoogle, getRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  console.log(user);
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
-      navigate("/patient/dashboard");
-    }
+    const fetchRoleAndNavigate = async () => {
+      if (user) {
+        const role = await getRole(user.id);
+        const realRole = role?.role;
+        if (realRole === "patient") navigate("/patient/dashboard");
+        else if (realRole === "doctor") navigate("/doctor/dashboard");
+        else if (realRole === "admin") navigate("/admin/dashboard");
+      }
+    };
+
+    fetchRoleAndNavigate();
   }, [user, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

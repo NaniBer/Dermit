@@ -79,59 +79,6 @@ const PatientDashboard = () => {
     navigate(`/patient/chat?conversation=${conversationId}`);
   };
 
-  // Mock past diagnoses - in a real app, this would come from a diagnoses table
-  const pastDiagnoses = [
-    {
-      id: 1,
-      condition: "Atopic Dermatitis",
-      doctor: "Dr. Sarah Johnson",
-      date: "2024-06-10",
-      status: "completed",
-      prescription:
-        "Moisturizer twice daily, Topical steroid (Hydrocortisone 1%)",
-      symptoms: "Red, itchy patches on arms and legs, worsening at night",
-      diagnosis:
-        "Based on the clinical presentation and patient history, this appears to be atopic dermatitis (eczema). The condition is characterized by dry, inflamed skin with intense itching.",
-      treatment:
-        "Apply moisturizer twice daily to affected areas. Use hydrocortisone 1% cream for flare-ups, but limit use to 7-10 days. Avoid known triggers such as harsh soaps and extreme temperatures.",
-      followUp:
-        "Follow-up in 4 weeks to assess treatment response. Contact if symptoms worsen or new areas are affected.",
-      severity: "Mild to Moderate",
-    },
-    {
-      id: 2,
-      condition: "Seborrheic Keratosis",
-      doctor: "Dr. Michael Chen",
-      date: "2024-05-28",
-      status: "completed",
-      prescription: "Observation, Follow-up in 6 months",
-      symptoms: "Brown, waxy growth on back, no pain or itching",
-      diagnosis:
-        "Benign seborrheic keratosis confirmed through dermoscopic examination. This is a common, non-cancerous skin growth that typically appears with age.",
-      treatment:
-        "No treatment required at this time. The lesion is benign and poses no health risk. Monitor for any changes in size, color, or texture.",
-      followUp:
-        "Routine follow-up in 6 months. Return sooner if any changes are noticed in the lesion's appearance.",
-      severity: "Benign",
-    },
-    {
-      id: 3,
-      condition: "Contact Dermatitis",
-      doctor: "Dr. Sarah Johnson",
-      date: "2024-04-15",
-      status: "completed",
-      prescription: "Topical corticosteroid, Avoid allergen exposure",
-      symptoms: "Red, swollen skin on hands after using new detergent",
-      diagnosis:
-        "Allergic contact dermatitis likely caused by exposure to fragrances or preservatives in household detergent. Patch testing may be considered if reactions persist.",
-      treatment:
-        "Apply topical corticosteroid cream twice daily for 7-10 days. Switch to fragrance-free, hypoallergenic detergents. Wear gloves when handling cleaning products.",
-      followUp:
-        "Symptoms should resolve within 1-2 weeks. Contact if no improvement or if reactions occur with other products.",
-      severity: "Mild",
-    },
-  ];
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">

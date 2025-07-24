@@ -38,10 +38,7 @@ const DoctorDashboard = () => {
           .from("consultations")
           .select(
             `
-            *,
-            profiles!consultations_patient_id_fkey (
-              first_name,
-              last_name
+            *
             )
           `
           )
@@ -103,8 +100,6 @@ const DoctorDashboard = () => {
       urgency: consultation.priority || "normal",
     }));
 
-  console.log(user);
-
   const fullname =
     user?.user_metadata?.first_name + " " + user?.user_metadata?.last_name;
 
@@ -139,19 +134,19 @@ const DoctorDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           <DashboardButton
             description="Total Consultations"
             value={stats.totalConsultations}
             icon={Users}
             color="blue"
           />
-          <DashboardButton
+          {/* <DashboardButton
             description="Pending Reviews"
             value={stats.pendingReviews}
             icon={Clock}
             color="orange"
-          />
+          /> */}
           <DashboardButton
             description="Completed Today"
             value={stats.completedToday}

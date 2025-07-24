@@ -129,28 +129,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return { error: null };
   };
 
-  // const signIn = async (email: string, password: string) => {
-  //   const { error } = await supabase.auth.signInWithPassword({
-  //     email,
-  //     password,
-  //   });
-
-  //   if (error) {
-  //     toast({
-  //       title: "Sign In Error",
-  //       description: error.message,
-  //       variant: "destructive",
-  //     });
-  //   } else {
-  //     toast({
-  //       title: "Welcome back!",
-  //       description: "You have successfully signed in.",
-  //     });
-  //   }
-
-  //   return { error };
-  // };
-
   const signIn = async (email: string, password: string) => {
     const { data: authData, error: authError } =
       await supabase.auth.signInWithPassword({
@@ -209,8 +187,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signInWithGoogle = async () => {
-    const redirectUrl = `${window.location.origin}/patient/dashboard`; // or add /dashboard, etc.
-
+    // const redirectUrl = `${window.location.origin}/patient/dashboard`; // or add /dashboard, etc.
+    const redirectUrl = `${window.location.origin}/auth-callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -244,6 +222,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       .select("role")
       .eq("user_id", userId)
       .maybeSingle();
+    console.log(roleData);
 
     const role = roleData.role;
     return { role, roleError };

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   MessageCircle,
   Calendar,
@@ -22,6 +23,7 @@ import { useNavigate, Link } from "react-router-dom";
 import PatientHeader from "@/components/PatientHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import ConsultationList from "@/components/patientConsultationPage/ConsultationList";
 
 const PatientConsultations = () => {
   const navigate = useNavigate();
@@ -69,6 +71,18 @@ const PatientConsultations = () => {
   useEffect(() => {
     console.log(consultations);
   }, [consultations]);
+
+  const activeConsultations = consultations.filter(
+    (c) => c.status === "in_progress" || c.status === "awaitingpatient"
+  );
+
+  const completedConsultations = consultations.filter(
+    (c) => c.status === "completed"
+  );
+
+  const pendingConsultations = consultations.filter(
+    (c) => c.status === "pending"
+  );
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -130,6 +144,12 @@ const PatientConsultations = () => {
   const handleStartConsultation = () => {
     navigate("/patient/new-consultation");
   };
+  const tabOptions = [
+    { value: "in_progress", label: "Active" },
+    { value: "pending", label: "Awaiting Doctor" },
+    { value: "completed", label: "Completed" },
+  ];
+  const [activeTab, setActiveTab] = useState("in_progress");
 
   if (loading) {
     return (
@@ -180,77 +200,33 @@ const PatientConsultations = () => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              {consultations.map((consultation) => (
-                <Card
-                  key={consultation.id}
-                  className="border border-gray-200 hover:shadow-md transition-all duration-300 bg-gradient-to-r from-white to-gray-50 cursor-pointer"
-                  onClick={() => handleConsultationClick(consultation.id)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      {/* Left side - Main info */}
-                      <div className="space-y-3 flex-1">
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            {new Date(
-                              consultation.created_at
-                            ).toLocaleDateString()}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {new Date(
-                              consultation.created_at
-                            ).toLocaleTimeString()}
-                          </div>
-                        </div>
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-3 mb-6">
+                  {tabOptions.map((tab) => (
+                    <TabsTrigger key={tab.value} value={tab.value}>
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
 
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-blue-600" />
-                          <span className="font-medium text-gray-900">
-                            {consultation.profiles?.first_name &&
-                            consultation.profiles?.last_name
-                              ? `Dr. ${consultation.profiles.first_name} ${consultation.profiles.last_name}`
-                              : "Doctor Assigned"}
-                          </span>
-                        </div>
-
-                        <div className="space-y-2">
-                          <p className="font-semibold text-gray-900">
-                            {consultation.title}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {consultation.description}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            {getPriorityBadge(
-                              consultation.priority || "normal"
-                            )}
-                            {getStatusBadge(consultation.status || "pending")}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right side - Actions */}
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          size="sm"
-                          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleConsultationClick(consultation.id);
-                          }}
-                        >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          {consultation.status === "completed"
-                            ? "View Chat"
-                            : "Continue Chat"}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                {tabOptions.map((tab) => (
+                  <TabsContent key={tab.value} value={tab.value}>
+                    <ConsultationList
+                      consultations={consultations.filter(
+                        (c) => c.status === tab.value
+                      )}
+                      handleConsultationClick={handleConsultationClick}
+                      tabTitle={
+                        tab.value === "in_progress" ? "active" : tab.value
+                      } // Map in_progress to active for your tabTitle prop
+                    />
+                  </TabsContent>
+                ))}
+              </Tabs>
             </div>
 
             {consultations.length === 0 && (

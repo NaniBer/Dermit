@@ -7,10 +7,41 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, Loader2, Stethoscope } from "lucide-react";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
+  const { user, getRole } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchOrCreateRole = async () => {
+      const userId = user?.id;
+      if (!userId) return;
+
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (!roleData || roleError) {
+        if (roleError) {
+          console.error("Error fetching user role:", roleError);
+        } else if (!roleData?.role) {
+          console.warn(
+            "No role found for user, inserting default 'patient' role."
+          );
+          const { error: insertError } = await supabase
+            .from("user_roles")
+            .insert({ user_id: userId, role: "patient" });
+
+          if (insertError) {
+            console.error("Error inserting default role:", insertError);
+          }
+        }
+      }
+    };
+
+    fetchOrCreateRole(); // run the async function inside useEffect
+  }, [user?.id]);
   useEffect(() => {
     const checkConsent = async () => {
       console.log("Checking user consent...");
@@ -31,13 +62,18 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         navigate("/login");
         return;
       }
+      console.log(user.id);
+      const role = await getRole(user.id);
+      const realRole = role?.role;
 
-      if (!profile?.consent_terms || !profile?.consent_privacy) {
-        navigate("/consent");
-        return;
+      if (realRole === "patient") {
+        if (!profile?.consent_terms || !profile?.consent_privacy) {
+          navigate("/consent");
+          return;
+        }
+
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     checkConsent();

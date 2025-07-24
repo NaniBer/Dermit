@@ -33,6 +33,7 @@ import Consent from "./pages/Consent";
 import PatientFeedback from "./pages/PatientFeedback";
 import DoctorThankyou from "./pages/DoctorThankyou";
 import PdfViewer from "./pages/pdfViewer";
+import AuthCallback from "./pages/auth-callback";
 
 const queryClient = new QueryClient();
 
@@ -122,7 +123,7 @@ const App = () => {
                 path="/consultation/:consultationId/accept"
                 element={<AcceptConsultationPage />}
               />
-              <Route path="/pdf" element={<PdfViewer />} />
+              <Route path="/auth-callback" element={<AuthCallback />} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

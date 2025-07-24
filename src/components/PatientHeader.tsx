@@ -122,7 +122,7 @@ const PatientHeader = () => {
               >
                 Consultations
               </Link>
-              <Link
+              {/* <Link
                 to="/patient/chat"
                 className={`${
                   currentPath === "/patient/chat"
@@ -131,7 +131,7 @@ const PatientHeader = () => {
                 }`}
               >
                 Messages
-              </Link>
+              </Link> */}
               <Link
                 to="/patient/profile"
                 className={`${

@@ -87,7 +87,7 @@ const AddNewUsers = () => {
       // Create user account for admin
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: newAdmin.email,
-        password: newAdmin.password,
+        password: "TempPassword123!Admin",
         options: {
           data: {
             first_name: newAdmin.firstName,
@@ -106,7 +106,15 @@ const AddNewUsers = () => {
           role: "admin",
         });
 
+        const { error: phoneError } = await supabase
+          .from("profiles")
+          .update({
+            phone: newAdmin.phone,
+          })
+          .eq("id", authData.user.id);
+
         if (roleError) throw roleError;
+        if (phoneError) throw phoneError;
 
         toast.success("Admin account created successfully!");
         setNewAdmin({
@@ -269,20 +277,6 @@ const AddNewUsers = () => {
                       handleAdminInputChange("email", e.target.value)
                     }
                     required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="adminPassword">Password</Label>
-                  <Input
-                    id="adminPassword"
-                    type="password"
-                    value={newAdmin.password}
-                    onChange={(e) =>
-                      handleAdminInputChange("password", e.target.value)
-                    }
-                    required
-                    minLength={8}
                   />
                 </div>
 

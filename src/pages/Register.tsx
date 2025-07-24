@@ -10,8 +10,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Stethoscope, User, UserCheck, Shield, Globe } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +21,7 @@ const Register = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const defaultTab = searchParams.get("type") || "patient";
-  const { signUp, user, signInWithGoogle } = useAuth();
+  const { signUp, user, signInWithGoogle, getRole } = useAuth();
 
   const { toast } = useToast();
 
@@ -59,11 +57,19 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   // Redirect if already logged in
-  useEffect(() => {
-    if (user) {
-      navigate("/patient/dashboard");
-    }
-  }, [user, navigate]);
+  // useEffect(() => {
+  //   const fetchRoleAndNavigate = async () => {
+  //     if (user) {
+  //       const role = await getRole(user.id);
+  //       const realRole = role?.role;
+  //       if (realRole === "patient") navigate("/patient/dashboard");
+  //       else if (realRole === "doctor") navigate("/doctor/dashboard");
+  //       else if (realRole === "admin") navigate("/admin/dashboard");
+  //     }
+  //   };
+
+  //   fetchRoleAndNavigate();
+  // }, [user, navigate]);
 
   const handlePatientRegister = async (e: React.FormEvent) => {
     e.preventDefault();

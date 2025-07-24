@@ -16,62 +16,58 @@ interface Doctor {
 
 const AdminDashboard = () => {
   const [doctors, setDoctors] = useState([]);
- const [items, setItems] = useState([]);
- const [itemAdmin, setItemAdmin] = useState([]);
-   const addItem = (newItem) => {
-    setItems(prevItems => [...prevItems, newItem]);
+  const [items, setItems] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const addItem = (newItem) => {
+    setItems((prevItems) => [...prevItems, newItem]);
     // setDoctors(prevItems => [...prevItems, newItem]);
   };
 
   const [consultationsNo, setConsultationsNo] = useState(0);
   const [patientsNo, setPatientsNo] = useState(0);
-   // Just for demonstration: adding stuff automatically when component mounts
+  // Just for demonstration: adding stuff automatically when component mounts
 
   useEffect(() => {
     const fetchDoctors = async () => {
-      const { data, error } = await supabase.from("doctor_profiles").select("*");
+      const { data, error } = await supabase
+        .from("doctor_profiles")
+        .select("*");
       if (error) {
         console.error("Error fetching doctors:", error);
       } else {
-        addItem(data)
+        data.forEach((doc) => addItem(doc));
         // setDoctors(data || []);
-      
       }
     };
-        const fetchAdmins = async () => {
+    const fetchAdmins = async () => {
       const { data, error } = await supabase.from("admin_profiles").select("*");
       if (error) {
         console.error("Error fetching doctors:", error);
       } else {
-        setItemAdmin(data)
+        setAdmins(data);
         // setDoctors(data || []);
-      
       }
     };
-       const fetchConsultationsNo = async () => {
-    const { data, count, error } = await supabase
-  .from('consultations')
-  .select('*', { count: 'exact' });
+    const fetchConsultationsNo = async () => {
+      const { data, count, error } = await supabase
+        .from("consultations")
+        .select("*", { count: "exact" });
       if (error) {
         console.error("Error fetching consultations:", error);
       } else {
-        // setItemAdmin(data)
-        // setDoctors(data || []);
-        // console.log(count)
-        setConsultationsNo(count)
-      
+        setConsultationsNo(count);
       }
     };
     const fetchPatientsNo = async () => {
       const { data, count, error } = await supabase
-  .from('patient_profiles')
-  .select('*', { count: 'exact' });
-    if (error) {
+        .from("patient_profiles")
+        .select("*", { count: "exact" });
+      if (error) {
         console.error("Error fetching patients:", error);
       } else {
-        setPatientsNo(count)
+        setPatientsNo(count);
       }
-    }
+    };
 
     fetchDoctors();
     fetchAdmins();
@@ -80,15 +76,6 @@ const AdminDashboard = () => {
   }, []);
 
   // Mock data for existing admins
-  const admins = [
-    {
-      id: 1,
-      name: "Admin User",
-      email: "admin@dermit.com",
-      joinDate: "2023-01-01",
-      status: "active",
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
@@ -143,7 +130,7 @@ const AdminDashboard = () => {
           <AddNewUsers />
 
           {/* Right Column - Existing Users */}
-          <ExistingUser doctors={items} admins={itemAdmin} />
+          <ExistingUser doctors={items} admins={admins} />
         </div>
       </div>
     </div>

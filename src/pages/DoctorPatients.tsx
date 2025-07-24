@@ -52,8 +52,9 @@ const DoctorPatients = () => {
       try {
         // Get all consultations for this doctor and their associated patients
         const { data: consultations, error } = await supabase
-          .from('consultations')
-          .select(`
+          .from("consultations")
+          .select(
+            `
             *,
             profiles!consultations_patient_id_fkey (
               id,
@@ -62,45 +63,53 @@ const DoctorPatients = () => {
               email,
               created_at
             )
-          `)
-          .eq('doctor_id', user.id)
-          .order('created_at', { ascending: false });
+          `
+          )
+          .eq("doctor_id", user.id)
+          .order("created_at", { ascending: false });
 
         if (error) throw error;
 
         // Group consultations by patient and create patient objects
         const patientMap = new Map();
-        
-        consultations?.forEach(consultation => {
+
+        consultations?.forEach((consultation) => {
           const patientId = consultation.patient_id;
           const patient = consultation.profiles;
-          
+
           if (!patientMap.has(patientId)) {
             patientMap.set(patientId, {
               id: patientId,
-              name: `${patient?.first_name || 'Unknown'} ${patient?.last_name || ''}`,
-              email: patient?.email || '',
+              name: `${patient?.first_name || "Unknown"} ${
+                patient?.last_name || ""
+              }`,
+              email: patient?.email || "",
               lastConsultation: consultation.created_at,
               consultations: [],
               status: consultation.status,
               priority: consultation.priority,
             });
           }
-          
+
           patientMap.get(patientId).consultations.push(consultation);
         });
 
         // Convert map to array and calculate stats
-        const patientsArray = Array.from(patientMap.values()).map(patient => {
+        const patientsArray = Array.from(patientMap.values()).map((patient) => {
           const totalConsultations = patient.consultations.length;
-          const completedConsultations = patient.consultations.filter(c => c.status === 'completed').length;
-          const ongoingConsultations = patient.consultations.filter(c => c.status === 'in_progress').length;
-          
+          const completedConsultations = patient.consultations.filter(
+            (c) => c.status === "completed"
+          ).length;
+          const ongoingConsultations = patient.consultations.filter(
+            (c) => c.status === "in_progress"
+          ).length;
+
           // Determine overall status
-          let status = 'completed';
-          if (ongoingConsultations > 0) status = 'ongoing';
-          else if (patient.consultations.some(c => c.status === 'pending')) status = 'pending';
-          
+          let status = "completed";
+          if (ongoingConsultations > 0) status = "ongoing";
+          else if (patient.consultations.some((c) => c.status === "pending"))
+            status = "pending";
+
           return {
             ...patient,
             totalConsultations,
@@ -109,15 +118,17 @@ const DoctorPatients = () => {
             status,
             // Mock data for fields not in current schema
             age: 0,
-            condition: patient.consultations[0]?.title || 'No condition specified',
+            condition:
+              patient.consultations[0]?.title || "No condition specified",
             notes: `Patient has ${totalConsultations} consultation(s) with ${completedConsultations} completed.`,
-            prescription: 'Prescription details would be stored in a separate table.',
+            prescription:
+              "Prescription details would be stored in a separate table.",
           };
         });
 
         setPatients(patientsArray);
       } catch (error) {
-        console.error('Error fetching patients:', error);
+        console.error("Error fetching patients:", error);
       } finally {
         setLoading(false);
       }
@@ -126,10 +137,11 @@ const DoctorPatients = () => {
     fetchPatients();
   }, [user]);
 
-  const filteredPatients = patients.filter(patient =>
-    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.condition.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPatients = patients.filter(
+    (patient) =>
+      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.condition.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -176,7 +188,7 @@ const DoctorPatients = () => {
         </Card>
 
         {/* Stats */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           <DashboardButton
             description="Total Patients"
             value={patients.length}
@@ -196,13 +208,6 @@ const DoctorPatients = () => {
             value={patients.filter((p) => p.status === "completed").length}
             icon={FileText}
             color="purple"
-          />
-
-          <DashboardButton
-            description="Pending"
-            value={patients.filter((p) => p.status === "pending").length}
-            icon={Calendar}
-            color="orange"
           />
         </div>
 
@@ -224,7 +229,9 @@ const DoctorPatients = () => {
                   <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                   <p className="text-lg">No patients found</p>
                   <p className="text-sm">
-                    {searchTerm ? "Try adjusting your search terms" : "Patients will appear here once you have consultations"}
+                    {searchTerm
+                      ? "Try adjusting your search terms"
+                      : "Patients will appear here once you have consultations"}
                   </p>
                 </div>
               ) : (
@@ -253,7 +260,12 @@ const DoctorPatients = () => {
                           <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                             <div className="flex items-center space-x-1">
                               <Calendar className="w-3 h-3" />
-                              <span>Last seen: {new Date(patient.lastConsultation).toLocaleDateString()}</span>
+                              <span>
+                                Last seen:{" "}
+                                {new Date(
+                                  patient.lastConsultation
+                                ).toLocaleDateString()}
+                              </span>
                             </div>
                             <span>
                               Total consultations: {patient.totalConsultations}
@@ -273,14 +285,16 @@ const DoctorPatients = () => {
                         >
                           {patient.status}
                         </Badge>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => {
                             // Navigate to the most recent consultation
                             const latestConsultation = patient.consultations[0];
                             if (latestConsultation) {
-                              navigate(`/doctor/consultation/${latestConsultation.id}`);
+                              navigate(
+                                `/doctor/consultation/${latestConsultation.id}`
+                              );
                             }
                           }}
                         >
@@ -303,7 +317,8 @@ const DoctorPatients = () => {
                           Consultation Status
                         </h5>
                         <p className="text-sm text-gray-700">
-                          {patient.ongoingConsultations} ongoing, {patient.completedConsultations} completed
+                          {patient.ongoingConsultations} ongoing,{" "}
+                          {patient.completedConsultations} completed
                         </p>
                       </div>
                     </div>
