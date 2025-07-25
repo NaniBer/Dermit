@@ -100,9 +100,22 @@ const DoctorDashboard = () => {
       urgency: consultation.priority || "normal",
     }));
 
-  const fullname =
-    user?.user_metadata?.first_name + " " + user?.user_metadata?.last_name;
+  const getFullName = (user: any) => {
+    const meta = user?.user_metadata;
 
+    // Try `fullname` first
+    console.log("User metadata:", meta);
+    if (meta?.name) return meta.name;
+
+    // Then fall back to first + last name combo
+    if (meta?.first_name || meta?.last_name)
+      return `${meta.first_name ?? ""} ${meta.last_name ?? ""}`.trim();
+
+    // Just in case everything is missing (ghost user 👻)
+    return "Unknown User";
+  };
+
+  const fullname = getFullName(user);
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
@@ -126,7 +139,7 @@ const DoctorDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Good morning, Dr. {fullname}!
+            Hello, Dr. {fullname}!
           </h1>
           <p className="text-gray-600">
             Here's your consultation overview for today

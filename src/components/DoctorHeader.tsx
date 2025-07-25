@@ -37,8 +37,26 @@ const DoctorHeader = () => {
     }
   };
 
-  const fullname =
-    user?.user_metadata?.first_name + " " + user?.user_metadata?.last_name;
+  useEffect(() => {
+    console.log("user in header:", user);
+  }, [user]);
+
+  const getFullName = (user: any) => {
+    const meta = user?.user_metadata;
+
+    // Try `fullname` first
+    console.log("User metadata:", meta);
+    if (meta?.name) return meta.name;
+
+    // Then fall back to first + last name combo
+    if (meta?.first_name || meta?.last_name)
+      return `${meta.first_name ?? ""} ${meta.last_name ?? ""}`.trim();
+
+    // Just in case everything is missing (ghost user 👻)
+    return "Unknown User";
+  };
+
+  const fullname = getFullName(user);
 
   const handleLogout = async () => {
     await signOut();
