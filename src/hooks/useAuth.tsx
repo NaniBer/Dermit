@@ -28,6 +28,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   getRole: (userId) => Promise<string>;
+  changePassword: (newPassword: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -228,6 +229,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return { role, roleError };
   };
 
+  const changePassword = async (newPassword: string) => {
+    if (!user) {
+      toast({
+        title: "Not signed in",
+        description: "You must be signed in to change your password.",
+        variant: "destructive",
+      });
+      return { error: new Error("User not signed in") };
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) {
+      toast({
+        title: "Password Change Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return { error };
+    }
+
+    toast({
+      title: "Password Changed",
+      description: "Your password has been updated successfully.",
+    });
+
+    return { error: null };
+  };
+
   const value = {
     user,
     role,
@@ -238,6 +270,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signOut,
     signInWithGoogle,
     getRole,
+    changePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -43,21 +43,38 @@ const DoctorConsultations = () => {
     const fetchConsultations = async () => {
       try {
         const { data, error } = await supabase
-          .from('consultations')
-          .select(`
-            *,
-            profiles!consultations_patient_id_fkey (
-              first_name,
-              last_name
+          .from("consultations")
+          .select(
+            `
+            *
+            
             )
-          `)
-          .eq('doctor_id', user.id)
-          .order('created_at', { ascending: false });
+          `
+          )
+          .eq("doctor_id", user.id)
+          .order("created_at", { ascending: false });
+
+        const { data: fetch, error: fetchError } = await supabase
+          .from("consultations")
+          .select(
+            `
+  *,
+  patient:patient_id (
+    first_name
+  ),
+  doctor:doctor_id (
+    first_name
+  )
+`
+          )
+          .eq("doctor_id", user.id)
+          .order("created_at", { ascending: false });
+        console.log(fetch);
 
         if (error) throw error;
         setConsultations(data || []);
       } catch (error) {
-        console.error('Error fetching consultations:', error);
+        console.error("Error fetching consultations:", error);
       } finally {
         setLoading(false);
       }
@@ -72,7 +89,9 @@ const DoctorConsultations = () => {
       (consultation.description || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      `${consultation.profiles?.first_name || ''} ${consultation.profiles?.last_name || ''}`
+      `${consultation.profiles?.first_name || ""} ${
+        consultation.profiles?.last_name || ""
+      }`
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
   );
@@ -85,22 +104,12 @@ const DoctorConsultations = () => {
     switch (status) {
       case "in_progress":
         return (
-          <Badge className="bg-green-100 text-green-800">
-            In Progress
-          </Badge>
+          <Badge className="bg-green-100 text-green-800">In Progress</Badge>
         );
       case "pending":
-        return (
-          <Badge className="bg-orange-100 text-orange-800">
-            Pending
-          </Badge>
-        );
+        return <Badge className="bg-orange-100 text-orange-800">Pending</Badge>;
       case "completed":
-        return (
-          <Badge className="bg-gray-100 text-gray-800">
-            Completed
-          </Badge>
-        );
+        return <Badge className="bg-gray-100 text-gray-800">Completed</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -109,23 +118,13 @@ const DoctorConsultations = () => {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case "urgent":
-        return (
-          <Badge className="bg-red-100 text-red-800">
-            {priority}
-          </Badge>
-        );
+        return <Badge className="bg-red-100 text-red-800">{priority}</Badge>;
       case "high":
         return (
-          <Badge className="bg-orange-100 text-orange-800">
-            {priority}
-          </Badge>
+          <Badge className="bg-orange-100 text-orange-800">{priority}</Badge>
         );
       case "normal":
-        return (
-          <Badge className="bg-blue-100 text-blue-800">
-            {priority}
-          </Badge>
-        );
+        return <Badge className="bg-blue-100 text-blue-800">{priority}</Badge>;
       default:
         return <Badge variant="outline">{priority}</Badge>;
     }
@@ -183,7 +182,7 @@ const DoctorConsultations = () => {
         </Card>
 
         {/* Notifications Badge */}
-        {unreadCount > 0 && (
+        {/* {unreadCount > 0 && (
           <div className="mb-6">
             <Card className="border-blue-200 bg-blue-50">
               <CardContent className="p-4">
@@ -201,10 +200,10 @@ const DoctorConsultations = () => {
               </CardContent>
             </Card>
           </div>
-        )}
+        )} */}
 
         {/* Stats */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           <DashboardButton
             description="Total"
             value={consultations.length}
@@ -219,13 +218,6 @@ const DoctorConsultations = () => {
             }
             icon={MessageSquare}
             color="green"
-          />
-
-          <DashboardButton
-            description="Pending"
-            value={consultations.filter((c) => c.status === "pending").length}
-            icon={Clock}
-            color="orange"
           />
 
           <DashboardButton
@@ -263,7 +255,7 @@ const DoctorConsultations = () => {
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-12 w-12">
                           <AvatarFallback className="bg-blue-100 text-blue-600">
-                            {consultation.profiles?.first_name?.[0] || 'P'}
+                            {consultation.profiles?.first_name?.[0] || "P"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -271,7 +263,9 @@ const DoctorConsultations = () => {
                             {consultation.title}
                           </h3>
                           <p className="text-sm text-gray-600">
-                            Patient: {consultation.profiles?.first_name || 'Unknown'} {consultation.profiles?.last_name || ''}
+                            Patient:{" "}
+                            {consultation.profiles?.first_name || "Unknown"}{" "}
+                            {consultation.profiles?.last_name || ""}
                           </p>
                           <p className="text-sm text-gray-600">
                             Created{" "}

@@ -135,7 +135,7 @@ const InstantNotificationSystem = ({
               action: (
                 <Button
                   onClick={() => handleAccept(newConsultation.id)}
-                  className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse"
+                  className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse"
                   size="default"
                 >
                   🩺 Accept & Start Chat

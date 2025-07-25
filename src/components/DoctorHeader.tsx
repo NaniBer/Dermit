@@ -19,7 +19,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import NotificationDropdown from "@/components/NotificationDropdown";
 import InstantNotificationSystem from "@/components/InstantNotificationSystem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 const DoctorHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,6 +36,7 @@ const DoctorHeader = () => {
       setNotificationBadgeCount(count);
     }
   };
+
   const fullname =
     user?.user_metadata?.first_name + " " + user?.user_metadata?.last_name;
 

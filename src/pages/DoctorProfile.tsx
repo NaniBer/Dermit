@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const DoctorProfile = () => {
   const navigate = useNavigate();
-  const user = useAuth();
+  const { user, changePassword } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
@@ -24,12 +24,6 @@ const DoctorProfile = () => {
     lastName: "",
     email: "",
     phone: "",
-    specialty: "",
-    licenseNumber: "",
-    yearsOfExperience: "",
-    education: "",
-    certifications: "",
-    bio: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -47,39 +41,30 @@ const DoctorProfile = () => {
 
     const fetchDoctorProfile = async () => {
       setLoading(true);
-      console.log(user);
+
       try {
         const { data, error } = await supabase
-          .from("doctors_info")
+          .from("profiles")
           .select(
-            `
-            specialty,
-            license_number,
-            years_of_experience,
-            education,
-            certifications,
-            bio,
-            profiles (
-              first_name,
+            `              
+            first_name,
               last_name,
               email,
               phone
             )
           `
           )
-          .eq("profiles.id", user.user.id)
+          .eq("id", user.id)
           .single();
-        console.log(user);
-        console.log(data);
 
         if (error) throw error;
 
         if (data) {
           setProfileData({
-            firstName: data.profiles.first_name || "",
-            lastName: data.profiles.last_name || "",
-            email: data.profiles.email || "",
-            phone: data.profiles.phone || "",
+            firstName: data.first_name || "",
+            lastName: data.last_name || "",
+            email: data.email || "",
+            phone: data.phone || "",
             specialty: data.specialty || "",
             licenseNumber: data.license_number || "",
             yearsOfExperience: data.years_of_experience?.toString() || "",
@@ -90,7 +75,6 @@ const DoctorProfile = () => {
         }
       } catch (error) {
         console.error("Error loading doctor profile:", error);
-        alert("Failed to load profile data.");
       } finally {
         setLoading(false);
       }
@@ -98,26 +82,38 @@ const DoctorProfile = () => {
 
     fetchDoctorProfile();
   }, [user, navigate]);
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("New passwords don't match!");
-      return;
-    }
-    if (passwordData.newPassword.length < 6) {
-      alert("Password must be at least 6 characters long!");
+      alert("New passwords don't match! 💥");
       return;
     }
 
-    // In real app, this would make API call to change password
-    console.log("Changing password...");
-    alert("Password changed successfully!");
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setShowPasswordChange(false);
+    if (passwordData.newPassword.length < 6) {
+      alert("Password must be at least 6 characters long! 🔒");
+      return;
+    }
+
+    try {
+      // Call the changePassword function from your Auth context
+      const { error } = await changePassword(passwordData.newPassword);
+
+      if (error) {
+        alert(`Uh-oh, something went wrong: ${error.message}`);
+        return;
+      }
+
+      alert("Password changed successfully! 🎉");
+      setPasswordData({
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setShowPasswordChange(false);
+    } catch (err) {
+      alert("Unexpected error occurred. Try again later.");
+      console.error(err);
+    }
   };
 
   const handleLogout = () => {
@@ -178,39 +174,6 @@ const DoctorProfile = () => {
                 </Button>
               </CardContent>
             </Card>
-
-            {/* Professional Stats */}
-            <Card className="shadow-lg mt-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Professional Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                      Years of Experience
-                    </span>
-                    <span className="font-medium">
-                      {profileData.yearsOfExperience} years
-                    </span>
-                  </div>
-                  {/* <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
-                      Total Patients
-                    </span>
-                    <span className="font-medium">1,247</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Consultations</span>
-                    <span className="font-medium">3,891</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Rating</span>
-                    <span className="font-medium">4.8/5.0</span>
-                  </div> */}
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Right Column - Profile Information */}
@@ -226,21 +189,6 @@ const DoctorProfile = () => {
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handlePasswordChange} className="space-y-4">
-                    <div>
-                      <Label htmlFor="currentPassword">Current Password</Label>
-                      <Input
-                        id="currentPassword"
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={(e) =>
-                          setPasswordData({
-                            ...passwordData,
-                            currentPassword: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
                     <div>
                       <Label htmlFor="newPassword">New Password</Label>
                       <Input
@@ -278,7 +226,7 @@ const DoctorProfile = () => {
                     <div className="flex space-x-3">
                       <Button
                         type="submit"
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-gradient-to-r from-brand-primary to-brand-secondary"
                       >
                         Update Password
                       </Button>
@@ -336,50 +284,6 @@ const DoctorProfile = () => {
             </Card>
 
             {/* Professional Information */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Stethoscope className="w-5 h-5 text-blue-600" />
-                  <span>Professional Information</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Specialty
-                    </label>
-                    <p className="text-gray-900">{profileData.specialty}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      License Number
-                    </label>
-                    <p className="text-gray-900">{profileData.licenseNumber}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Education
-                    </label>
-                    <p className="text-gray-900">{profileData.education}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Certifications
-                    </label>
-                    <p className="text-gray-900">
-                      {profileData.certifications}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Bio
-                    </label>
-                    <p className="text-gray-900">{profileData.bio}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

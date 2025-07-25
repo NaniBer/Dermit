@@ -30,6 +30,7 @@ import {
   Phone,
   Video,
   Calendar,
+  Star,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -45,6 +46,10 @@ import { ConsultationSummaryCard } from "@/components/doctorChat/ConsultationSum
 // import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 
 type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
+interface Feedback {
+  rating: number;
+  feedback_message: string;
+}
 
 const DoctorConsultationDetail = () => {
   const { id } = useParams();
@@ -53,6 +58,7 @@ const DoctorConsultationDetail = () => {
   const { toast } = useToast();
   const [newMessage, setNewMessage] = useState("");
   const [consultation, setConsultation] = useState<Consultation | null>(null);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showImagesModal, setShowImagesModal] = useState(false);
@@ -73,6 +79,10 @@ const DoctorConsultationDetail = () => {
           .single();
 
         if (error) throw error;
+        if (data.status === "completed") {
+          fetchFeedback(id);
+        }
+        console.log(data);
         setConsultation(data);
       } catch (error) {
         console.error("Error fetching consultation:", error);
@@ -86,8 +96,30 @@ const DoctorConsultationDetail = () => {
       }
     };
 
+    const fetchFeedback = async (id) => {
+      try {
+        const { data: fetchData, error: fetchError } = await supabase
+          .from("patient_feedback")
+          .select("rating, feedback_message")
+          .eq("consultation_id", id)
+          .maybeSingle();
+
+        if (fetchError) throw fetchError;
+
+        setFeedback(fetchData);
+      } catch (fetchError) {
+        console.error("Error fetching consultation:", fetchError);
+        toast({
+          title: "Error",
+          description: "Failed to load consultation details",
+          variant: "destructive",
+        });
+      }
+    };
+    const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/";
+
     const fetchSignedImages = async (id) => {
-      const res = await fetch("http://localhost:3000/signed-images", {
+      const res = await fetch(`${URL}/signed-images`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json", // this tells the server it's JSON
@@ -263,13 +295,15 @@ const DoctorConsultationDetail = () => {
                       </CardDescription>
                     </div>
                   </div>
-                  <Button
-                    variant="destructive"
-                    className="ml-4"
-                    onClick={() => setShowEndDialog(true)}
-                  >
-                    End Consultation
-                  </Button>
+                  {consultation.status !== "completed" && (
+                    <Button
+                      variant="destructive"
+                      className="ml-4"
+                      onClick={() => setShowEndDialog(true)}
+                    >
+                      End Consultation
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <Dialog open={showEndDialog} onOpenChange={setShowEndDialog}>
@@ -343,26 +377,69 @@ const DoctorConsultationDetail = () => {
               </CardContent>
 
               {/* Message Input */}
-              <div className="p-4 border-t">
-                <div className="flex space-x-2">
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Type your message to the patient..."
-                    className="flex-1 bg-white"
-                    disabled={loading || isChatClosed}
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    className="self-end"
-                    disabled={loading || isChatClosed}
-                  >
-                    <Send className="w-4 h-4" />
-                  </Button>
+              {consultation.status === "completed" ? (
+                <div className="border-t p-4 text-center text-sm text-gray-500 italic">
+                  💬 This chat has ended. Thank you for your message!
                 </div>
-              </div>
+              ) : (
+                <div className="p-4 border-t">
+                  <div className="flex space-x-2">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Type your message to the patient..."
+                      className="flex-1 bg-white"
+                      disabled={loading || isChatClosed}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      className="self-end"
+                      disabled={loading || isChatClosed}
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </Card>
+            {feedback && (
+              <Card className="shadow-lg mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">
+                    Feedback
+                  </CardTitle>
+                  <CardDescription className="mt-2 text-sm text-gray-600">
+                    {feedback.feedback_message ||
+                      "No feedback message provided."}
+                  </CardDescription>
+
+                  {/* Read-only Star Rating */}
+                  <div className="mt-4 flex gap-1">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <Star
+                        key={num}
+                        className={`w-5 h-5 transition-transform hover:scale-105 ${
+                          feedback.rating && feedback.rating >= num
+                            ? "text-brand-primary"
+                            : "text-gray-300"
+                        }`}
+                        fill={
+                          feedback.rating && feedback.rating >= num
+                            ? "#3BC4B2"
+                            : "white"
+                        }
+                        color={
+                          feedback.rating && feedback.rating >= num
+                            ? "hsl(var(--brand-primary))"
+                            : "#D1D5DB"
+                        }
+                      />
+                    ))}
+                  </div>
+                </CardHeader>
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Patient Info & Actions */}

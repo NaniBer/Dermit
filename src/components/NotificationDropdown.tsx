@@ -24,7 +24,9 @@ interface NotificationDropdownProps {
   badgeCount?: number;
 }
 
-const NotificationDropdown = ({ badgeCount = 0 }: NotificationDropdownProps) => {
+const NotificationDropdown = ({
+  badgeCount = 0,
+}: NotificationDropdownProps) => {
   const [pendingConsultations, setPendingConsultations] = useState<
     ConsultationWithDetails[]
   >([]);
@@ -216,7 +218,9 @@ const NotificationDropdown = ({ badgeCount = 0 }: NotificationDropdownProps) => 
                 <Card
                   key={consultation.id}
                   className="border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/doctor/consultation/${consultation.id}`)}
+                  onClick={() =>
+                    navigate(`/doctor/consultation/${consultation.id}`)
+                  }
                 >
                   <CardContent className="p-4">
                     <div className="space-y-3">
@@ -263,7 +267,7 @@ const NotificationDropdown = ({ badgeCount = 0 }: NotificationDropdownProps) => 
                             e.stopPropagation();
                             handleAccept(consultation.id);
                           }}
-                          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                          className="bg-gradient-to-r from-brand-secondary to-brand-primary text-white"
                           size="sm"
                         >
                           Accept

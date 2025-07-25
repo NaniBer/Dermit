@@ -32,6 +32,7 @@ import DoctorHeader from "@/components/DoctorHeader";
 import DashboardButton from "@/components/doctorDashboard/DashboardButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { set } from "date-fns";
 
 const DoctorPatients = () => {
   const navigate = useNavigate();
@@ -39,6 +40,9 @@ const DoctorPatients = () => {
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [totalConsultations, setTotalConsultations] = useState(0);
+  const [ongoingConsultations, setOngoingConsultations] = useState(0);
+  const [completedConsultations, setCompletedConsultations] = useState(0);
 
   const handleLogout = () => {
     navigate("/login");
@@ -50,40 +54,33 @@ const DoctorPatients = () => {
 
     const fetchPatients = async () => {
       try {
-        // Get all consultations for this doctor and their associated patients
-        const { data: consultations, error } = await supabase
-          .from("consultations")
-          .select(
-            `
-            *,
-            profiles!consultations_patient_id_fkey (
-              id,
-              first_name,
-              last_name,
-              email,
-              created_at
-            )
-          `
-          )
-          .eq("doctor_id", user.id)
-          .order("created_at", { ascending: false });
+        const { data: consultationData, error: consultationError } =
+          await supabase
+            .from("consultations_with_patient_profiles")
+            .select("*")
+            .eq("doctor_id", user.id)
+            .order("created_at", { ascending: false });
 
-        if (error) throw error;
+        if (consultationError) throw consultationError;
 
-        // Group consultations by patient and create patient objects
         const patientMap = new Map();
 
-        consultations?.forEach((consultation) => {
+        consultationData?.forEach((consultation) => {
           const patientId = consultation.patient_id;
-          const patient = consultation.profiles;
+
+          const patient = {
+            first_name: consultation.patient_first_name,
+            last_name: consultation.patient_last_name,
+            email: consultation.patient_email,
+          };
 
           if (!patientMap.has(patientId)) {
             patientMap.set(patientId, {
               id: patientId,
-              name: `${patient?.first_name || "Unknown"} ${
-                patient?.last_name || ""
-              }`,
-              email: patient?.email || "",
+              name: `${patient.first_name ?? "Unknown"} ${
+                patient.last_name ?? ""
+              }`.trim(),
+              email: patient.email ?? "",
               lastConsultation: consultation.created_at,
               consultations: [],
               status: consultation.status,
@@ -91,20 +88,23 @@ const DoctorPatients = () => {
             });
           }
 
-          patientMap.get(patientId).consultations.push(consultation);
+          // Push current consultation into patient's consultations array
+          patientMap.get(patientId)?.consultations.push(consultation);
         });
 
-        // Convert map to array and calculate stats
         const patientsArray = Array.from(patientMap.values()).map((patient) => {
           const totalConsultations = patient.consultations.length;
+          setTotalConsultations(totalConsultations);
           const completedConsultations = patient.consultations.filter(
             (c) => c.status === "completed"
           ).length;
+          setCompletedConsultations(completedConsultations);
+
           const ongoingConsultations = patient.consultations.filter(
             (c) => c.status === "in_progress"
           ).length;
+          setOngoingConsultations(ongoingConsultations);
 
-          // Determine overall status
           let status = "completed";
           if (ongoingConsultations > 0) status = "ongoing";
           else if (patient.consultations.some((c) => c.status === "pending"))
@@ -116,7 +116,6 @@ const DoctorPatients = () => {
             completedConsultations,
             ongoingConsultations,
             status,
-            // Mock data for fields not in current schema
             age: 0,
             condition:
               patient.consultations[0]?.title || "No condition specified",
@@ -198,14 +197,14 @@ const DoctorPatients = () => {
 
           <DashboardButton
             description="Ongoing Cases"
-            value={patients.filter((p) => p.status === "ongoing").length}
+            value={ongoingConsultations}
             icon={Stethoscope}
             color="green"
           />
 
           <DashboardButton
             description="Completed"
-            value={patients.filter((p) => p.status === "completed").length}
+            value={completedConsultations}
             icon={FileText}
             color="purple"
           />
