@@ -24,7 +24,7 @@ const DoctorHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [notificationBadgeCount, setNotificationBadgeCount] = useState(0);
 
   const handleBadgeCountChange = (
@@ -40,7 +40,8 @@ const DoctorHeader = () => {
   const fullname =
     user?.user_metadata?.first_name + " " + user?.user_metadata?.last_name;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     navigate("/login");
   };
 
