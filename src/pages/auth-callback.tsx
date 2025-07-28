@@ -15,11 +15,18 @@ const AuthCallback = () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
+      console.log(user);
 
       if (user) {
-        const role = await getRole(user.id); // Your own API/db call
+        const role = await getRole(user.id);
+        console.log("User role:", role);
+        if (!role || !role.role) {
+          navigate("/patient/dashboard");
+        }
         const realRole = role?.role;
-        console.log(realRole);
+        if (role === null) {
+          navigate("/patient/dashboard");
+        }
 
         if (realRole === "patient") navigate("/patient/dashboard");
         else if (realRole === "doctor") navigate("/doctor/dashboard");
@@ -47,7 +54,7 @@ const AuthCallback = () => {
       </div>
     );
 
-  return <>{children}</>;
+  // return <>{children}</>;
 };
 
 export default AuthCallback;

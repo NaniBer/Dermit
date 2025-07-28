@@ -223,9 +223,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       .select("role")
       .eq("user_id", userId)
       .maybeSingle();
-    console.log(roleData);
 
-    const role = roleData.role;
+    const role = roleData?.role ?? null; // if roleData is null or role is undefined, return null
     return { role, roleError };
   };
 
