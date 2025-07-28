@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -23,88 +22,115 @@ import {
   Plus,
   UserPlus,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
 import AdminHeader from "@/components/AdminHeader";
 import DashboardButton from "@/components/adminDashboard/DashboardButtons";
 import DoctorsList from "@/components/adminDoctors/DoctorsList";
+import { supabase } from "@/integrations/supabase/client";
+
+type Doctor = {
+  id: number;
+  first_name: string;
+  email: string;
+  phone: string;
+  specialty: string;
+  profilePic: string;
+  photo?: File | null;
+};
 
 const AdminDoctors = () => {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddingDoctor, setIsAddingDoctor] = useState(false);
-  const [editingDoctor, setEditingDoctor] = useState<number | null>(null);
-
-  const handleLogout = () => {
-    navigate("/login");
+  const [editingDoctor, setEditingDoctor] = useState<Doctor | null>(null);
+  const [patientsNo, setPatientsNo] = useState(0);
+  const [consultationsNo, setConsultationsNo] = useState(0);
+  const [doctors, setDoctors] = useState([]);
+  const addDoctor = (newDoctor) => {
+    setDoctors((prevItems) => [...prevItems, newDoctor]);
   };
 
-  // Mock doctor data
-  const [doctors, setDoctors] = useState([
-    {
-      id: 1,
-      name: "Dr. Sarah Johnson",
-      email: "sarah.johnson@dermit.com",
-      phone: "+1 (555) 123-4567",
-      specialty: "Dermatology",
-      licenseNumber: "DRM-2024-001",
-      licenseExpiry: "2025-12-31",
-      experience: "8 years",
-      status: "active",
-      patients: 145,
-      consultations: 892,
-      joinDate: "2023-01-15",
-    },
-    {
-      id: 2,
-      name: "Dr. Michael Chen",
-      email: "michael.chen@dermit.com",
-      phone: "+1 (555) 234-5678",
-      specialty: "Dermatology",
-      licenseNumber: "DRM-2024-002",
-      licenseExpiry: "2025-08-15",
-      experience: "12 years",
-      status: "active",
-      patients: 198,
-      consultations: 1247,
-      joinDate: "2023-03-20",
-    },
-    {
-      id: 3,
-      name: "Dr. Emily Rodriguez",
-      email: "emily.rodriguez@dermit.com",
-      phone: "+1 (555) 345-6789",
-      specialty: "Pediatric Dermatology",
-      licenseNumber: "DRM-2024-003",
-      licenseExpiry: "2024-11-30",
-      experience: "6 years",
-      status: "inactive",
-      patients: 89,
-      consultations: 356,
-      joinDate: "2023-06-10",
-    },
-  ]);
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      const { data, error } = await supabase
+        .from("doctor_profiles")
+        .select("*");
+      console.log("Fetched doctors:", data, error);
+      if (error) {
+        console.error("Error fetching doctors:", error);
+      } else {
+        data.forEach((doc) => addDoctor(doc));
+        // setDoctors(data || []);
+      }
+    };
+    const fetchPatientsNo = async () => {
+      const { data, count, error } = await supabase
+        .from("patient_profiles")
+        .select("*", { count: "exact" });
+      if (error) {
+        console.error("Error fetching patients:", error);
+      } else {
+        setPatientsNo(count);
+      }
+    };
+    const fetchConsultationsNo = async () => {
+      const { data, count, error } = await supabase
+        .from("consultations")
+        .select("*", { count: "exact" });
+      if (error) {
+        console.error("Error fetching consultations:", error);
+      } else {
+        setConsultationsNo(count);
+      }
+    };
+
+    fetchDoctors();
+    fetchConsultationsNo();
+    fetchPatientsNo();
+  }, []);
 
   const [newDoctor, setNewDoctor] = useState({
-    name: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone: "",
     specialty: "",
-    licenseNumber: "",
-    licenseExpiry: "",
-    experience: "",
-    bio: "",
+    profilePic: "",
+    photo: File,
   });
+  const [editFormData, setEditFormData] = useState({
+    first_name: "",
+    email: "",
+    phone: "",
+    specialty: "",
+    profilePic: "",
+    photo: File,
+  });
+  useEffect(() => {
+    console.log("Editing doctor:", editingDoctor);
+    if (editingDoctor) {
+      setEditFormData({
+        first_name: editingDoctor.first_name,
+        last_name: editingDoctor.last_name || "",
+        email: editingDoctor.email,
+        phone: editingDoctor.phone || "",
+        specialty: editingDoctor.specialty || "",
+        profilePic: editFormData.profilePic || "",
+        photo: null, // Reset photo for edit
+      });
+    }
+  }, [editingDoctor]);
 
   const filteredDoctors = doctors.filter(
     (doctor) =>
-      doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor.email.toLowerCase().includes(searchTerm.toLowerCase())
+      doctor.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doctor.specialty?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doctor.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const handleDoctorInputChange = (field: string, value: string) => {
+    setNewDoctor((prev) => ({ ...prev, [field]: value }));
+  };
 
   const handleAddDoctor = () => {
-    if (newDoctor.name && newDoctor.email && newDoctor.specialty) {
+    if (newDoctor.first_name && newDoctor.email && newDoctor.specialty) {
       const doctor = {
         id: doctors.length + 1,
         ...newDoctor,
@@ -115,34 +141,105 @@ const AdminDoctors = () => {
       };
       setDoctors([...doctors, doctor]);
       setNewDoctor({
-        name: "",
+        first_name: "",
+        last_name: "",
         email: "",
         phone: "",
         specialty: "",
-        licenseNumber: "",
-        licenseExpiry: "",
-        experience: "",
-        bio: "",
+        profilePic: "",
+        photo: null,
       });
       setIsAddingDoctor(false);
     }
   };
 
   const handleEditDoctor = (doctorId: number) => {
-    setEditingDoctor(editingDoctor === doctorId ? null : doctorId);
+    const doc = doctors.find((d) => d.id === doctorId) || null;
+    setEditingDoctor(doc);
   };
+  const handleSaveEdit = async () => {
+    console.log("saving edit for doctor:", editFormData);
+    if (!editingDoctor) return;
 
-  const handleToggleStatus = (doctorId: number) => {
-    setDoctors(
-      doctors.map((doctor) =>
-        doctor.id === doctorId
-          ? {
-              ...doctor,
-              status: doctor.status === "active" ? "inactive" : "active",
-            }
-          : doctor
+    let uploadedImageUrl = editingDoctor.profilePic || ""; // Default to existing one
+
+    if (editFormData.photo) {
+      console.log("Uploading new photo:", editFormData.photo);
+      const formData = new FormData();
+      formData.append("file", editFormData.photo);
+      formData.append("upload_preset", "gth9yu4u");
+      formData.append("folder", "doctor_profile");
+
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/dmrspz5bh/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await res.json();
+      uploadedImageUrl = data.secure_url;
+      console.log("Image uploaded:", data);
+    }
+
+    const updatedDoctor = {
+      ...editFormData,
+      profilePic: uploadedImageUrl,
+    };
+
+    setDoctors((prevDoctors) =>
+      prevDoctors.map((doc) =>
+        doc.id === editingDoctor.id ? { ...doc, ...updatedDoctor } : doc
       )
     );
+
+    // optional: update in your DB
+    const { data, error } = await supabase.rpc("update_doctor", {
+      p_doctor_id: editingDoctor.id,
+      p_first_name: updatedDoctor.first_name,
+      p_last_name: updatedDoctor.last_name,
+      p_email: updatedDoctor.email,
+      p_phone: updatedDoctor.phone,
+      p_specialty: updatedDoctor.specialty,
+      p_profilepic: updatedDoctor.profilePic,
+    });
+
+    if (error) {
+      console.error("Update error:", error);
+    } else {
+      setEditingDoctor(null);
+      // maybe show success feedback here!
+    }
+  };
+
+  const handleToggleStatus = async (doctorId: string) => {
+    try {
+      // Find the doctor object
+      const doctor = doctors.find((doc) => doc.id === doctorId);
+      if (!doctor) return;
+
+      // Flip the status
+      const newStatus = doctor.status === "active" ? "inactive" : "active";
+
+      // Update backend (Supabase example)
+      const { error } = await supabase
+        .from("doctors_info")
+        .update({ status: newStatus })
+        .eq("profile_id", doctorId);
+
+      if (error) throw error;
+
+      // If update successful, update local state
+      setDoctors(
+        doctors.map((doc) =>
+          doc.id === doctorId ? { ...doc, status: newStatus } : doc
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      // Optional: Add user-friendly error feedback here!
+    }
   };
 
   return (
@@ -184,7 +281,7 @@ const AdminDoctors = () => {
                 </Button>
                 <Dialog open={isAddingDoctor} onOpenChange={setIsAddingDoctor}>
                   <DialogTrigger asChild>
-                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700">
+                    <Button className="bg-gradient-to-r from-brand-primary to-brand-secondary">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Doctor
                     </Button>
@@ -196,125 +293,77 @@ const AdminDoctors = () => {
                         Enter the doctor's information and credentials
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="grid gap-4 py-4">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="name">Full Name</Label>
+                    <form onSubmit={handleAddDoctor} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="firstName">First Name</Label>
                           <Input
-                            id="name"
-                            value={newDoctor.name}
+                            id="firstName"
+                            value={newDoctor.first_name}
                             onChange={(e) =>
-                              setNewDoctor({
-                                ...newDoctor,
-                                name: e.target.value,
-                              })
+                              handleDoctorInputChange(
+                                "first_name",
+                                e.target.value
+                              )
                             }
-                            placeholder="Dr. John Doe"
+                            required
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="email">Email</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="lastName">Last Name</Label>
                           <Input
-                            id="email"
-                            type="email"
-                            value={newDoctor.email}
+                            id="lastName"
+                            value={newDoctor.last_name}
                             onChange={(e) =>
-                              setNewDoctor({
-                                ...newDoctor,
-                                email: e.target.value,
-                              })
+                              handleDoctorInputChange(
+                                "last_name",
+                                e.target.value
+                              )
                             }
-                            placeholder="john.doe@dermit.com"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="phone">Phone</Label>
-                          <Input
-                            id="phone"
-                            value={newDoctor.phone}
-                            onChange={(e) =>
-                              setNewDoctor({
-                                ...newDoctor,
-                                phone: e.target.value,
-                              })
-                            }
-                            placeholder="+1 (555) 123-4567"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="specialty">Specialty</Label>
-                          <Input
-                            id="specialty"
-                            value={newDoctor.specialty}
-                            onChange={(e) =>
-                              setNewDoctor({
-                                ...newDoctor,
-                                specialty: e.target.value,
-                              })
-                            }
-                            placeholder="Dermatology"
+                            required
                           />
                         </div>
                       </div>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="licenseNumber">License Number</Label>
-                          <Input
-                            id="licenseNumber"
-                            value={newDoctor.licenseNumber}
-                            onChange={(e) =>
-                              setNewDoctor({
-                                ...newDoctor,
-                                licenseNumber: e.target.value,
-                              })
-                            }
-                            placeholder="DRM-2024-004"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="licenseExpiry">License Expiry</Label>
-                          <Input
-                            id="licenseExpiry"
-                            type="date"
-                            value={newDoctor.licenseExpiry}
-                            onChange={(e) =>
-                              setNewDoctor({
-                                ...newDoctor,
-                                licenseExpiry: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="experience">Years of Experience</Label>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
                         <Input
-                          id="experience"
-                          value={newDoctor.experience}
+                          id="email"
+                          type="email"
+                          value={newDoctor.email}
                           onChange={(e) =>
-                            setNewDoctor({
-                              ...newDoctor,
-                              experience: e.target.value,
-                            })
+                            handleDoctorInputChange("email", e.target.value)
                           }
-                          placeholder="5 years"
+                          required
                         />
                       </div>
-                      <div>
-                        <Label htmlFor="bio">Biography</Label>
-                        <Textarea
-                          id="bio"
-                          value={newDoctor.bio}
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          value={newDoctor.phone}
                           onChange={(e) =>
-                            setNewDoctor({ ...newDoctor, bio: e.target.value })
+                            handleDoctorInputChange("phone", e.target.value)
                           }
-                          placeholder="Brief professional biography..."
-                          rows={3}
+                          required
                         />
                       </div>
-                    </div>
+
+                      {/* <div className="space-y-2">
+                  <Label htmlFor="specialty">Specialty</Label>
+                  <Input
+                    id="specialty"
+                    value={newDoctor.specialty}
+                    onChange={(e) =>
+                      handleDoctorInputChange("specialty", e.target.value)
+                    }
+                    placeholder="e.g., General Dermatology"
+                    required
+                  />
+                </div> */}
+                    </form>
                     <div className="flex justify-end space-x-2">
                       <Button
                         variant="outline"
@@ -322,7 +371,136 @@ const AdminDoctors = () => {
                       >
                         Cancel
                       </Button>
-                      <Button onClick={handleAddDoctor}>Add Doctor</Button>
+                      <Button
+                        className="bg-gradient-to-r from-brand-primary to-brand-secondary"
+                        onClick={handleAddDoctor}
+                      >
+                        Add Doctor
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                {/* Edit doctor */}
+                <Dialog
+                  open={!!editingDoctor}
+                  onOpenChange={(open) => !open && setEditingDoctor(null)}
+                >
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Edit Doctor</DialogTitle>
+                      <DialogDescription>
+                        Update the doctor's information
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      {/* Like your Add Doctor form but use editFormData and setEditFormData */}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="editName">First Name</Label>
+                          <Input
+                            id="editName"
+                            value={editFormData.first_name}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                first_name: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="editEmail">Email</Label>
+                          <Input
+                            id="editEmail"
+                            type="email"
+                            value={editFormData.email}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                email: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      {/* Add inputs for phone, specialty, licenseNumber, licenseExpiry, experience, bio... */}
+                      {/* For example: */}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="editPhone">Phone</Label>
+                          <Input
+                            id="editPhone"
+                            value={editFormData.phone}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                phone: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="editSpecialty">Specialty</Label>
+                          <Input
+                            id="editSpecialty"
+                            value={editFormData.specialty}
+                            onChange={(e) =>
+                              setEditFormData({
+                                ...editFormData,
+                                specialty: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      {/* Continue with licenseNumber, licenseExpiry, experience, bio */}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="profilePic">Profile Picture</Label>
+                      <Input
+                        id="profilePic"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            // Store the file itself for uploading
+                            setEditFormData((prev) => ({
+                              ...prev,
+                              photo: file, // use this for Cloudinary
+                            }));
+
+                            // Optional: Show base64 preview
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setEditFormData((prev) => ({
+                                ...prev,
+                                profilePic: reader.result as string, // use this for UI preview
+                              }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+
+                      {editFormData.profilePic && (
+                        <img
+                          src={editFormData.profilePic}
+                          alt="Profile preview"
+                          className="mt-2 w-24 h-24 rounded-full object-cover"
+                        />
+                      )}
+                    </div>
+
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setEditingDoctor(null)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button onClick={handleSaveEdit}>Save</Button>
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -349,14 +527,14 @@ const AdminDoctors = () => {
 
           <DashboardButton
             description="Total Patients"
-            value={doctors.reduce((sum, d) => sum + d.patients, 0)}
+            value={patientsNo}
             icon={UserPlus}
             color="purple"
           />
 
           <DashboardButton
             description="Total Consultations"
-            value={doctors.reduce((sum, d) => sum + d.consultations, 0)}
+            value={consultationsNo}
             icon={Stethoscope}
             color="orange"
           />

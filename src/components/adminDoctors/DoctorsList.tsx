@@ -14,7 +14,7 @@ import React from "react";
 
 interface Doctor {
   id: number;
-  name: string;
+  first_name: string;
   email: string;
   phone: string;
   specialty: string;
@@ -38,6 +38,7 @@ const DoctorsList: React.FC<DoctorListProps> = ({
   onEdit,
   onToggleStatus,
 }) => {
+  console.log(doctors);
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -59,16 +60,30 @@ const DoctorsList: React.FC<DoctorListProps> = ({
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-4">
                   <Avatar className="w-12 h-12">
-                    <AvatarFallback className="bg-purple-100 text-purple-600">
-                      {doctor.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
+                    {doctor?.profilePic || doctor?.profile_pic ? (
+                      <img
+                        src={doctor.profilePic || doctor.profile_pic}
+                        alt={`${doctor.first_name ?? "User"}'s avatar`}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : doctor?.first_name ? (
+                      <AvatarFallback className="bg-purple-100 text-purple-600">
+                        {doctor.first_name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    ) : (
+                      <AvatarFallback className="bg-purple-100 text-purple-600">
+                        U
+                      </AvatarFallback>
+                    )}
                   </Avatar>
+
                   <div>
                     <h4 className="font-semibold text-gray-900">
-                      {doctor.name}
+                      {doctor?.first_name}
                     </h4>
                     <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                       <div className="flex items-center space-x-1">
@@ -79,10 +94,6 @@ const DoctorsList: React.FC<DoctorListProps> = ({
                         <Phone className="w-3 h-3" />
                         <span>{doctor.phone}</span>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                      <span>License: {doctor.licenseNumber}</span>
-                      <span>Expires: {doctor.licenseExpiry}</span>
                     </div>
                   </div>
                 </div>
@@ -117,7 +128,7 @@ const DoctorsList: React.FC<DoctorListProps> = ({
                   </Button>
                 </div>
               </div>
-              <div className="mt-3 grid grid-cols-4 gap-4 text-sm">
+              {/* <div className="mt-3 grid grid-cols-4 gap-4 text-sm">
                 <div>
                   <span className="text-gray-500">Specialty:</span>
                   <p className="font-medium">{doctor.specialty}</p>
@@ -134,7 +145,7 @@ const DoctorsList: React.FC<DoctorListProps> = ({
                   <span className="text-gray-500">Consultations:</span>
                   <p className="font-medium">{doctor.consultations}</p>
                 </div>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>

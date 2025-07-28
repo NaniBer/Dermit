@@ -1,35 +1,26 @@
-import React, { useEffect, useState } from "react";
-import {
-  useParams,
-  useSearchParams,
-  useNavigate,
-  Link,
-} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2, Stethoscope } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 
 const AcceptConsultationPage = () => {
   const { consultationId } = useParams();
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [alreadyAccepted, setAlreadyAccepted] = useState(false);
 
   useEffect(() => {
     if (authLoading) return; // Wait for auth state
-
     if (!user) {
       // Redirect to login with return URL
       navigate(`/login?redirect=/consultation/${consultationId}/accept`);
       return;
     }
-
     (async () => {
       try {
         // Fetch role for logged-in user
@@ -60,7 +51,6 @@ const AcceptConsultationPage = () => {
         console.log(consultation, consultError);
 
         if (consultError) throw consultError;
-
         if (
           consultation &&
           consultation.doctor_id === user.id &&

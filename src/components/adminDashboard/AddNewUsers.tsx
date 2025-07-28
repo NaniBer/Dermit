@@ -19,7 +19,7 @@ const AddNewUsers = () => {
     lastName: "",
     email: "",
     phone: "",
-    specialty: "",
+    // specialty: "",
     licenseNumber: "",
     experience: "",
     licenseExpiry: "",
@@ -59,8 +59,15 @@ const AddNewUsers = () => {
           user_id: authData.user.id,
           role: "doctor",
         });
-
         if (roleError) throw roleError;
+
+        const { error: AddPhoneError } = await supabase
+          .from("profiles")
+          .update({
+            phone: newDoctor.phone,
+          })
+          .eq("id", authData.user.id);
+        if (AddPhoneError) throw AddPhoneError;
 
         toast.success("Doctor account created successfully!");
         setNewDoctor({
@@ -68,7 +75,7 @@ const AddNewUsers = () => {
           lastName: "",
           email: "",
           phone: "",
-          specialty: "",
+          // specialty: "",
           licenseNumber: "",
           experience: "",
           licenseExpiry: "",
@@ -218,7 +225,7 @@ const AddNewUsers = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="specialty">Specialty</Label>
                   <Input
                     id="specialty"
@@ -229,7 +236,7 @@ const AddNewUsers = () => {
                     placeholder="e.g., General Dermatology"
                     required
                   />
-                </div>
+                </div> */}
 
                 <Button
                   type="submit"

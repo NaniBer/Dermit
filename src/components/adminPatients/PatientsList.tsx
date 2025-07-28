@@ -60,11 +60,14 @@ const PatientList: React.FC<PatientListProps> = ({
                     <Avatar className="w-12 h-12">
                       <AvatarFallback className="bg-blue-100 text-blue-600">
                         {patient.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                          ? patient.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                          : "U"}
                       </AvatarFallback>
                     </Avatar>
+
                     <div>
                       <h4 className="font-semibold text-gray-900">
                         {patient.name}
@@ -79,16 +82,16 @@ const PatientList: React.FC<PatientListProps> = ({
                           <span>{patient.phone}</span>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                      {/* <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                         <div className="flex items-center space-x-1">
                           <Calendar className="w-3 h-3" />
                           <span>Joined: {patient.joinDate}</span>
                         </div>
                         <span>Assigned to: {patient.assignedDoctor}</span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  {/* <div className="flex items-center space-x-2">
                     <Badge
                       className={
                         patient.status === "active"
@@ -98,21 +101,28 @@ const PatientList: React.FC<PatientListProps> = ({
                     >
                       {patient.status}
                     </Badge>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-500">Consultations:</span>
-                    <p className="font-medium">{patient.consultations}</p>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-500">
+                      Number of Consultations:
+                    </span>
+                    <p className="font-medium text-black">
+                      {patient.consultation_count > 0
+                        ? patient.consultation_count
+                        : "No consultations yet"}
+                    </p>
                   </div>
-                  <div>
+
+                  {/* <div>
                     <span className="text-gray-500">Last Consultation:</span>
                     <p className="font-medium">{patient.lastConsultation}</p>
-                  </div>
-                  <div>
+                  </div> */}
+                  {/* <div>
                     <span className="text-gray-500">Status:</span>
                     <p className="font-medium capitalize">{patient.status}</p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))

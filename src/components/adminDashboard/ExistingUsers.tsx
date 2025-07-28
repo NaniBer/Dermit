@@ -45,14 +45,27 @@ const ExistingUser = ({ doctors, admins }) => {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarFallback className="bg-purple-100 text-purple-600">
-                            {(
-                              doctor?.first_name?.charAt(0) ||
-                              doctor?.email?.charAt(0) ||
-                              "U"
-                            ).toUpperCase()}
-                          </AvatarFallback>
+                          {doctor?.profilePic || doctor?.profile_pic ? (
+                            <img
+                              src={doctor.profilePic || doctor.profile_pic}
+                              alt={`${doctor.first_name ?? "User"}'s avatar`}
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : doctor?.first_name ? (
+                            <AvatarFallback className="bg-purple-100 text-purple-600">
+                              {doctor.first_name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          ) : (
+                            <AvatarFallback className="bg-purple-100 text-purple-600">
+                              U
+                            </AvatarFallback>
+                          )}
                         </Avatar>
+
                         <div>
                           <h4 className="font-semibold text-gray-900">
                             {doctor?.first_name} {doctor?.last_name}

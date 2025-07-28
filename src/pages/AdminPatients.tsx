@@ -29,72 +29,53 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminHeader from "@/components/AdminHeader";
 import DashboardButton from "@/components/adminDashboard/DashboardButtons";
 import PatientList from "@/components/adminPatients/PatientsList";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminPatients = () => {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-
-  const handleLogout = () => {
-    navigate("/login");
+  const [consultationsNo, setConsultationsNo] = useState(0);
+  const [patientsNo, setPatientsNo] = useState(0);
+  const [patients, setPatients] = useState([]);
+  const addPatient = (newpatient) => {
+    setPatients((prevItems) => [...prevItems, newpatient]);
   };
+  useEffect(() => {
+    const fetchConsultationsNo = async () => {
+      const { data, count, error } = await supabase
+        .from("consultations")
+        .select("*", { count: "exact" });
+      if (error) {
+        console.error("Error fetching consultations:", error);
+      } else {
+        setConsultationsNo(count);
+      }
+    };
+    const fetchPatientsNo = async () => {
+      const { data, error } = await supabase
+        .from("patient_profiles")
+        .select("*");
+      console.log(data, error);
+      if (error) {
+        console.error("Error fetching doctors:", error);
+      } else {
+        data.forEach((doc) => addPatient(doc));
+        // setDoctors(data || []);
+      }
+    };
 
-  // Mock patient data
-  const patients = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@example.com",
-      phone: "+1 (555) 123-4567",
-      joinDate: "2024-01-15",
-      status: "active",
-      consultations: 3,
-      lastConsultation: "2024-06-10",
-      assignedDoctor: "Dr. Sarah Johnson",
-    },
-    {
-      id: 2,
-      name: "Sarah Wilson",
-      email: "sarah.wilson@example.com",
-      phone: "+1 (555) 234-5678",
-      joinDate: "2024-02-20",
-      status: "active",
-      consultations: 1,
-      lastConsultation: "2024-06-12",
-      assignedDoctor: "Dr. Michael Chen",
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      email: "michael.brown@example.com",
-      phone: "+1 (555) 345-6789",
-      joinDate: "2024-03-05",
-      status: "inactive",
-      consultations: 5,
-      lastConsultation: "2024-05-28",
-      assignedDoctor: "Dr. Sarah Johnson",
-    },
-    {
-      id: 4,
-      name: "Emma Davis",
-      email: "emma.davis@example.com",
-      phone: "+1 (555) 456-7890",
-      joinDate: "2024-04-12",
-      status: "active",
-      consultations: 2,
-      lastConsultation: "2024-06-11",
-      assignedDoctor: "Dr. Michael Chen",
-    },
-  ];
+    fetchConsultationsNo();
+    fetchPatientsNo();
+  }, []);
 
   const filteredPatients = patients.filter(
     (patient) =>
-      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.assignedDoctor.toLowerCase().includes(searchTerm.toLowerCase())
+      patient.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.assignedDoctor?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -135,7 +116,7 @@ const AdminPatients = () => {
         </Card>
 
         {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           <DashboardButton
             description="Total Patients"
             value={patients.length}
@@ -143,16 +124,16 @@ const AdminPatients = () => {
             color="blue"
           />
 
-          <DashboardButton
+          {/* <DashboardButton
             description="Active Patients"
             value={patients.filter((p) => p.status === "active").length}
             icon={Activity}
             color="green"
-          />
+          /> */}
 
           <DashboardButton
             description="Total Consultations"
-            value={patients.reduce((sum, p) => sum + p.consultations, 0)}
+            value={consultationsNo}
             icon={Stethoscope}
             color="purple"
           />

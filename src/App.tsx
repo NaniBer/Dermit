@@ -32,17 +32,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Consent from "./pages/Consent";
 import PatientFeedback from "./pages/PatientFeedback";
 import DoctorThankyou from "./pages/DoctorThankyou";
-import PdfViewer from "./pages/pdfViewer";
 import AuthCallback from "./pages/auth-callback";
 
 const queryClient = new QueryClient();
 
-const NotificationSetup = () => {
-  const [notificationCount, setNotificationCount] = useState(0);
-  return (
-    <InstantNotificationSystem onBadgeCountChange={setNotificationCount} />
-  );
-};
 const App = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   return (

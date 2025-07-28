@@ -4,7 +4,7 @@ import DashboardButton from "@/components/adminDashboard/DashboardButtons";
 import AddNewUsers from "@/components/adminDashboard/AddNewUsers";
 import ExistingUser from "@/components/adminDashboard/ExistingUsers";
 import { supabase } from "@/integrations/supabase/client";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Doctor {
   id: string;
