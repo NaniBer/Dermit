@@ -73,6 +73,7 @@ const Register = () => {
 
   const handlePatientRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Registering patient with data:", patientData);
 
     if (patientData.password !== patientData.confirmPassword) {
       toast({
@@ -96,50 +97,27 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { data: signUpData, error: signUpError } =
-        await supabase.auth.signUp({
-          email: patientData.email,
-          password: patientData.password,
-        });
+      // 💥 Use your existing signUp function here
+      const { error: signUpError } = await signUp(
+        patientData.email,
+        patientData.password,
+        patientData.firstName,
+        patientData.lastName,
+        "patient"
+      );
 
       if (signUpError) throw signUpError;
 
-      // signUpData.user will exist here
-      if (!signUpData.user?.email_confirmed_at) {
-        // Email NOT confirmed yet, so NO auto sign-in
-        toast({
-          title: "Please Confirm Your Email",
-          description:
-            "Check your inbox for a confirmation email before signing in.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return; // exit the function so no auto sign-in happens
-      }
-
-      // If email is confirmed (unlikely at sign-up), auto sign-in:
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: patientData.email,
-        password: patientData.password,
-      });
-      if (signInError) throw signInError;
-
-      // Add roles and consent after sign-in
+      // Get user after sign up
       const {
         data: { user: signedInUser },
       } = await supabase.auth.getUser();
 
       if (signedInUser) {
-        await supabase.from("user_roles").insert({
-          user_id: signedInUser.id,
-          role: "patient",
-        });
-
+        // 💾 Save consent data into profiles table
         await supabase
           .from("profiles")
           .update({
-            // consent_ai_training: patientData.consentAiTraining,
-            // consent_data_storage: patientData.consentDataStorage,
             consent_terms: patientData.constentTerms,
             consent_privacy: patientData.consentPrivacy,
             consent_timestamp: new Date().toISOString(),
@@ -149,9 +127,10 @@ const Register = () => {
 
       toast({
         title: "Welcome aboard!",
-        description: "You have successfully signed up and logged in.",
+        description: "Please confirm your email before logging in.",
       });
-      navigate("/patient/dashboard");
+
+      navigate("/"); // or wherever you want them to go
     } catch (error) {
       toast({
         title: "Oops!",

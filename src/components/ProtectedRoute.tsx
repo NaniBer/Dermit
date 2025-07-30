@@ -44,12 +44,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [user?.id]);
   useEffect(() => {
     const checkConsent = async () => {
-      console.log("Checking user consent...");
-      console.log("User state:", user);
-      //   if (!user) {
-      //     navigate("/login");
-      //     return;
-      //   }
+      if (!user) {
+        navigate("/login");
+        return;
+      }
 
       const { data: profile, error } = await supabase
         .from("profiles")
@@ -62,7 +60,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         navigate("/login");
         return;
       }
-      console.log(user.id);
+
       const role = await getRole(user.id);
       const realRole = role?.role;
 

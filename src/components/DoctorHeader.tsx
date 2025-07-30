@@ -37,15 +37,11 @@ const DoctorHeader = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("user in header:", user);
-  }, [user]);
-
   const getFullName = (user: any) => {
     const meta = user?.user_metadata;
 
     // Try `fullname` first
-    console.log("User metadata:", meta);
+
     if (meta?.name) return meta.name;
 
     // Then fall back to first + last name combo

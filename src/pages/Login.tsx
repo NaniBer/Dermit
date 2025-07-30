@@ -21,7 +21,6 @@ const Login = () => {
   const { signIn, user, signInWithGoogle, getRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  console.log(user);
 
   // Redirect if already logged in
   useEffect(() => {

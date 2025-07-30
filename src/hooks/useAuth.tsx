@@ -53,13 +53,48 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Set up auth state listener
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      if (event === "SIGNED_IN" && session?.user) {
+        const user = session.user;
+
+        const handleFirstSignIn = async () => {
+          try {
+            const accessToken = session?.access_token;
+
+            const response = await fetch(
+              "https://nydetrcmdwjkellmqjki.supabase.co/functions/v1/google-oauth-signup-handler",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({
+                  type: "SIGNUP",
+                  provider: "google",
+                  user: user,
+                  identities: user.identities,
+                }),
+              }
+            );
+
+            const result = await response.json();
+            // Fetch and set role
+            const { role } = await getRole(user.id);
+            setRole(role);
+          } catch (err) {
+            console.error("❌ Failed to call Edge Function:", err);
+          }
+        };
+
+        handleFirstSignIn(); // call the async inner function
+      }
     });
 
     // Get initial session
@@ -170,6 +205,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       return { error: roleError || new Error("Role not found") };
     }
+    console.log("user_metadata:", user.user_metadata);
+    console.log("identity_data:", user.identities?.[0]?.identity_data);
 
     const role = roleData.role;
     const name = authData.user?.user_metadata?.first_name || "User";
@@ -223,8 +260,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       .select("role")
       .eq("user_id", userId)
       .maybeSingle();
+    if (roleData === null) {
+      const { error: insertError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: userId, role: "patient" });
 
-    const role = roleData?.role ?? null; // if roleData is null or role is undefined, return null
+      if (insertError) {
+        console.error("Error inserting default role:", insertError);
+      }
+    }
+
+    const role = roleData?.role ?? "patient"; // if roleData is null or role is undefined, return null
     return { role, roleError };
   };
 

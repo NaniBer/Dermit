@@ -117,6 +117,7 @@ const DoctorConsultationDetail = () => {
       }
     };
     const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/";
+    // const URL = "http://localhost:3000";
 
     const fetchSignedImages = async (id) => {
       const res = await fetch(`${URL}/signed-images`, {

@@ -29,6 +29,8 @@ const PatientFeedback = () => {
   const [rating, setRating] = useState<number | null>(null);
   const [allowContact, setAllowContact] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pictureLoading, setPictureLoading] = useState(false);
+  const [pictureDeleted, setPictureDeleted] = useState(false);
   const [contactMethod, setContactMethod] = useState<
     "telegram" | "phone" | "email" | ""
   >("");
@@ -59,6 +61,7 @@ const PatientFeedback = () => {
         console.error("Failed to fetch consultation summary", error);
       } else {
         setConsultation(data);
+        console.log(data);
         console.log(consultation.doctor_id);
         const { data: fetchDoctorData, error: fetchDoctorError } =
           await supabase
@@ -67,9 +70,6 @@ const PatientFeedback = () => {
             .eq("id", consultation.doctor_id)
             .maybeSingle();
 
-        const doctorName =
-          fetchDoctorData.first_name + " " + fetchDoctorData.last_name;
-        console.log(name);
         setFormData((prev) => ({
           ...prev,
           patientName:
@@ -90,6 +90,43 @@ const PatientFeedback = () => {
 
     if (id) fetchConsultation();
   }, []);
+
+  const deletePicture = async () => {
+    // const URL = "http://localhost:3000";
+    const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/";
+    setPictureLoading(true);
+
+    try {
+      const res = await fetch(`${URL}/delete-image`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          consultation_id: id,
+        }),
+      });
+
+      const data = await res.json();
+
+      console.log("🧨 Picture(s) deleted:", data);
+
+      if (!res.ok) {
+        throw new Error(
+          data.error || "Something went wrong while deleting the picture."
+        );
+      }
+
+      // Maybe show a toast or update UI if successful
+      // toast.success("Image(s) deleted successfully!");
+    } catch (error) {
+      console.error("❌ Error deleting picture:", error);
+      // toast.error("Failed to delete image.");
+    } finally {
+      setPictureLoading(false); // Always stop the loading spinner
+      setPictureDeleted(true); // Set the state to indicate picture deletion
+    }
+  };
 
   const handleFeedbackSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,6 +180,45 @@ const PatientFeedback = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 flex items-center justify-center px-4 py-10">
       {/* Right: Feedback Form */}
       <div className="w-full lg:w-1/2">
+        <Card className="flex flex-col justify-between p-6">
+          {pictureDeleted ? (
+            <div className="text-center">
+              <h2 className="text-lg font-semibold">Picture Deleted</h2>
+              <p className="text-gray-600 mt-2">
+                Your picture has been deleted from our database.
+              </p>
+            </div>
+          ) : (
+            <>
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold">
+                  We Value Your Privacy
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  Should we delete your picture from our database?
+                  <span className="text-sm text-gray-500 block mt-1">
+                    If you haven’t uploaded a picture, feel free to ignore this
+                    message.
+                  </span>
+                </CardDescription>
+              </CardHeader>
+
+              <div className="flex justify-center">
+                <Button
+                  variant="destructive"
+                  className="mt-4 px-6 py-2"
+                  disabled={pictureLoading}
+                  onClick={() => {
+                    deletePicture();
+                  }}
+                >
+                  {pictureLoading ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </>
+          )}
+        </Card>
+
         <Card className="shadow-xl border-none rounded-2xl">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -157,7 +233,7 @@ const PatientFeedback = () => {
             <form onSubmit={handleFeedbackSubmit} className="space-y-6">
               {/* Rating */}
               <div>
-                <Label className="block mb-2 text-gray-700 font-medium text-center">
+                <Label className="block mb-2  text-gray-700 font-medium text-center">
                   Rate your experience
                 </Label>
                 <div className="flex justify-center gap-1">
