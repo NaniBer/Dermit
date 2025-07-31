@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle, Loader2, Stethoscope } from "lucide-react";
 
 const AuthCallback = () => {
-  const { getRole } = useAuth();
+  const { getRole, signOut } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const checkUserAndRedirect = async () => {
       const {
@@ -29,12 +30,32 @@ const AuthCallback = () => {
         }
 
         if (realRole === "patient") navigate("/patient/dashboard");
-        else if (realRole === "doctor") navigate("/doctor/dashboard");
-        else if (realRole === "admin") navigate("/admin/dashboard");
+        else if (realRole === "doctor") {
+          checkStatus(user.id);
+          navigate("/doctor/dashboard");
+        } else if (realRole === "admin") navigate("/admin/dashboard");
         if (role === null) {
           navigate("/patient/dashboard");
         }
         setLoading(false);
+      }
+    };
+    const checkStatus = async (id) => {
+      const { data, error } = await supabase
+        .from("doctors_info")
+        .select("status")
+        .eq("profile_id", id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching consultations:", error);
+      } else {
+        if (data.status === "active") {
+          navigate("/doctor/dashboard");
+        } else {
+          await signOut();
+          navigate("/account-issue");
+        }
       }
     };
 

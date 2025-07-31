@@ -56,10 +56,6 @@ const PatientProfile = () => {
     confirmPassword: "",
   });
 
-  const handleLogout = () => {
-    navigate("/login");
-  };
-
   const handleSave = () => {
     console.log("Saving profile:", profile);
     setIsEditing(false);

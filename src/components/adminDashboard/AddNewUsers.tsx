@@ -61,12 +61,13 @@ const AddNewUsers = () => {
         });
         if (roleError) throw roleError;
 
-        const { error: AddPhoneError } = await supabase
+        const { data: AddPhoneData, error: AddPhoneError } = await supabase
           .from("profiles")
           .update({
             phone: newDoctor.phone,
           })
           .eq("id", authData.user.id);
+        console.log(AddPhoneData);
         if (AddPhoneError) throw AddPhoneError;
 
         toast.success("Doctor account created successfully!");
@@ -112,13 +113,6 @@ const AddNewUsers = () => {
           user_id: authData.user.id,
           role: "admin",
         });
-
-        const { error: phoneError } = await supabase
-          .from("profiles")
-          .update({
-            phone: newAdmin.phone,
-          })
-          .eq("id", authData.user.id);
 
         if (roleError) throw roleError;
         if (phoneError) throw phoneError;

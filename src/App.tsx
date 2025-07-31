@@ -33,6 +33,7 @@ import Consent from "./pages/Consent";
 import PatientFeedback from "./pages/PatientFeedback";
 import DoctorThankyou from "./pages/DoctorThankyou";
 import AuthCallback from "./pages/auth-callback";
+import AccountIssue from "./pages/account-issue";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,7 @@ const App = () => {
                 element={<AcceptConsultationPage />}
               />
               <Route path="/auth-callback" element={<AuthCallback />} />
+              <Route path="/account-issue" element={<AccountIssue />} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

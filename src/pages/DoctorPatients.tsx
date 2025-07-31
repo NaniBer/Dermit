@@ -44,10 +44,6 @@ const DoctorPatients = () => {
   const [ongoingConsultations, setOngoingConsultations] = useState(0);
   const [completedConsultations, setCompletedConsultations] = useState(0);
 
-  const handleLogout = () => {
-    navigate("/login");
-  };
-
   // Fetch patients for the doctor
   useEffect(() => {
     if (!user) return;

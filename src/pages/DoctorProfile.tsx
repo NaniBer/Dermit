@@ -65,12 +65,6 @@ const DoctorProfile = () => {
             lastName: data.last_name || "",
             email: data.email || "",
             phone: data.phone || "",
-            specialty: data.specialty || "",
-            licenseNumber: data.license_number || "",
-            yearsOfExperience: data.years_of_experience?.toString() || "",
-            education: data.education || "",
-            certifications: data.certifications || "",
-            bio: data.bio || "",
           });
         }
       } catch (error) {
@@ -115,11 +109,27 @@ const DoctorProfile = () => {
       console.error(err);
     }
   };
+  const handleSaveProfile = async () => {
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          first_name: profileData.firstName,
+          last_name: profileData.lastName,
+          email: profileData.email,
+          phone: profileData.phone,
+        })
+        .eq("id", user.id);
 
-  const handleLogout = () => {
-    navigate("/login");
+      if (error) throw error;
+
+      alert("Profile updated successfully! 💫");
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("There was a hiccup saving your profile 😓");
+    }
   };
-  // ... Your existing handlers (handleLogout, handleSave, handleCancel, handlePasswordChange) remain the same.
 
   if (loading) {
     return (
@@ -246,44 +256,106 @@ const DoctorProfile = () => {
             {/* Personal Information */}
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <User className="w-5 h-5 text-blue-600" />
-                  <span>Personal Information</span>
-                </CardTitle>
+                <div className="flex justify-between">
+                  <CardTitle className="flex items-center space-x-2">
+                    <User className="w-5 h-5 text-brand-primary" />
+                    <span>Personal Information</span>
+                  </CardTitle>
+                  <div>
+                    <Button
+                      className="bg-gradient-to-r from-brand-primary to-brand-secondary"
+                      onClick={() => {
+                        if (isEditing) {
+                          handleSaveProfile();
+                        } else {
+                          setIsEditing(true);
+                        }
+                      }}
+                    >
+                      {isEditing ? "Save Profile" : "Edit Profile"}
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
-                        First Name
-                      </label>
-                      <p className="text-gray-900">{profileData.firstName}</p>
+                      <Label htmlFor="firstName">First Name</Label>
+                      {isEditing ? (
+                        <Input
+                          id="firstName"
+                          value={profileData.firstName}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              firstName: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        <p className="text-gray-900">{profileData.firstName}</p>
+                      )}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
-                        Last Name
-                      </label>
-                      <p className="text-gray-900">{profileData.lastName}</p>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      {isEditing ? (
+                        <Input
+                          id="lastName"
+                          value={profileData.lastName}
+                          onChange={(e) =>
+                            setProfileData({
+                              ...profileData,
+                              lastName: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        <p className="text-gray-900">{profileData.lastName}</p>
+                      )}
                     </div>
                   </div>
+
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Email
-                    </label>
-                    <p className="text-gray-900">{profileData.email}</p>
+                    <Label htmlFor="email">Email</Label>
+                    {isEditing ? (
+                      <Input
+                        id="email"
+                        type="email"
+                        value={profileData.email}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            email: e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      <p className="text-gray-900">{profileData.email}</p>
+                    )}
                   </div>
+
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Phone
-                    </label>
-                    <p className="text-gray-900">{profileData.phone}</p>
+                    <Label htmlFor="phone">Phone</Label>
+                    {isEditing ? (
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={profileData.phone}
+                        onChange={(e) =>
+                          setProfileData({
+                            ...profileData,
+                            phone: e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      <p className="text-gray-900">{profileData.phone}</p>
+                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Professional Information */}
           </div>
         </div>
       </div>

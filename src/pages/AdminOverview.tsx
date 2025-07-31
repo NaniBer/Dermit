@@ -20,23 +20,13 @@ import {
   Edit,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import RecentActivity from "@/components/adminOverview/recentActivity";
 import PlatformStats from "@/components/adminOverview/platformStats";
 import AdminHeader from "@/components/AdminHeader";
 
 const AdminOverview = () => {
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    navigate("/login");
-  };
 
   const stats = {
     totalDoctors: 12,

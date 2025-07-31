@@ -26,11 +26,7 @@ const Login = () => {
   useEffect(() => {
     const fetchRoleAndNavigate = async () => {
       if (user) {
-        const role = await getRole(user.id);
-        const realRole = role?.role;
-        if (realRole === "patient") navigate("/patient/dashboard");
-        else if (realRole === "doctor") navigate("/doctor/dashboard");
-        else if (realRole === "admin") navigate("/admin/dashboard");
+        navigate("/auth-callback");
       }
     };
 
@@ -44,13 +40,7 @@ const Login = () => {
     try {
       const { error, role } = await signIn(email, password);
       if (!error && role) {
-        if (role === "patient") {
-          navigate("/patient/dashboard");
-        } else if (role === "doctor") {
-          navigate("/doctor/dashboard");
-        } else if (role === "admin") {
-          navigate("/admin/overview");
-        }
+        navigate("/auth-callback");
       }
     } catch (error) {
       console.error("Login error:", error);
