@@ -23,19 +23,23 @@ import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import PatientHeader from "@/components/PatientHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from "uuid";
 
 const PatientConsultationChat = () => {
   const { id } = useParams<{ id: string }>();
   const [message, setMessage] = useState("");
   const [chatReady, setChatReady] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
   const { messages, loading, sendMessage, status } = useChat(
     chatReady ? id : ""
   );
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const navigate = useNavigate();
   const [doctorName, setDoctorName] = useState<string | null>(null);
   const [feedbackData, setFeedbackData] = useState(null);
+  const token = session?.access_token;
   const getDoctorNameFromConsultation = async (consultationId: string) => {
     // 1️⃣ Fetch consultation to get doctor_id
     const { data: consultation, error: consultError } = await supabase
@@ -93,12 +97,18 @@ const PatientConsultationChat = () => {
       fetchFeedback();
     }
   }, [status, id]);
-  // useEffect(() => {
-  //   console.log(status);
-  //   if (status === "completed") {
-  //     navigate(`/patient/feedback/${id}`);
-  //   }
-  // }, [status, navigate]);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadedImage(file);
+
+    // Create a preview URL using FileReader
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,15 +130,55 @@ const PatientConsultationChat = () => {
   useEffect(() => {
     if (id) setChatReady(true);
   }, [id]);
-
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (uploadedImage) {
+      const myUuid = uuidv4();
+      const formData = new FormData();
 
-    await sendMessage(message);
-    setMessage("");
+      formData.append("file", uploadedImage);
+      formData.append("filename", myUuid);
+      formData.append("consultation_id", id);
+      formData.append("image_type", "chat");
+      // Replace with your API endpoint
+
+      const URL = "http://localhost:3000/upload-image";
+      const response = await fetch(URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData, // NO content-type header! The browser adds it automatically with boundary
+      });
+      if (!response.ok) {
+        // Handle error...
+        console.error("Failed to send image");
+        return;
+      }
+      const { imageUrl } = await response.json();
+      console.log("Image URL:", imageUrl);
+      await sendMessage("Image sent", "image", imageUrl);
+      setUploadedImage(null);
+      setImagePreview("");
+    } else {
+      if (!message.trim()) return;
+
+      await sendMessage(message);
+      setMessage("");
+    }
   };
+  useEffect(() => {
+    console.log(messages);
+  }, [messages]);
 
+  // const handleSendMessage = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   if (!message.trim()) return;
+
+  //   await sendMessage(message);
+  //   setMessage("");
+  // };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <PatientHeader />
@@ -176,31 +226,46 @@ const PatientConsultationChat = () => {
               ) : (
                 messages.map((msg) => (
                   <div
-                    key={msg.id}
-                    className={`flex ${
+                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                       msg.sender_id === user?.id
-                        ? "justify-end"
-                        : "justify-start"
+                        ? "bg-brand-primary text-white"
+                        : "bg-gray-100 text-gray-900"
                     }`}
                   >
-                    <div
-                      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    {msg.message_type === "image" && msg.file_url ? (
+                      <img
+                        src={msg.signedUrl || msg.file_url}
+                        alt="chat attachment"
+                        className="rounded-md max-w-full h-auto"
+                      />
+                    ) : (
+                      <p className="text-sm">{msg.content}</p>
+                    )}
+
+                    {msg.file_url && msg.message_type !== "image" && (
+                      <div className="mt-2">
+                        <div className="flex items-center space-x-2 text-xs">
+                          <FileText className="w-3 h-3" />
+                          <a
+                            href={msg.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline"
+                          >
+                            Download Attachment
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    <p
+                      className={`text-xs mt-1 ${
                         msg.sender_id === user?.id
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-100 text-gray-900"
+                          ? "text-blue-100"
+                          : "text-gray-500"
                       }`}
                     >
-                      <p>{msg.content}</p>
-                      <p
-                        className={`text-xs mt-1 ${
-                          msg.sender_id === user?.id
-                            ? "text-blue-100"
-                            : "text-gray-500"
-                        }`}
-                      >
-                        {new Date(msg.created_at!).toLocaleTimeString()}
-                      </p>
-                    </div>
+                      {new Date(msg.created_at!).toLocaleTimeString()}
+                    </p>
                   </div>
                 ))
               )}
@@ -215,6 +280,48 @@ const PatientConsultationChat = () => {
             ) : (
               <div className="border-t p-4">
                 <form onSubmit={handleSendMessage} className="flex space-x-2">
+                  {imagePreview && (
+                    <div className="mb-2 relative">
+                      <img
+                        src={imagePreview}
+                        alt="Image preview"
+                        className="h-20 w-auto rounded border"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="absolute top-0 right-0"
+                        onClick={() => {
+                          setUploadedImage(null);
+                          setImagePreview("");
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="chat-image-upload"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                    disabled={loading}
+                  />
+
+                  {/* Upload Button */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="p-2"
+                    disabled={loading}
+                    onClick={() =>
+                      document.getElementById("chat-image-upload")?.click()
+                    }
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </Button>
                   <Input
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
