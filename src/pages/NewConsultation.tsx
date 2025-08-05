@@ -30,7 +30,7 @@ import WaitingForDoctor from "@/components/WaitingForDoctor";
 import { v4 as uuidv4 } from "uuid";
 
 const NewConsultation = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -55,13 +55,16 @@ const NewConsultation = () => {
   };
 
   const uploadToDrive = async (image, consultationId): Promise<string> => {
+    const token = session?.access_token;
     const myUuid = uuidv4();
     const formData = new FormData();
 
     formData.append("file", image);
     formData.append("filename", myUuid);
     formData.append("consultation_id", consultationId);
-    const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/upload-image";
+    formData.append("image_type", "consultationImage");
+    // const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/upload-image";
+    const URL = "http://localhost:3000/upload-image";
 
     const res = await fetch(
       // "http://localhost:3000/upload-image",
@@ -69,6 +72,9 @@ const NewConsultation = () => {
       URL,
       {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formData, // NO content-type header! The browser adds it automatically with boundary
       }
     );

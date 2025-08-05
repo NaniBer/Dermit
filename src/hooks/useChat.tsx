@@ -11,8 +11,10 @@ export const useChat = (consultationId: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { toast } = useToast();
+  const URL = "http://localhost:3000";
+  const token = session?.access_token;
 
   // Fetch existing messages
   const fetchMessages = useCallback(async () => {
@@ -27,13 +29,44 @@ export const useChat = (consultationId: string) => {
 
       if (error) throw error;
 
-      setMessages(data || []);
+      const messagesWithSignedUrls = await Promise.all(
+        (data || []).map(async (msg) => {
+          if (msg.message_type === "image") {
+            try {
+              const res = await fetch(`${URL}/chat-signed-images`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ image_url: msg.file_url }), // this should be like "secure_uploads/..."
+              });
 
-      const { data: statusData, error: statusErrot } = await supabase
+              const { signedUrl } = await res.json();
+              return {
+                ...msg,
+                signedUrl,
+              };
+            } catch (err) {
+              console.error("Error fetching signed URL:", err);
+              return msg; // fallback without signedUrl
+            }
+          }
+
+          return msg;
+        })
+      );
+
+      setMessages(messagesWithSignedUrls);
+
+      // Fetch status
+      const { data: statusData, error: statusError } = await supabase
         .from("consultations")
         .select("status")
         .eq("id", consultationId);
-      setStatus(statusData[0].status);
+
+      if (statusError) throw statusError;
+      setStatus(statusData?.[0]?.status);
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast({
@@ -54,6 +87,7 @@ export const useChat = (consultationId: string) => {
       fileUrl?: string
     ) => {
       if (!user || !consultationId) return;
+      console.log(messageType, fileUrl);
 
       const newMessage: MessageInsert = {
         consultation_id: consultationId,

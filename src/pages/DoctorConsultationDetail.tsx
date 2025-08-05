@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -31,6 +31,7 @@ import {
   Video,
   Calendar,
   Star,
+  Paperclip,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -41,9 +42,10 @@ import type { Database } from "@/integrations/supabase/types";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Input } from "@/components/ui/input";
 import { ConsultationSummaryCard } from "@/components/doctorChat/ConsultationSummaryCard";
-// import Image from "next/image";
+import ImageViewer from "@/components/ImageViewer";
+import { v4 as uuidv4 } from "uuid";
 
-// import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
+// Inside your component
 
 type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
 interface Feedback {
@@ -54,7 +56,7 @@ interface Feedback {
 const DoctorConsultationDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const { toast } = useToast();
   const [newMessage, setNewMessage] = useState("");
   const [consultation, setConsultation] = useState<Consultation | null>(null);
@@ -64,8 +66,11 @@ const DoctorConsultationDetail = () => {
   const [showImagesModal, setShowImagesModal] = useState(false);
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [isChatClosed, setIsChatClosed] = useState(false);
-  // Use real-time chat
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+
   const { messages, sendMessage } = useChat(id || "");
+  const token = session?.access_token;
 
   useEffect(() => {
     if (!id) return;
@@ -82,7 +87,7 @@ const DoctorConsultationDetail = () => {
         if (data.status === "completed") {
           fetchFeedback(id);
         }
-        console.log(data);
+
         setConsultation(data);
       } catch (error) {
         console.error("Error fetching consultation:", error);
@@ -116,20 +121,23 @@ const DoctorConsultationDetail = () => {
         });
       }
     };
-    const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/";
-    // const URL = "http://localhost:3000";
+    // const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/";
+    const URL = "http://localhost:3000";
 
     const fetchSignedImages = async (id) => {
       const res = await fetch(`${URL}/signed-images`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json", // this tells the server it's JSON
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // If needed
         },
         body: JSON.stringify({
           consultation_id: id,
         }),
       });
+
       const data = await res.json();
+
       return data.signedUrls;
     };
 
@@ -142,7 +150,35 @@ const DoctorConsultationDetail = () => {
   }, [id, toast]);
 
   const handleSendMessage = async () => {
-    if (newMessage.trim() && user) {
+    if (uploadedImage) {
+      const myUuid = uuidv4();
+      const formData = new FormData();
+
+      formData.append("file", uploadedImage);
+      formData.append("filename", myUuid);
+      formData.append("consultation_id", id);
+      formData.append("image_type", "chat");
+      // Replace with your API endpoint
+
+      const URL = "http://localhost:3000/upload-image";
+      const response = await fetch(URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData, // NO content-type header! The browser adds it automatically with boundary
+      });
+      if (!response.ok) {
+        // Handle error...
+        console.error("Failed to send image");
+        return;
+      }
+      const { imageUrl } = await response.json();
+      console.log("Image URL:", imageUrl);
+      await sendMessage("Image sent", "image", imageUrl);
+      setUploadedImage(null);
+      setImagePreview("");
+    } else if (newMessage.trim() && user) {
       await sendMessage(newMessage);
       setNewMessage("");
     }
@@ -237,6 +273,19 @@ const DoctorConsultationDetail = () => {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadedImage(file);
+
+    // Create a preview URL using FileReader
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
@@ -266,6 +315,8 @@ const DoctorConsultationDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+      {/* Sample Delete Later on*/}
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Button
@@ -355,19 +406,34 @@ const DoctorConsultationDetail = () => {
                             : "bg-gray-100 text-gray-900"
                         }`}
                       >
-                        <p className="text-sm">{message.content}</p>
-                        {message.file_url && (
-                          <div className="mt-2">
-                            <div className="flex items-center space-x-2 text-xs">
-                              {message.message_type === "image" ? (
-                                <Camera className="w-3 h-3" />
-                              ) : (
-                                <FileText className="w-3 h-3" />
-                              )}
-                              <span>Attachment</span>
-                            </div>
-                          </div>
+                        {message.message_type === "image" &&
+                        message.file_url ? (
+                          <img
+                            src={message.signedUrl || message.file_url}
+                            alt="chat attachment"
+                            className="rounded-md max-w-full h-auto"
+                          />
+                        ) : (
+                          <p className="text-sm">{message.content}</p>
                         )}
+
+                        {message.file_url &&
+                          message.message_type !== "image" && (
+                            <div className="mt-2">
+                              <div className="flex items-center space-x-2 text-xs">
+                                <FileText className="w-3 h-3" />
+                                <a
+                                  href={message.file_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="underline"
+                                >
+                                  Download Attachment
+                                </a>
+                              </div>
+                            </div>
+                          )}
+
                         <p className="text-xs mt-1 opacity-75">
                           {new Date(message.created_at!).toLocaleTimeString()}
                         </p>
@@ -384,7 +450,51 @@ const DoctorConsultationDetail = () => {
                 </div>
               ) : (
                 <div className="p-4 border-t">
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 items-end">
+                    {imagePreview && (
+                      <div className="mb-2 relative">
+                        <img
+                          src={imagePreview}
+                          alt="Image preview"
+                          className="h-20 w-auto rounded border"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          className="absolute top-0 right-0"
+                          onClick={() => {
+                            setUploadedImage(null);
+                            setImagePreview("");
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    )}
+                    {/* Hidden file input */}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="chat-image-upload"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={loading || isChatClosed}
+                    />
+
+                    {/* Upload Button */}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="p-2"
+                      disabled={loading || isChatClosed}
+                      onClick={() =>
+                        document.getElementById("chat-image-upload")?.click()
+                      }
+                    >
+                      <Paperclip className="w-5 h-5" />
+                    </Button>
+
+                    {/* 💬 Text Input */}
                     <Input
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
@@ -393,6 +503,8 @@ const DoctorConsultationDetail = () => {
                       className="flex-1 bg-white"
                       disabled={loading || isChatClosed}
                     />
+
+                    {/* 🚀 Send Button */}
                     <Button
                       onClick={handleSendMessage}
                       className="self-end"
@@ -532,27 +644,17 @@ const DoctorConsultationDetail = () => {
                       >
                         View Images
                       </Button>
+
                       <Dialog
                         open={showImagesModal}
                         onOpenChange={setShowImagesModal}
                       >
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Consulhjkltation Images</DialogTitle>
+                            <DialogTitle>Consultation Images</DialogTitle>
                           </DialogHeader>
-                          <div className="grid gap-4">
-                            {images.map((url: string, idx: number) => (
-                              <img
-                                src={url}
-                                alt={`Consultation Image ${idx + 1}`}
 
-                                // key={idx}
-                                // src={url}
-                                // alt={`Consultation Image ${idx + 1}`}
-                                // className="rounded border max-h-64 object-contain bg-gray-500"
-                              />
-                            ))}
-                          </div>
+                          <ImageViewer images={images} />
                           <DialogClose asChild>
                             <Button className="mt-4 w-full">Close</Button>
                           </DialogClose>
