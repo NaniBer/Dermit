@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 import MessageItem from "@/components/MessageItem";
 import ChatInput from "@/components/MessageInput";
 import PatientChatHeader from "@/components/patientChat/PatientChatHeader";
+import PatientDashboardButton from "@/components/PatientDashboardButton";
 
 const PatientConsultationChat = () => {
   const { id } = useParams<{ id: string }>();
@@ -123,6 +124,7 @@ const PatientConsultationChat = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <PatientHeader />
+      <PatientDashboardButton />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Chat Header */}

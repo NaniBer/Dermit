@@ -22,10 +22,11 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const checkEverything = async () => {
-      if (!user) {
-        navigate("/login");
-        return;
-      }
+      // if (!user) {
+      //   console.log("halu");
+      //   navigate("/login");
+      //   return;
+      // }
 
       const userId = user.id;
       const role = await getRole(userId);
@@ -36,6 +37,7 @@ const AuthCallback = () => {
           .select("consent_terms, consent_privacy")
           .eq("id", userId)
           .single<ConsentType>();
+        console.log("Profile data:", profile);
 
         if (error) {
           console.error("Error fetching profile:", error);

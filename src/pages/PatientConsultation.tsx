@@ -24,6 +24,7 @@ import PatientHeader from "@/components/PatientHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import ConsultationList from "@/components/patientConsultationPage/ConsultationList";
+import PatientDashboardButton from "@/components/PatientDashboardButton";
 
 const PatientConsultations = () => {
   const navigate = useNavigate();
@@ -72,78 +73,10 @@ const PatientConsultations = () => {
     console.log(consultations);
   }, [consultations]);
 
-  const activeConsultations = consultations.filter(
-    (c) => c.status === "in_progress" || c.status === "awaitingpatient"
-  );
-
-  const completedConsultations = consultations.filter(
-    (c) => c.status === "completed"
-  );
-
-  const pendingConsultations = consultations.filter(
-    (c) => c.status === "pending"
-  );
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Completed
-          </Badge>
-        );
-      case "pending":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200">
-            <Clock className="w-3 h-3 mr-1" />
-            Awaiting Doctor
-          </Badge>
-        );
-      case "in_progress":
-        return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200">
-            <MessageCircle className="w-3 h-3 mr-1" />
-            In Progress
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return (
-          <Badge className="bg-red-100 text-red-800 border-red-200">
-            {priority}
-          </Badge>
-        );
-      case "high":
-        return (
-          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-            {priority}
-          </Badge>
-        );
-      case "normal":
-        return (
-          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-            {priority}
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{priority}</Badge>;
-    }
-  };
-
   const handleConsultationClick = (consultationId: string) => {
     navigate(`/patient/consultation/${consultationId}`);
   };
 
-  const handleStartConsultation = () => {
-    navigate("/patient/new-consultation");
-  };
   const tabOptions = [
     { value: "in_progress", label: "Active" },
     { value: "pending", label: "Awaiting Doctor" },
@@ -168,6 +101,7 @@ const PatientConsultations = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <PatientHeader />
+      <PatientDashboardButton />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Section 1: Start a New Consultation */}

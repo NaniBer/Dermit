@@ -58,7 +58,7 @@ const NewConsultation = () => {
     }
   };
 
-  const uploadToDrive = async (image, consultationId): Promise<string> => {
+  const uploadToDrive = async (image, consultationId): Promise<boolean> => {
     const token = session?.access_token;
     const myUuid = uuidv4();
     const formData = new FormData();
@@ -78,9 +78,11 @@ const NewConsultation = () => {
     });
 
     if (!res.ok) throw new Error("Upload failed");
-
-    const { url } = await res.json();
-    return url;
+    if (res.status === 200) {
+      return true;
+    } else {
+      return false;
+    }
   };
   const removeImage = (index: number) => {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
@@ -109,11 +111,12 @@ const NewConsultation = () => {
     }
 
     setLoading(true);
+    const status = uploadedImages.length > 0 ? "awaiting_assets" : "pending";
     const newConsultation: ConsultationInsert = {
       patient_id: user.id,
       title: formData.chiefComplaint.substring(0, 100), // Use first 100 chars as title
       description: `Chief Complaint: ${formData.chiefComplaint}\n\nMedical History: ${formData.knownIllnesses}\n\nAdditional Comments: ${formData.additionalComments}`,
-      status: "pending",
+      status: status,
       priority: "normal",
       images: [],
     };
@@ -124,8 +127,16 @@ const NewConsultation = () => {
         .insert(newConsultation)
         .select()
         .single<ConsultationInsert>();
+      console.log(data);
       for (const images of uploadedImages) {
-        const url = await uploadToDrive(images, data.id);
+        const status = await uploadToDrive(images, data.id);
+
+        if (status) {
+          await supabase
+            .from("consultations")
+            .update({ status: "pending" })
+            .eq("id", data.id);
+        }
       }
 
       console.log("Consultation data:", data);

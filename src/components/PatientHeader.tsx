@@ -183,15 +183,15 @@ const PatientHeader = () => {
                     <Stethoscope className="w-4 h-4 mr-2" />
                     Consultations
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/patient/chat")}>
+                  {/* <DropdownMenuItem onClick={() => navigate("/patient/chat")}>
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Messages
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </div>
-                <DropdownMenuItem onClick={() => navigate("/patient/profile")}>
+                {/* <DropdownMenuItem onClick={() => navigate("/patient/profile")}>
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Profile
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout

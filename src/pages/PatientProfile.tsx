@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,6 +33,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import PatientHeader from "@/components/PatientHeader";
+
+import PatientDashboardButton from "@/components/PatientDashboardButton";
 
 const PatientProfile = () => {
   const navigate = useNavigate();
@@ -92,6 +94,7 @@ const PatientProfile = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
       <PatientHeader />
+      <PatientDashboardButton />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
@@ -144,13 +147,13 @@ const PatientProfile = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="personal" className="w-full">
+                <Tabs defaultValue="security" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="personal">Personal Info</TabsTrigger>
+                    {/* <TabsTrigger value="personal">Personal Info</TabsTrigger> */}
                     <TabsTrigger value="security">Security</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="personal" className="space-y-6 mt-6">
+                  {/* <TabsContent value="personal" className="space-y-6 mt-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-medium">
                         Personal Information
@@ -298,7 +301,7 @@ const PatientProfile = () => {
                         placeholder="List any medications you are currently taking..."
                       />
                     </div>
-                  </TabsContent>
+                  </TabsContent> */}
 
                   <TabsContent value="security" className="space-y-6 mt-6">
                     <div className="flex items-center space-x-2 mb-4">

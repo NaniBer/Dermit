@@ -27,11 +27,6 @@ const ProtectedRoute = ({ children, allowedRoles }: Props) => {
 
   useEffect(() => {
     const checkAccess = async () => {
-      if (!user) {
-        navigate("/login");
-        return;
-      }
-
       const userId = user.id;
       const role = await getRole(userId);
 
