@@ -58,10 +58,10 @@ const PatientChatHeader: React.FC<PatientChatHeaderProps> = ({
     fetchDoctorName();
   }, [consultationId]);
   return (
-    <Card className="shadow-lg mb-6">
+    <Card className="shadow-lg mb-2">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <Avatar className="h-12 w-12">
               <AvatarFallback className="bg-blue-100 text-blue-600">
                 DR

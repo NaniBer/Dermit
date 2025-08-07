@@ -8,15 +8,14 @@ const PatientDashboardButton = () => {
       {/* <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200">
         Go to Patient Dashboard
       </button> */}
+
       <Button
-        type="submit"
-        className="px-4 py-2 rounded hover:bg-blue-600 transition duration-200 bg-white text-black       "
-        onClick={() => {
-          navigate("/patient/dashboard");
-        }}
+        variant="ghost"
+        onClick={() => navigate("/patient/dashboard")}
+        className="px-4 py-2 rounded  transition duration-200 text-black       "
       >
-        <ArrowLeft />
-        Dashboard
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Back
       </Button>
     </div>
   );

@@ -136,7 +136,7 @@ const ConsultationList = ({
                 {consultation.status !== "pending" && (
                   <Button
                     size="sm"
-                    className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                    className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleConsultationClick(consultation.id);

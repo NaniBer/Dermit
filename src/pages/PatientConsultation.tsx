@@ -139,9 +139,13 @@ const PatientConsultations = () => {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsList className="grid w-full grid-cols-3 mb-6 ">
                   {tabOptions.map((tab) => (
-                    <TabsTrigger key={tab.value} value={tab.value}>
+                    <TabsTrigger
+                      key={tab.value}
+                      value={tab.value}
+                      className="text-sm md:text-base"
+                    >
                       {tab.label}
                     </TabsTrigger>
                   ))}
@@ -174,44 +178,6 @@ const PatientConsultations = () => {
         </Card>
 
         {/* Section 3: Quick Status Legend */}
-        <Card className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 mt-8">
-          <CardHeader>
-            <CardTitle className="text-lg text-gray-900">
-              Status Guide
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-green-100 text-green-800 border-green-200">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Completed
-                </Badge>
-                <span className="text-sm text-gray-600">
-                  Consultation finished
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Awaiting Doctor
-                </Badge>
-                <span className="text-sm text-gray-600">
-                  Doctor will respond soon
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                  <MessageCircle className="w-3 h-3 mr-1" />
-                  In Progress
-                </Badge>
-                <span className="text-sm text-gray-600">
-                  Active consultation
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
