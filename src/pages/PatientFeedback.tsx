@@ -17,8 +17,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "react-router-dom";
-import SaveAsPDF from "./pdfViewer";
-
+export interface ProfileData {
+  first_name: string | null;
+  last_name: string | null;
+}
 const PatientFeedback = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -35,7 +37,8 @@ const PatientFeedback = () => {
     "telegram" | "phone" | "email" | ""
   >("");
   const [contactValue, setContactValue] = useState("");
-  const [consultation, setConsultation] = useState<any>(null);
+  const [consultation, setConsultation] = useState(null);
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [formData, setFormData] = useState({
     patientName: "",
     // age: "",
@@ -68,7 +71,7 @@ const PatientFeedback = () => {
             .from("profiles")
             .select("first_name, last_name")
             .eq("id", consultation.doctor_id)
-            .maybeSingle();
+            .maybeSingle<ProfileData>();
 
         setFormData((prev) => ({
           ...prev,
@@ -92,12 +95,10 @@ const PatientFeedback = () => {
   }, []);
 
   const deletePicture = async () => {
-    // const URL = "http://localhost:3000";
-    const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/";
     setPictureLoading(true);
 
     try {
-      const res = await fetch(`${URL}/delete-image`, {
+      const res = await fetch(`${backendUrl}/delete-image`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

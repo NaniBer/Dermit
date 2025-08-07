@@ -28,7 +28,7 @@ import ConsultationList from "@/components/patientConsultationPage/ConsultationL
 const PatientConsultations = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [consultations, setConsultations] = useState<any[]>([]);
+  const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch real consultation data

@@ -1,17 +1,7 @@
 import { useState, useEffect, use } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
-
 import {
   Dialog,
   DialogContent,
@@ -19,59 +9,51 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  ArrowLeft,
-  MessageSquare,
-  Clock,
-  CheckCircle,
-  FileText,
-  Camera,
-  Send,
-  Phone,
-  Video,
-  Calendar,
-  Star,
-  Paperclip,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/hooks/useChat";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
-import { DialogClose } from "@radix-ui/react-dialog";
-import { Input } from "@/components/ui/input";
 import { ConsultationSummaryCard } from "@/components/doctorChat/ConsultationSummaryCard";
-import ImageViewer from "@/components/ImageViewer";
-import { v4 as uuidv4 } from "uuid";
 
-// Inside your component
+import { v4 as uuidv4 } from "uuid";
+import MessageItem from "@/components/MessageItem";
+import ChatInput from "@/components/MessageInput";
+import FeedbackCard from "@/components/doctorChat/FeedbackCard";
+import ChatHeader from "@/components/doctorChat/ChatHeader";
+import PatientInfoCard from "@/components/doctorChat/PatientInfoCard";
+import PatientMedicalDetails from "@/components/doctorChat/PatientMedicalDetails";
+import ActionButtons from "@/components/doctorChat/ActionButtons";
 
 type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
-interface Feedback {
-  rating: number;
-  feedback_message: string;
-}
 
 const DoctorConsultationDetail = () => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, session } = useAuth();
   const { toast } = useToast();
   const [newMessage, setNewMessage] = useState("");
+  const [chatReady, setChatReady] = useState(false);
   const [consultation, setConsultation] = useState<Consultation | null>(null);
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
+
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showImagesModal, setShowImagesModal] = useState(false);
   const [showEndDialog, setShowEndDialog] = useState(false);
   const [isChatClosed, setIsChatClosed] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
 
-  const { messages, sendMessage } = useChat(id || "");
+  const {
+    messages,
+    sendMessage,
+    loading: chatLoading,
+  } = useChat(chatReady ? id : "");
   const token = session?.access_token;
-
+  useEffect(() => {
+    if (id) setChatReady(true);
+  }, [id]);
   useEffect(() => {
     if (!id) return;
 
@@ -81,13 +63,9 @@ const DoctorConsultationDetail = () => {
           .from("consultations")
           .select("*")
           .eq("id", id)
-          .single();
+          .single<Consultation>();
 
         if (error) throw error;
-        if (data.status === "completed") {
-          fetchFeedback(id);
-        }
-
         setConsultation(data);
       } catch (error) {
         console.error("Error fetching consultation:", error);
@@ -101,31 +79,8 @@ const DoctorConsultationDetail = () => {
       }
     };
 
-    const fetchFeedback = async (id) => {
-      try {
-        const { data: fetchData, error: fetchError } = await supabase
-          .from("patient_feedback")
-          .select("rating, feedback_message")
-          .eq("consultation_id", id)
-          .maybeSingle();
-
-        if (fetchError) throw fetchError;
-
-        setFeedback(fetchData);
-      } catch (fetchError) {
-        console.error("Error fetching consultation:", fetchError);
-        toast({
-          title: "Error",
-          description: "Failed to load consultation details",
-          variant: "destructive",
-        });
-      }
-    };
-    // const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/";
-    const URL = "http://localhost:3000";
-
     const fetchSignedImages = async (id) => {
-      const res = await fetch(`${URL}/signed-images`, {
+      const res = await fetch(`${backendUrl}/signed-images`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -145,11 +100,10 @@ const DoctorConsultationDetail = () => {
       fetchConsultation();
       fetchSignedImages(id).then((urls) => setImages(urls));
     }
+  }, [id, toast, backendUrl, token]);
 
-    // fetchConsultation();
-  }, [id, toast]);
-
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (uploadedImage) {
       const myUuid = uuidv4();
       const formData = new FormData();
@@ -158,27 +112,25 @@ const DoctorConsultationDetail = () => {
       formData.append("filename", myUuid);
       formData.append("consultation_id", id);
       formData.append("image_type", "chat");
-      // Replace with your API endpoint
 
-      const URL = "http://localhost:3000/upload-image";
+      const URL = `${backendUrl}/upload-image`;
       const response = await fetch(URL, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: formData, // NO content-type header! The browser adds it automatically with boundary
+        body: formData,
       });
       if (!response.ok) {
-        // Handle error...
         console.error("Failed to send image");
         return;
       }
       const { imageUrl } = await response.json();
-      console.log("Image URL:", imageUrl);
       await sendMessage("Image sent", "image", imageUrl);
       setUploadedImage(null);
       setImagePreview("");
-    } else if (newMessage.trim() && user) {
+    } else {
+      if (!newMessage.trim()) return;
       await sendMessage(newMessage);
       setNewMessage("");
     }
@@ -266,12 +218,6 @@ const DoctorConsultationDetail = () => {
       });
     }
   };
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -286,7 +232,7 @@ const DoctorConsultationDetail = () => {
     reader.readAsDataURL(file);
   };
 
-  if (loading) {
+  if (loading && !consultation) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
         <div className="text-center">
@@ -315,8 +261,6 @@ const DoctorConsultationDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-      {/* Sample Delete Later on*/}
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Button
@@ -333,30 +277,10 @@ const DoctorConsultationDetail = () => {
           <div className="lg:col-span-2">
             <Card className="shadow-lg h-[600px] flex flex-col">
               <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="w-12 h-12">
-                      <AvatarFallback>PT</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-lg">
-                        Patient Consultation
-                      </CardTitle>
-                      <CardDescription>
-                        Consultation #{consultation.id.substring(0, 8)}
-                      </CardDescription>
-                    </div>
-                  </div>
-                  {consultation.status !== "completed" && (
-                    <Button
-                      variant="destructive"
-                      className="ml-4"
-                      onClick={() => setShowEndDialog(true)}
-                    >
-                      End Consultation
-                    </Button>
-                  )}
-                </div>
+                <ChatHeader
+                  consultation={consultation}
+                  onEndClick={() => setShowEndDialog(true)}
+                />
               </CardHeader>
               <Dialog open={showEndDialog} onOpenChange={setShowEndDialog}>
                 <DialogContent>
@@ -386,59 +310,24 @@ const DoctorConsultationDetail = () => {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+              {chatLoading && (
+                <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading Chats...</p>
+                  </div>
+                </div>
+              )}
 
               {/* Messages */}
               <CardContent className="flex-1 overflow-y-auto">
                 <div className="space-y-4">
                   {messages.map((message) => (
-                    <div
+                    <MessageItem
                       key={message.id}
-                      className={`flex ${
-                        message.sender_id === user?.id
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.sender_id === user?.id
-                            ? "bg-brand-primary text-white"
-                            : "bg-gray-100 text-gray-900"
-                        }`}
-                      >
-                        {message.message_type === "image" &&
-                        message.file_url ? (
-                          <img
-                            src={message.signedUrl || message.file_url}
-                            alt="chat attachment"
-                            className="rounded-md max-w-full h-auto"
-                          />
-                        ) : (
-                          <p className="text-sm">{message.content}</p>
-                        )}
-
-                        {message.file_url &&
-                          message.message_type !== "image" && (
-                            <div className="mt-2">
-                              <div className="flex items-center space-x-2 text-xs">
-                                <FileText className="w-3 h-3" />
-                                <a
-                                  href={message.file_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="underline"
-                                >
-                                  Download Attachment
-                                </a>
-                              </div>
-                            </div>
-                          )}
-
-                        <p className="text-xs mt-1 opacity-75">
-                          {new Date(message.created_at!).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    </div>
+                      message={message}
+                      currentUserId={user?.id}
+                    />
                   ))}
                 </div>
               </CardContent>
@@ -449,248 +338,40 @@ const DoctorConsultationDetail = () => {
                   💬 This chat has ended. Thank you for your message!
                 </div>
               ) : (
-                <div className="p-4 border-t">
-                  <div className="flex space-x-2 items-end">
-                    {imagePreview && (
-                      <div className="mb-2 relative">
-                        <img
-                          src={imagePreview}
-                          alt="Image preview"
-                          className="h-20 w-auto rounded border"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          className="absolute top-0 right-0"
-                          onClick={() => {
-                            setUploadedImage(null);
-                            setImagePreview("");
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    )}
-                    {/* Hidden file input */}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="chat-image-upload"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                      disabled={loading || isChatClosed}
-                    />
-
-                    {/* Upload Button */}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="p-2"
-                      disabled={loading || isChatClosed}
-                      onClick={() =>
-                        document.getElementById("chat-image-upload")?.click()
-                      }
-                    >
-                      <Paperclip className="w-5 h-5" />
-                    </Button>
-
-                    {/* 💬 Text Input */}
-                    <Input
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder="Type your message to the patient..."
-                      className="flex-1 bg-white"
-                      disabled={loading || isChatClosed}
-                    />
-
-                    {/* 🚀 Send Button */}
-                    <Button
-                      onClick={handleSendMessage}
-                      className="self-end"
-                      disabled={loading || isChatClosed}
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+                <ChatInput
+                  loading={loading}
+                  message={newMessage}
+                  imagePreview={imagePreview}
+                  handleSendMessage={handleSendMessage}
+                  handleImageUpload={handleImageUpload}
+                  setUploadedImage={setUploadedImage}
+                  setImagePreview={setImagePreview}
+                  setMessage={setNewMessage}
+                />
               )}
             </Card>
-            {feedback && (
-              <Card className="shadow-lg mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold">
-                    Feedback
-                  </CardTitle>
-                  <CardDescription className="mt-2 text-sm text-gray-600">
-                    {feedback.feedback_message ||
-                      "No feedback message provided."}
-                  </CardDescription>
-
-                  {/* Read-only Star Rating */}
-                  <div className="mt-4 flex gap-1">
-                    {[1, 2, 3, 4, 5].map((num) => (
-                      <Star
-                        key={num}
-                        className={`w-5 h-5 transition-transform hover:scale-105 ${
-                          feedback.rating && feedback.rating >= num
-                            ? "text-brand-primary"
-                            : "text-gray-300"
-                        }`}
-                        fill={
-                          feedback.rating && feedback.rating >= num
-                            ? "#3BC4B2"
-                            : "white"
-                        }
-                        color={
-                          feedback.rating && feedback.rating >= num
-                            ? "hsl(var(--brand-primary))"
-                            : "#D1D5DB"
-                        }
-                      />
-                    ))}
-                  </div>
-                </CardHeader>
-              </Card>
+            {consultation.status === "completed" && (
+              <FeedbackCard consultationId={consultation.id} />
             )}
           </div>
 
           {/* Right Column - Patient Info & Actions */}
           <div className="space-y-6">
             {/* Patient Information */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Patient Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Title
-                    </label>
-                    <p className="text-gray-900">{consultation.title}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Status
-                    </label>
-                    <Badge
-                      className={
-                        consultation.status === "in_progress"
-                          ? "bg-green-100 text-green-800"
-                          : consultation.status === "pending"
-                          ? "bg-orange-100 text-orange-800"
-                          : "bg-gray-100 text-gray-800"
-                      }
-                    >
-                      {consultation.status}
-                    </Badge>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Priority
-                    </label>
-                    <Badge
-                      className={
-                        consultation.priority === "high"
-                          ? "bg-red-100 text-red-800"
-                          : consultation.priority === "normal"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-green-100 text-green-800"
-                      }
-                    >
-                      {consultation.priority}
-                    </Badge>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Created
-                    </label>
-                    <p className="text-gray-900">
-                      {new Date(consultation.created_at!).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PatientInfoCard consultation={consultation} />
 
             {/* Medical Details */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Medical Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">
-                      Description
-                    </label>
-                    <p className="text-sm text-gray-900 whitespace-pre-line">
-                      {consultation.description || "No description provided. "}
-                    </p>
-                  </div>
-                  {consultation.images && consultation.images.length > 0 && (
-                    <div>
-                      <label className="text-sm font-medium text-gray-600">
-                        Images
-                      </label>
-                      <p className="text-sm text-gray-900">
-                        {consultation.images.length} image(s) uploaded
-                      </p>
-                      <Button
-                        variant="outline"
-                        className="mt-2"
-                        onClick={() => setShowImagesModal(true)}
-                      >
-                        View Images
-                      </Button>
-
-                      <Dialog
-                        open={showImagesModal}
-                        onOpenChange={setShowImagesModal}
-                      >
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Consultation Images</DialogTitle>
-                          </DialogHeader>
-
-                          <ImageViewer images={images} />
-                          <DialogClose asChild>
-                            <Button className="mt-4 w-full">Close</Button>
-                          </DialogClose>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+            <PatientMedicalDetails
+              images={images}
+              consultation={consultation}
+            />
 
             {/* Actions */}
             {consultation.status === "pending" && (
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    Consultation Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button
-                    onClick={handleAcceptConsultation}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Accept Consultation
-                  </Button>
-                  <Button
-                    onClick={handleDeclineConsultation}
-                    variant="outline"
-                    className="w-full border-red-200 text-red-600 hover:bg-red-50"
-                  >
-                    Decline Consultation
-                  </Button>
-                </CardContent>
-              </Card>
+              <ActionButtons
+                handleAcceptConsultation={handleAcceptConsultation}
+                handleDeclineConsultation={handleDeclineConsultation}
+              />
             )}
 
             {/* Consultation Summary Card */}
@@ -698,28 +379,6 @@ const DoctorConsultationDetail = () => {
               consultation={consultation}
               setConsultation={setConsultation}
             />
-
-            {/* Quick Actions */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Follow-up
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Generate Report
-                </Button>
-                <Link to={`/doctor/patients`}>
-                  <Button variant="outline" className="w-full">
-                    View Patient History
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>

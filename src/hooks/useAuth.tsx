@@ -20,7 +20,7 @@ interface AuthContextType {
     firstName: string,
     lastName: string,
     role: "doctor" | "patient"
-  ) => Promise<{ error: any }>;
+  ) => Promise<{ error }>;
   signIn: (
     email: string,
     password: string
@@ -32,7 +32,9 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
+interface RoleType {
+  role: string;
+}
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -86,7 +88,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             const result = await response.json();
             // Fetch and set role
-            const { role } = await getRole(user.id);
+            const role = await getRole(user.id);
             setRole(role);
           } catch (err) {
             console.error("❌ Failed to call Edge Function:", err);
@@ -145,7 +147,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         user_id: userId,
         role: role,
       });
-      console.log("Role assignment attempt:", { userId, role });
 
       if (roleError) {
         toast({
@@ -205,10 +206,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       return { error: roleError || new Error("Role not found") };
     }
-    console.log("user_metadata:", user.user_metadata);
-    console.log("identity_data:", user.identities?.[0]?.identity_data);
 
-    const role = roleData.role;
+    const role = roleData;
     const name = authData.user?.user_metadata?.first_name || "User";
 
     // 💾 Update context state manually!
@@ -259,7 +258,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       .from("user_roles")
       .select("role")
       .eq("user_id", userId)
-      .maybeSingle();
+      .maybeSingle<RoleType>();
     if (roleData === null) {
       const { error: insertError } = await supabase
         .from("user_roles")
@@ -270,8 +269,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     }
 
-    const role = roleData?.role ?? "patient"; // if roleData is null or role is undefined, return null
-    return { role, roleError };
+    const role = roleData.role ?? "patient";
+
+    return role;
   };
 
   const changePassword = async (newPassword: string) => {

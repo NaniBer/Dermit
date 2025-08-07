@@ -25,11 +25,12 @@ import { supabase } from "@/integrations/supabase/client";
 const PatientDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [consultations, setConsultations] = useState<any[]>([]);
+  const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Fetch user's consultations
   useEffect(() => {
+    console.log("Fetching consultations for user:", user?.id);
     if (!user) return;
 
     const fetchConsultations = async () => {

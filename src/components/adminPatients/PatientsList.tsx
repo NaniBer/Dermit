@@ -7,9 +7,8 @@ import {
 } from "@/components/ui/card";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Edit, Users, Calendar } from "lucide-react";
+import { Mail, Phone, Users } from "lucide-react";
 import React from "react";
 
 export interface Patient {
@@ -22,6 +21,7 @@ export interface Patient {
   consultations: number;
   lastConsultation: string;
   assignedDoctor: string;
+  consultation_count: number;
 }
 interface PatientListProps {
   patients: Patient[];
@@ -34,6 +34,7 @@ const PatientList: React.FC<PatientListProps> = ({
   onClearSearch,
   searchTerm,
 }) => {
+  console.log(patients);
   return (
     <Card className="shadow-lg">
       <CardHeader>

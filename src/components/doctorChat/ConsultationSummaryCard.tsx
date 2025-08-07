@@ -3,26 +3,35 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+export interface ConsultationSummary {
+  id: string;
+  observations?: string;
+  diagnosis?: string;
+  treatment_plan?: string;
+  status?: string;
+}
 
 type Props = {
-  consultation: {
-    id: string;
-    observations?: string;
-    diagnosis?: string;
-    treatment_plan?: string;
-  };
-  setConsultation: React.Dispatch<React.SetStateAction<any>>;
+  consultation: ConsultationSummary;
+  setConsultation: React.Dispatch<React.SetStateAction<ConsultationSummary>>;
 };
 
-export const ConsultationSummaryCard = ({
+export const ConsultationSummaryCard: React.FC<Props> = ({
   consultation,
   setConsultation,
-}: Props) => {
+}) => {
   const [isEditing, setIsEditing] = useState(true);
 
+  useEffect(() => {
+    if (consultation.status === "completed") {
+      setIsEditing(false);
+    }
+  }, [consultation.status]);
+
   const handleSave = async () => {
-    const { data: updateData, error } = await supabase
+    const { error } = await supabase
       .from("consultations")
       .update({
         observations: consultation.observations,
@@ -136,13 +145,14 @@ export const ConsultationSummaryCard = ({
                 {consultation.treatment_plan || "—"}
               </p>
             </div>
-
-            <Button
-              className="w-full bg-gradient-to-r from-brand-secondary to-brand-primary"
-              onClick={() => setIsEditing(true)}
-            >
-              Edit Summary
-            </Button>
+            {consultation.status !== "completed" && (
+              <Button
+                className="w-full bg-gradient-to-r from-brand-secondary to-brand-primary"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit Summary
+              </Button>
+            )}
           </>
         )}
       </CardContent>

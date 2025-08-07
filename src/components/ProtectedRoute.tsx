@@ -1,85 +1,89 @@
 // components/ProtectedRoute.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, Stethoscope } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Database } from "@/integrations/supabase/types";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, getRole } = useAuth();
-  const navigate = useNavigate();
+type Props = {
+  children: React.ReactNode;
+  allowedRoles?: string[]; // optional, if you want to restrict to certain roles
+};
+type Status = Database["public"]["Tables"]["doctors_info"]["Row"]["status"];
+type DoctorStatusRow = {
+  status: Status;
+};
+type ConsentType = {
+  consent_terms: boolean;
+  consent_privacy: boolean;
+};
+
+const ProtectedRoute = ({ children, allowedRoles }: Props) => {
+  const { user, getRole, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchOrCreateRole = async () => {
-      const userId = user?.id;
-      if (!userId) return;
-
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (!roleData || roleError) {
-        if (roleError) {
-          console.error("Error fetching user role:", roleError);
-        } else if (!roleData?.role) {
-          console.warn(
-            "No role found for user, inserting default 'patient' role."
-          );
-          const { error: insertError } = await supabase
-            .from("user_roles")
-            .insert({ user_id: userId, role: "patient" });
-
-          if (insertError) {
-            console.error("Error inserting default role:", insertError);
-          }
-        }
-      }
-    };
-
-    fetchOrCreateRole(); // run the async function inside useEffect
-  }, [user?.id]);
-  useEffect(() => {
-    const checkConsent = async () => {
+    const checkAccess = async () => {
       if (!user) {
         navigate("/login");
         return;
       }
 
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("consent_terms, consent_privacy")
-        .eq("id", user.id)
-        .single();
+      const userId = user.id;
+      const role = await getRole(userId);
 
-      if (error) {
-        console.error("Error fetching profile:", error.message);
-        navigate("/login");
+      if (allowedRoles && !allowedRoles.includes(role)) {
+        navigate("/access-denied");
         return;
       }
 
-      const role = await getRole(user.id);
-      const realRole = role?.role;
+      if (role === "doctor") {
+        const { data, error } = await supabase
+          .from("doctors_info")
+          .select("status")
+          .eq("profile_id", userId)
+          .maybeSingle<DoctorStatusRow>();
 
-      if (realRole === "patient") {
+        if (error) {
+          console.error("Error fetching doctor status:", error);
+          return;
+        }
+
+        if (data?.status === "active") {
+          navigate("/doctor/dashboard");
+        } else {
+          await signOut();
+          navigate("/account-issue");
+        }
+      }
+      if (role === "patient") {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("consent_terms, consent_privacy")
+          .eq("id", userId)
+          .single<ConsentType>();
+
         if (!profile?.consent_terms || !profile?.consent_privacy) {
           navigate("/consent");
           return;
         }
 
-        setLoading(false);
+        // If consent is good:
+        navigate("/patient/dashboard");
       }
+
+      setLoading(false);
     };
 
-    checkConsent();
-  }, [user, navigate]);
+    checkAccess();
+  }, [user]);
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md text-center shadow-xl border-0">
           <CardContent className="p-8">
             <div className="w-16 h-16 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full flex items-center justify-center mx-auto mb-6">
@@ -89,6 +93,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
         </Card>
       </div>
     );
+  }
 
   return <>{children}</>;
 };

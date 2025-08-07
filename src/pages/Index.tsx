@@ -30,12 +30,10 @@ const Index = () => {
       try {
         const role = await getRole(user.id);
         console.log("User Role:", role);
-        const realRole = role?.role;
-        console.log(realRole);
 
-        if (realRole === "doctor") {
+        if (role === "doctor") {
           navigate("/doctor/dashboard");
-        } else if (realRole === "patient") {
+        } else if (role === "patient") {
           navigate("/patient/dashboard");
         }
       } catch (error) {

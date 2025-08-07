@@ -66,7 +66,7 @@ const App = () => {
               <Route
                 path="/patient/dashboard"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute allowedRoles={["patient"]}>
                     <PatientDashboard />
                   </ProtectedRoute>
                 }
@@ -91,7 +91,14 @@ const App = () => {
               />
 
               {/* Doctor Routes */}
-              <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
+              <Route
+                path="/doctor/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["doctor"]}>
+                    <DoctorDashboard />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/doctor/consultations"
                 element={<DoctorConsultations />}

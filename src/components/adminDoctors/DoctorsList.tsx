@@ -13,7 +13,7 @@ import { Mail, Phone, Edit, Users } from "lucide-react";
 import React from "react";
 
 interface Doctor {
-  id: number;
+  id: string;
   first_name: string;
   email: string;
   phone: string;
@@ -25,12 +25,14 @@ interface Doctor {
   patients: number;
   consultations: number;
   joinDate: string;
+  profile_pic?: string;
+  profilePic?: string;
 }
 
 interface DoctorListProps {
   doctors: Doctor[];
-  onEdit: (id: number) => void;
-  onToggleStatus: (id: number) => void;
+  onEdit: (id: string) => void;
+  onToggleStatus: (id: string) => void;
 }
 
 const DoctorsList: React.FC<DoctorListProps> = ({

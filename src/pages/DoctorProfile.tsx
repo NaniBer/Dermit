@@ -5,12 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, User, Edit, X, Lock, Stethoscope } from "lucide-react";
+import { Camera, User, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import DoctorHeader from "@/components/DoctorHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-
+interface ProfileData {
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  specialty?: string;
+}
 const DoctorProfile = () => {
   const navigate = useNavigate();
   const { user, changePassword } = useAuth();
@@ -24,6 +30,7 @@ const DoctorProfile = () => {
     lastName: "",
     email: "",
     phone: "",
+    specialty: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -55,7 +62,7 @@ const DoctorProfile = () => {
           `
           )
           .eq("id", user.id)
-          .single();
+          .single<ProfileData>();
 
         if (error) throw error;
 
@@ -65,6 +72,7 @@ const DoctorProfile = () => {
             lastName: data.last_name || "",
             email: data.email || "",
             phone: data.phone || "",
+            specialty: data.specialty || "Dermatologist",
           });
         }
       } catch (error) {
@@ -100,6 +108,7 @@ const DoctorProfile = () => {
 
       alert("Password changed successfully! 🎉");
       setPasswordData({
+        currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });

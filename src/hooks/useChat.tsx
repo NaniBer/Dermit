@@ -6,6 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Message = Database["public"]["Tables"]["messages"]["Row"];
 type MessageInsert = Database["public"]["Tables"]["messages"]["Insert"];
+type MessageWithUrl = Message & { signedUrl?: string };
 
 export const useChat = (consultationId: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -13,7 +14,7 @@ export const useChat = (consultationId: string) => {
   const [loading, setLoading] = useState(true);
   const { user, session } = useAuth();
   const { toast } = useToast();
-  const URL = "http://localhost:3000";
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const token = session?.access_token;
 
   // Fetch existing messages
@@ -33,7 +34,7 @@ export const useChat = (consultationId: string) => {
         (data || []).map(async (msg) => {
           if (msg.message_type === "image") {
             try {
-              const res = await fetch(`${URL}/chat-signed-images`, {
+              const res = await fetch(`${backendUrl}/chat-signed-images`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -87,7 +88,6 @@ export const useChat = (consultationId: string) => {
       fileUrl?: string
     ) => {
       if (!user || !consultationId) return;
-      console.log(messageType, fileUrl);
 
       const newMessage: MessageInsert = {
         consultation_id: consultationId,
@@ -130,10 +130,33 @@ export const useChat = (consultationId: string) => {
           filter: `consultation_id=eq.${consultationId}`,
         },
         (payload) => {
-          const newMessage = payload.new as Message;
+          const newMessage = payload.new as MessageWithUrl;
+          console.log("New message received:", newMessage);
+
+          if (newMessage.message_type === "image") {
+            (async () => {
+              try {
+                const res = await fetch(`${backendUrl}/chat-signed-images`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({ image_url: newMessage.file_url }),
+                });
+
+                const { signedUrl } = await res.json();
+                newMessage.signedUrl = signedUrl;
+              } catch (err) {
+                console.error("Error fetching signed URL:", err);
+              }
+            })();
+          }
+
           setMessages((prev) => [...prev, newMessage]);
         }
       )
+
       .on(
         "postgres_changes",
         {

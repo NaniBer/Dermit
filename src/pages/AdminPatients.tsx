@@ -1,34 +1,10 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Users,
-  Search,
-  Filter,
-  Mail,
-  Phone,
-  Calendar,
-  Activity,
-  Stethoscope,
-  ChevronDown,
-  LogOut,
-  Edit,
-} from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
+import { Users, Search, Filter, Stethoscope } from "lucide-react";
+
 import { useEffect, useState } from "react";
 import AdminHeader from "@/components/AdminHeader";
 import DashboardButton from "@/components/adminDashboard/DashboardButtons";

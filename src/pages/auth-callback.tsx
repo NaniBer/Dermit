@@ -1,66 +1,89 @@
 // components/ProtectedRoute.tsx
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle, Loader2, Stethoscope } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
 
+type Status = Database["public"]["Tables"]["doctors_info"]["Row"]["status"];
+type DoctorStatusRow = {
+  status: Status;
+};
+type ConsentType = {
+  consent_terms: boolean;
+  consent_privacy: boolean;
+};
 const AuthCallback = () => {
-  const { getRole, signOut } = useAuth();
+  const { getRole, signOut, user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkUserAndRedirect = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      console.log(user);
-
-      if (user) {
-        const role = await getRole(user.id);
-        console.log("User role:", role);
-        if (!role || !role.role) {
-          navigate("/patient/dashboard");
-        }
-        const realRole = role?.role;
-        if (role === null) {
-          navigate("/patient/dashboard");
-        }
-
-        if (realRole === "patient") navigate("/patient/dashboard");
-        else if (realRole === "doctor") {
-          checkStatus(user.id);
-          navigate("/doctor/dashboard");
-        } else if (realRole === "admin") navigate("/admin/dashboard");
-        if (role === null) {
-          navigate("/patient/dashboard");
-        }
-        setLoading(false);
+    const checkEverything = async () => {
+      if (!user) {
+        navigate("/login");
+        return;
       }
-    };
-    const checkStatus = async (id) => {
-      const { data, error } = await supabase
-        .from("doctors_info")
-        .select("status")
-        .eq("profile_id", id)
-        .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching consultations:", error);
-      } else {
-        if (data.status === "active") {
+      const userId = user.id;
+      const role = await getRole(userId);
+
+      if (role === "patient") {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("consent_terms, consent_privacy")
+          .eq("id", userId)
+          .single<ConsentType>();
+
+        if (error) {
+          console.error("Error fetching profile:", error);
+          navigate("/login");
+          return;
+        }
+
+        if (!profile?.consent_terms || !profile?.consent_privacy) {
+          navigate("/consent");
+          return;
+        }
+
+        // If consent is good:
+        navigate("/patient/dashboard");
+      }
+
+      if (role === "doctor") {
+        const { data, error } = await supabase
+          .from("doctors_info")
+          .select("status")
+          .eq("profile_id", userId)
+          .maybeSingle<DoctorStatusRow>();
+
+        if (error) {
+          console.error("Error fetching doctor status:", error);
+          return;
+        }
+
+        if (data?.status === "active") {
           navigate("/doctor/dashboard");
         } else {
           await signOut();
           navigate("/account-issue");
         }
       }
+
+      if (role === "admin") {
+        navigate("/admin/dashboard");
+      }
+
+      if (!role) {
+        console.warn("No role found, defaulting to patient dashboard.");
+        navigate("/patient/dashboard");
+      }
     };
 
-    checkUserAndRedirect();
-  }, []);
+    checkEverything();
+  }, [user, getRole, navigate, signOut]);
 
   if (loading)
     return (

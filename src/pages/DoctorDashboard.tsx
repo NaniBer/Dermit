@@ -1,17 +1,8 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  MessageSquare,
-  FileText,
-  Users,
-  Clock,
-  CheckCircle,
-  Calendar,
-} from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+
+import { MessageSquare, Users, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import DashboardButton from "@/components/doctorDashboard/DashboardButtons";
-import PastDiagnosis from "@/components/patientDashboard/PastDiagnosis";
 import ChatList from "@/components/ChatList";
 import DoctorHeader from "@/components/DoctorHeader";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 const DoctorDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [consultations, setConsultations] = useState<any[]>([]);
+  const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalConsultations: 0,

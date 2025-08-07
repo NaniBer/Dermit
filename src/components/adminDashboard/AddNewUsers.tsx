@@ -115,7 +115,6 @@ const AddNewUsers = () => {
         });
 
         if (roleError) throw roleError;
-        if (phoneError) throw phoneError;
 
         toast.success("Admin account created successfully!");
         setNewAdmin({

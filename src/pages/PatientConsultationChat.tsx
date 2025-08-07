@@ -6,24 +6,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Send,
-  Paperclip,
-  Phone,
-  Video,
-  MoreVertical,
-  Star,
-} from "lucide-react";
+import { Star } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useChat } from "@/hooks/useChat";
 import { useAuth } from "@/hooks/useAuth";
 import PatientHeader from "@/components/PatientHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
+import MessageItem from "@/components/MessageItem";
+import ChatInput from "@/components/MessageInput";
+import PatientChatHeader from "@/components/patientChat/PatientChatHeader";
 
 const PatientConsultationChat = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,40 +27,12 @@ const PatientConsultationChat = () => {
   const { messages, loading, sendMessage, status } = useChat(
     chatReady ? id : ""
   );
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { user, session } = useAuth();
   const navigate = useNavigate();
-  const [doctorName, setDoctorName] = useState<string | null>(null);
   const [feedbackData, setFeedbackData] = useState(null);
   const token = session?.access_token;
-  const getDoctorNameFromConsultation = async (consultationId: string) => {
-    // 1️⃣ Fetch consultation to get doctor_id
-    const { data: consultation, error: consultError } = await supabase
-      .from("consultations")
-      .select("doctor_id")
-      .eq("id", consultationId)
-      .maybeSingle();
 
-    if (consultError || !consultation?.doctor_id) {
-      console.error("Failed to fetch consultation or doctor ID:", consultError);
-      return null;
-    }
-
-    const doctorId = consultation.doctor_id;
-
-    // 2️⃣ Fetch doctor's profile
-    const { data: doctor, error: doctorError } = await supabase
-      .from("profiles")
-      .select("first_name") // or "name", "first_name", etc., based on your schema
-      .eq("id", doctorId)
-      .maybeSingle();
-
-    if (doctorError || !doctor) {
-      console.error("Failed to fetch doctor profile:", doctorError);
-      return null;
-    }
-
-    return doctor.first_name; // 🧠 Or whatever field you use for name
-  };
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
@@ -117,16 +81,7 @@ const PatientConsultationChat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-  useEffect(() => {
-    if (!id) return;
 
-    const fetchDoctorName = async () => {
-      const name = await getDoctorNameFromConsultation(id);
-      setDoctorName(name);
-    };
-
-    fetchDoctorName();
-  }, [id]);
   useEffect(() => {
     if (id) setChatReady(true);
   }, [id]);
@@ -140,18 +95,16 @@ const PatientConsultationChat = () => {
       formData.append("filename", myUuid);
       formData.append("consultation_id", id);
       formData.append("image_type", "chat");
-      // Replace with your API endpoint
 
-      const URL = "http://localhost:3000/upload-image";
+      const URL = `${backendUrl}/upload-image`;
       const response = await fetch(URL, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: formData, // NO content-type header! The browser adds it automatically with boundary
+        body: formData,
       });
       if (!response.ok) {
-        // Handle error...
         console.error("Failed to send image");
         return;
       }
@@ -162,51 +115,18 @@ const PatientConsultationChat = () => {
       setImagePreview("");
     } else {
       if (!message.trim()) return;
-
       await sendMessage(message);
       setMessage("");
     }
   };
-  useEffect(() => {
-    console.log(messages);
-  }, [messages]);
 
-  // const handleSendMessage = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   if (!message.trim()) return;
-
-  //   await sendMessage(message);
-  //   setMessage("");
-  // };
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <PatientHeader />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Chat Header */}
-        <Card className="shadow-lg mb-6">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarFallback className="bg-blue-100 text-blue-600">
-                    DR
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-lg">Dr. {doctorName}</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <Badge className="bg-green-100 text-green-800">
-                      Online
-                    </Badge>
-                    <span className="text-sm text-gray-600">Dermatologist</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardHeader>
-        </Card>
+        <PatientChatHeader consultationId={id} />
 
         {/* Chat Messages */}
         <Card className="shadow-lg">
@@ -225,48 +145,11 @@ const PatientConsultationChat = () => {
                 </div>
               ) : (
                 messages.map((msg) => (
-                  <div
-                    className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                      msg.sender_id === user?.id
-                        ? "bg-brand-primary text-white"
-                        : "bg-gray-100 text-gray-900"
-                    }`}
-                  >
-                    {msg.message_type === "image" && msg.file_url ? (
-                      <img
-                        src={msg.signedUrl || msg.file_url}
-                        alt="chat attachment"
-                        className="rounded-md max-w-full h-auto"
-                      />
-                    ) : (
-                      <p className="text-sm">{msg.content}</p>
-                    )}
-
-                    {msg.file_url && msg.message_type !== "image" && (
-                      <div className="mt-2">
-                        <div className="flex items-center space-x-2 text-xs">
-                          <FileText className="w-3 h-3" />
-                          <a
-                            href={msg.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline"
-                          >
-                            Download Attachment
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                    <p
-                      className={`text-xs mt-1 ${
-                        msg.sender_id === user?.id
-                          ? "text-blue-100"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      {new Date(msg.created_at!).toLocaleTimeString()}
-                    </p>
-                  </div>
+                  <MessageItem
+                    key={msg.id}
+                    message={msg}
+                    currentUserId={user?.id}
+                  />
                 ))
               )}
               <div ref={messagesEndRef} />
@@ -278,61 +161,16 @@ const PatientConsultationChat = () => {
                 💬 This chat has ended. Thank you for your message!
               </div>
             ) : (
-              <div className="border-t p-4">
-                <form onSubmit={handleSendMessage} className="flex space-x-2">
-                  {imagePreview && (
-                    <div className="mb-2 relative">
-                      <img
-                        src={imagePreview}
-                        alt="Image preview"
-                        className="h-20 w-auto rounded border"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        className="absolute top-0 right-0"
-                        onClick={() => {
-                          setUploadedImage(null);
-                          setImagePreview("");
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  )}
-                  {/* Hidden file input */}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="chat-image-upload"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                    disabled={loading}
-                  />
-
-                  {/* Upload Button */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="p-2"
-                    disabled={loading}
-                    onClick={() =>
-                      document.getElementById("chat-image-upload")?.click()
-                    }
-                  >
-                    <Paperclip className="w-5 h-5" />
-                  </Button>
-                  <Input
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1"
-                  />
-                  <Button type="submit" size="sm">
-                    <Send className="w-4 h-4" />
-                  </Button>
-                </form>
-              </div>
+              <ChatInput
+                loading={loading}
+                message={message}
+                imagePreview={imagePreview}
+                handleSendMessage={handleSendMessage}
+                handleImageUpload={handleImageUpload}
+                setUploadedImage={setUploadedImage}
+                setImagePreview={setImagePreview}
+                setMessage={setMessage}
+              />
             )}
           </CardContent>
         </Card>

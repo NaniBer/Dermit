@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Stethoscope } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,12 +21,14 @@ const Login = () => {
   const { signIn, user, signInWithGoogle, getRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get("redirect") || "/auth-callback";
 
   // Redirect if already logged in
   useEffect(() => {
     const fetchRoleAndNavigate = async () => {
       if (user) {
-        navigate("/auth-callback");
+        navigate(redirect);
       }
     };
 
@@ -40,7 +42,7 @@ const Login = () => {
     try {
       const { error, role } = await signIn(email, password);
       if (!error && role) {
-        navigate("/auth-callback");
+        navigate(redirect);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -52,7 +54,6 @@ const Login = () => {
     setLoading(true);
     try {
       await signInWithGoogle();
-      console.log("Google sign-in successful", signInWithGoogle);
     } catch (error) {
       toast({
         title: "Google Sign-In Error",
@@ -60,7 +61,7 @@ const Login = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false); // don't forget to turn off the spinner
+      setLoading(false);
     }
   };
 

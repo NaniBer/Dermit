@@ -28,8 +28,9 @@ import DoctorsList from "@/components/adminDoctors/DoctorsList";
 import { supabase } from "@/integrations/supabase/client";
 
 type Doctor = {
-  id: number;
+  id: string;
   first_name: string;
+  last_name?: string;
   email: string;
   phone: string;
   specialty: string;
@@ -94,15 +95,16 @@ const AdminDoctors = () => {
     phone: "",
     specialty: "",
     profilePic: "",
-    photo: File,
+    photo: null,
   });
   const [editFormData, setEditFormData] = useState({
     first_name: "",
+    last_name: "",
     email: "",
     phone: "",
     specialty: "",
     profilePic: "",
-    photo: File,
+    photo: null as File | null,
   });
   useEffect(() => {
     console.log("Editing doctor:", editingDoctor);
@@ -350,19 +352,6 @@ const AdminDoctors = () => {
                           required
                         />
                       </div>
-
-                      {/* <div className="space-y-2">
-                  <Label htmlFor="specialty">Specialty</Label>
-                  <Input
-                    id="specialty"
-                    value={newDoctor.specialty}
-                    onChange={(e) =>
-                      handleDoctorInputChange("specialty", e.target.value)
-                    }
-                    placeholder="e.g., General Dermatology"
-                    required
-                  />
-                </div> */}
                     </form>
                     <div className="flex justify-end space-x-2">
                       <Button

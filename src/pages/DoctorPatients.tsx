@@ -17,27 +17,17 @@ import {
   FileText,
   MessageCircle,
   Stethoscope,
-  ChevronDown,
-  LogOut,
-  Edit,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
 import DoctorHeader from "@/components/DoctorHeader";
 import DashboardButton from "@/components/doctorDashboard/DashboardButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { set } from "date-fns";
 
 const DoctorPatients = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [patients, setPatients] = useState<any[]>([]);
+  const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalConsultations, setTotalConsultations] = useState(0);

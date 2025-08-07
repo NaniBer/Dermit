@@ -28,6 +28,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import WaitingForDoctor from "@/components/WaitingForDoctor";
 import { v4 as uuidv4 } from "uuid";
+import { Database } from "@/integrations/supabase/types";
+type ConsultationInsert =
+  Database["public"]["Tables"]["consultations"]["Insert"];
 
 const NewConsultation = () => {
   const { user, session } = useAuth();
@@ -44,6 +47,7 @@ const NewConsultation = () => {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -63,21 +67,15 @@ const NewConsultation = () => {
     formData.append("filename", myUuid);
     formData.append("consultation_id", consultationId);
     formData.append("image_type", "consultationImage");
-    // const URL = "https://dermitconsultalertbot-cdezn.sevalla.app/upload-image";
-    const URL = "http://localhost:3000/upload-image";
+    const URL = `${backendUrl}/upload-image`;
 
-    const res = await fetch(
-      // "http://localhost:3000/upload-image",
-
-      URL,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData, // NO content-type header! The browser adds it automatically with boundary
-      }
-    );
+    const res = await fetch(URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData, // NO content-type header! The browser adds it automatically with boundary
+    });
 
     if (!res.ok) throw new Error("Upload failed");
 
@@ -111,20 +109,21 @@ const NewConsultation = () => {
     }
 
     setLoading(true);
+    const newConsultation: ConsultationInsert = {
+      patient_id: user.id,
+      title: formData.chiefComplaint.substring(0, 100), // Use first 100 chars as title
+      description: `Chief Complaint: ${formData.chiefComplaint}\n\nMedical History: ${formData.knownIllnesses}\n\nAdditional Comments: ${formData.additionalComments}`,
+      status: "pending",
+      priority: "normal",
+      images: [],
+    };
 
     try {
       const { data, error } = await supabase
         .from("consultations")
-        .insert({
-          patient_id: user.id,
-          title: formData.chiefComplaint.substring(0, 100), // Use first 100 chars as title
-          description: `Chief Complaint: ${formData.chiefComplaint}\n\nMedical History: ${formData.knownIllnesses}\n\nAdditional Comments: ${formData.additionalComments}`,
-          status: "pending",
-          priority: "normal",
-          images: uploadedImages,
-        })
+        .insert(newConsultation)
         .select()
-        .single();
+        .single<ConsultationInsert>();
       for (const images of uploadedImages) {
         const url = await uploadToDrive(images, data.id);
       }

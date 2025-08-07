@@ -5,7 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
+import { Database } from "@/integrations/supabase/types";
 
+type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
+type UserRole = Database["public"]["Tables"]["user_roles"]["Row"];
 const AcceptConsultationPage = () => {
   const { consultationId } = useParams();
   const navigate = useNavigate();
@@ -15,9 +18,8 @@ const AcceptConsultationPage = () => {
   const [alreadyAccepted, setAlreadyAccepted] = useState(false);
 
   useEffect(() => {
-    if (authLoading) return; // Wait for auth state
+    if (authLoading) return;
     if (!user) {
-      // Redirect to login with return URL
       navigate(`/login?redirect=/consultation/${consultationId}/accept`);
       return;
     }
@@ -28,7 +30,7 @@ const AcceptConsultationPage = () => {
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id)
-          .maybeSingle();
+          .maybeSingle<UserRole>();
 
         if (roleError || !roleData) {
           setError("Failed to verify your permissions.");
@@ -47,7 +49,7 @@ const AcceptConsultationPage = () => {
           .from("consultations")
           .select("id, doctor_id, status")
           .eq("id", consultationId)
-          .maybeSingle();
+          .maybeSingle<Consultation>();
         console.log(consultation, consultError);
 
         if (consultError) throw consultError;
@@ -82,11 +84,11 @@ const AcceptConsultationPage = () => {
           setLoading(false);
           return;
         }
-        await createChat(data);
+        // await createChat(data);
 
         // Success! Redirect to chat
         navigate(`/doctor/consultation/${consultationId}/`);
-      } catch (err: any) {
+      } catch (err) {
         setError(err.message || "Failed to accept consultation.");
         setLoading(false);
       }

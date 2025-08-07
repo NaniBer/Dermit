@@ -1,42 +1,46 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import {
   MessageSquare,
   Users,
-  Clock,
   CheckCircle,
   Search,
   Filter,
-  Bell,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import type { Database } from "@/integrations/supabase/types";
 
 import DashboardButton from "@/components/doctorDashboard/DashboardButtons";
 import DoctorHeader from "@/components/DoctorHeader";
-import { useConsultations } from "@/hooks/useConsultations";
-import { useNotifications } from "@/hooks/useNotifications";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
+type ConsultationRow = Database["public"]["Tables"]["consultations"]["Row"];
+
+interface ConsultationWithRelations extends ConsultationRow {
+  patient?: {
+    first_name: string | null;
+    last_name: string | null;
+  };
+  doctor?: {
+    first_name: string | null;
+    last_name: string | null;
+  };
+}
 const DoctorConsultations = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [consultations, setConsultations] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { notifications, unreadCount } = useNotifications();
 
-  // Fetch consultations for the doctor
+  const [searchTerm, setSearchTerm] = useState("");
+  const [consultations, setConsultations] = useState<
+    ConsultationWithRelations[]
+  >([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (!user) return;
 
@@ -46,33 +50,25 @@ const DoctorConsultations = () => {
           .from("consultations")
           .select(
             `
-            *
-            
+            *,
+            patient:patient_id (
+              first_name,
+              last_name
+            ),
+            doctor:doctor_id (
+              first_name,
+              last_name
             )
           `
           )
           .eq("doctor_id", user.id)
           .order("created_at", { ascending: false });
 
-        const { data: fetch, error: fetchError } = await supabase
-          .from("consultations")
-          .select(
-            `
-  *,
-  patient:patient_id (
-    first_name
-  ),
-  doctor:doctor_id (
-    first_name
-  )
-`
-          )
-          .eq("doctor_id", user.id)
-          .order("created_at", { ascending: false });
-        console.log(fetch);
-
         if (error) throw error;
-        setConsultations(data || []);
+
+        setConsultations(
+          (data as unknown as ConsultationWithRelations[]) || []
+        );
       } catch (error) {
         console.error("Error fetching consultations:", error);
       } finally {
@@ -83,18 +79,18 @@ const DoctorConsultations = () => {
     fetchConsultations();
   }, [user]);
 
-  const filteredConsultations = consultations.filter(
-    (consultation) =>
-      consultation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (consultation.description || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      `${consultation.profiles?.first_name || ""} ${
-        consultation.profiles?.last_name || ""
-      }`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-  );
+  const filteredConsultations = consultations.filter((consultation) => {
+    const patientName = `${consultation.patient?.first_name || ""} ${
+      consultation.patient?.last_name || ""
+    }`.toLowerCase();
+    const search = searchTerm.toLowerCase();
+
+    return (
+      (consultation.title?.toLowerCase().includes(search) ?? false) ||
+      (consultation.description?.toLowerCase().includes(search) ?? false) ||
+      patientName.includes(search)
+    );
+  });
 
   const handleConsultationClick = (consultationId: string) => {
     navigate(`/doctor/consultation/${consultationId}`);
@@ -146,11 +142,9 @@ const DoctorConsultations = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-      {/* Header */}
       <DoctorHeader />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Consultations
@@ -160,7 +154,6 @@ const DoctorConsultations = () => {
           </p>
         </div>
 
-        {/* Search and Filter */}
         <Card className="shadow-lg mb-8">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
@@ -181,28 +174,6 @@ const DoctorConsultations = () => {
           </CardContent>
         </Card>
 
-        {/* Notifications Badge */}
-        {/* {unreadCount > 0 && (
-          <div className="mb-6">
-            <Card className="border-blue-200 bg-blue-50">
-              <CardContent className="p-4">
-                <div className="flex items-center space-x-3">
-                  <Bell className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium text-blue-900">
-                      {unreadCount} new notification{unreadCount > 1 ? "s" : ""}
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      New consultation requests available
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )} */}
-
-        {/* Stats */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <DashboardButton
             description="Total"
@@ -210,7 +181,6 @@ const DoctorConsultations = () => {
             icon={Users}
             color="blue"
           />
-
           <DashboardButton
             description="Active"
             value={
@@ -219,7 +189,6 @@ const DoctorConsultations = () => {
             icon={MessageSquare}
             color="green"
           />
-
           <DashboardButton
             description="Completed"
             value={consultations.filter((c) => c.status === "completed").length}
@@ -228,7 +197,6 @@ const DoctorConsultations = () => {
           />
         </div>
 
-        {/* Consultations List */}
         <div className="space-y-4">
           {filteredConsultations.length === 0 ? (
             <Card className="shadow-lg">
@@ -255,7 +223,7 @@ const DoctorConsultations = () => {
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-12 w-12">
                           <AvatarFallback className="bg-blue-100 text-blue-600">
-                            {consultation.profiles?.first_name?.[0] || "P"}
+                            {consultation.patient?.first_name?.[0] || "P"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -264,8 +232,8 @@ const DoctorConsultations = () => {
                           </h3>
                           <p className="text-sm text-gray-600">
                             Patient:{" "}
-                            {consultation.profiles?.first_name || "Unknown"}{" "}
-                            {consultation.profiles?.last_name || ""}
+                            {consultation.patient?.first_name || "Unknown"}{" "}
+                            {consultation.patient?.last_name || ""}
                           </p>
                           <p className="text-sm text-gray-600">
                             Created{" "}
