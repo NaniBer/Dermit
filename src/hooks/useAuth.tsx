@@ -243,6 +243,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signOut = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      toast({
+        title: "Already signed out",
+        description: "No active session found.",
+      });
+      return;
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
