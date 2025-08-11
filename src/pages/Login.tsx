@@ -141,7 +141,7 @@ const Login = () => {
                 ) : (
                   <>
                     <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                      src="/google-logo.svg"
                       alt="Google logo, a red 'G' with a blue, yellow, and green tail"
                       className="w-5 h-5"
                     />
