@@ -116,8 +116,7 @@ const Index = () => {
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
-                {/* <Link to="https://forms.gle/1QxJq1Hn91JoM2vX7"> */}
-                <Link to="/">
+                <Link to="/feedback">
                   <Button
                     size="lg"
                     variant="outline"

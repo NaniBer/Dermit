@@ -34,6 +34,7 @@ import PatientFeedback from "./pages/PatientFeedback";
 import DoctorThankyou from "./pages/DoctorThankyou";
 import AuthCallback from "./pages/auth-callback";
 import AccountIssue from "./pages/account-issue";
+import Feedback from "./pages/Feedback";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => {
               <Route path="/consultations" element={<Consultations />} />
               <Route path="/terms" element={<TermsoFService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/feedback" element={<Feedback />} />
 
               {/* Patient Routes */}
 
