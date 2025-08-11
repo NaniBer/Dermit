@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Stethoscope } from "lucide-react";
+import { Loader2, Stethoscope } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +52,7 @@ const Login = () => {
   };
   const handleGoogleSignIn = async () => {
     setLoading(true);
+    console.log(loading);
     try {
       await signInWithGoogle();
     } catch (error) {
@@ -126,19 +127,27 @@ const Login = () => {
                 {loading ? "Signing In..." : "Sign In"}
               </Button>
               <Button
+                type="button"
                 variant="outline"
                 className="w-full mb-4 flex items-center justify-center space-x-2"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
               >
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-                  alt="Google logo, a red 'G' with a blue, yellow, and green tail"
-                  className="w-5 h-5"
-                />
-                <span>
-                  {loading ? "Redirecting..." : "Sign in with Google"}
-                </span>
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="animate-spin w-5 h-5" />
+                    <span>Redirecting...</span>
+                  </div>
+                ) : (
+                  <>
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+                      alt="Google logo, a red 'G' with a blue, yellow, and green tail"
+                      className="w-5 h-5"
+                    />
+                    <span>Sign in with Google</span>
+                  </>
+                )}
               </Button>
             </form>
 

@@ -1,10 +1,23 @@
-
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { MessageCircle, Calendar, User, FileText, Clock, CheckCircle, RotateCcw } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  MessageCircle,
+  Calendar,
+  User,
+  FileText,
+  Clock,
+  CheckCircle,
+  RotateCcw,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Consultations = () => {
   const navigate = useNavigate();
@@ -19,7 +32,7 @@ const Consultations = () => {
       diagnosis: "Mild Eczema",
       severity: "Mild",
       status: "Completed",
-      canFollowUp: true
+      canFollowUp: true,
     },
     {
       id: 2,
@@ -29,7 +42,7 @@ const Consultations = () => {
       diagnosis: "Acne Treatment Follow-up",
       severity: "Follow-up Needed",
       status: "Follow-up Scheduled",
-      canFollowUp: false
+      canFollowUp: false,
     },
     {
       id: 3,
@@ -39,8 +52,8 @@ const Consultations = () => {
       diagnosis: "Skin Irritation Assessment",
       severity: "Moderate",
       status: "Awaiting Doctor",
-      canFollowUp: false
-    }
+      canFollowUp: false,
+    },
   ];
 
   const getStatusBadge = (status: string) => {
@@ -74,18 +87,30 @@ const Consultations = () => {
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case "Mild":
-        return <Badge className="bg-blue-100 text-blue-800 border-blue-200">{severity}</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+            {severity}
+          </Badge>
+        );
       case "Moderate":
-        return <Badge className="bg-orange-100 text-orange-800 border-orange-200">{severity}</Badge>;
+        return (
+          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
+            {severity}
+          </Badge>
+        );
       case "Follow-up Needed":
-        return <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200">{severity}</Badge>;
+        return (
+          <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200">
+            {severity}
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{severity}</Badge>;
     }
   };
 
   const handleStartConsultation = () => {
-    navigate('/patient/new-consultation');
+    navigate("/patient/new-consultation");
   };
 
   return (
@@ -96,7 +121,9 @@ const Consultations = () => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
             Welcome to <span className="text-blue-600">DerMit</span>
           </h1>
-          <p className="text-gray-600 text-lg">Your skin health, our priority</p>
+          <p className="text-gray-600 text-lg">
+            Your skin health, our priority
+          </p>
         </div>
 
         {/* Section 1: Start a New Consultation */}
@@ -110,26 +137,26 @@ const Consultations = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button 
+            <Button
               onClick={handleStartConsultation}
               className="w-full h-16 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
             >
               <MessageCircle className="w-6 h-6 mr-3" />
               💬 Start Chat Consultation
             </Button>
-            
+
             {/* Future options (disabled) */}
             <div className="grid md:grid-cols-2 gap-4">
-              <Button 
-                disabled 
-                variant="outline" 
+              <Button
+                disabled
+                variant="outline"
                 className="h-12 text-gray-400 border-gray-200 cursor-not-allowed"
               >
                 📹 Video Call (Coming Soon)
               </Button>
-              <Button 
-                disabled 
-                variant="outline" 
+              <Button
+                disabled
+                variant="outline"
                 className="h-12 text-gray-400 border-gray-200 cursor-not-allowed"
               >
                 🔍 Symptom Checker (Coming Soon)
@@ -152,8 +179,8 @@ const Consultations = () => {
           <CardContent className="p-6">
             <div className="space-y-4">
               {consultationHistory.map((consultation) => (
-                <Card 
-                  key={consultation.id} 
+                <Card
+                  key={consultation.id}
                   className="border border-gray-200 hover:shadow-md transition-all duration-300 bg-gradient-to-r from-white to-gray-50"
                 >
                   <CardContent className="p-6">
@@ -170,14 +197,18 @@ const Consultations = () => {
                             {consultation.time}
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-blue-600" />
-                          <span className="font-medium text-gray-900">{consultation.doctor}</span>
+                          <span className="font-medium text-gray-900">
+                            {consultation.doctor}
+                          </span>
                         </div>
-                        
+
                         <div className="space-y-2">
-                          <p className="font-semibold text-gray-900">{consultation.diagnosis}</p>
+                          <p className="font-semibold text-gray-900">
+                            {consultation.diagnosis}
+                          </p>
                           <div className="flex items-center gap-2">
                             {getSeverityBadge(consultation.severity)}
                             {getStatusBadge(consultation.status)}
@@ -187,11 +218,18 @@ const Consultations = () => {
 
                       {/* Right side - Actions */}
                       <div className="flex flex-col gap-2">
-                        <Button variant="outline" size="sm" className="hover:bg-blue-50">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="hover:bg-blue-50"
+                        >
                           View Chat Summary
                         </Button>
                         {consultation.canFollowUp && (
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                          >
                             <RotateCcw className="w-4 h-4 mr-1" />
                             Request Follow-up
                           </Button>
@@ -202,7 +240,7 @@ const Consultations = () => {
                 </Card>
               ))}
             </div>
-            
+
             {consultationHistory.length === 0 && (
               <div className="text-center py-12 text-gray-500">
                 <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
@@ -214,36 +252,6 @@ const Consultations = () => {
         </Card>
 
         {/* Section 3: Quick Status Legend */}
-        <Card className="bg-gradient-to-r from-gray-50 to-white border border-gray-200">
-          <CardHeader>
-            <CardTitle className="text-lg text-gray-900">Status Guide</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <Badge className="bg-green-100 text-green-800 border-green-200">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Completed
-                </Badge>
-                <span className="text-sm text-gray-600">Consultation finished</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Awaiting Doctor
-                </Badge>
-                <span className="text-sm text-gray-600">Doctor will respond soon</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                  <RotateCcw className="w-3 h-3 mr-1" />
-                  Follow-up Scheduled
-                </Badge>
-                <span className="text-sm text-gray-600">Next appointment booked</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

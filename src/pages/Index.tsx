@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const { user, getRole } = useAuth();
@@ -184,7 +185,7 @@ const Index = () => {
               and professional platform
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -209,7 +210,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-gray-600">
-                  Get expert consultations within 24 hours of your request
+                  Get expert consultations within 30 minutes of your request
                 </CardDescription>
               </CardContent>
             </Card>
@@ -252,9 +253,9 @@ const Index = () => {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of patients who trust Dermit for their skin care
-            needs. Book your consultation today and take the first step towards
-            healthier skin.
+            Getting expert dermatology care has never been easier. No waiting
+            rooms. No judgment. Just simple, secure online consultations — on
+            your terms. Start your skin check today in just a few clicks.
           </p>
           <Link to="/register?type=patient">
             <Button
@@ -269,21 +270,7 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
-                <Stethoscope className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold">Dermit</span>
-            </div>
-            <p className="text-gray-400">
-              © 2024 Dermit. Professional teledermatology platform.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

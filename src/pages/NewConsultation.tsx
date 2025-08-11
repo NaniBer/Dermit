@@ -115,7 +115,7 @@ const NewConsultation = () => {
     const newConsultation: ConsultationInsert = {
       patient_id: user.id,
       title: formData.chiefComplaint.substring(0, 100), // Use first 100 chars as title
-      description: `Chief Complaint: ${formData.chiefComplaint}\n\nMedical History: ${formData.knownIllnesses}\n\nAdditional Comments: ${formData.additionalComments}`,
+      description: `Main Concern: ${formData.chiefComplaint}\n\nMedical History: ${formData.knownIllnesses}\n\nAdditional Comments: ${formData.additionalComments}`,
       status: status,
       priority: "normal",
       images: [],
@@ -166,7 +166,7 @@ const NewConsultation = () => {
     if (currentStep == 2 && !formData.chiefComplaint.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please describe your chief complaint.",
+        description: "Please Tell us what's going on with your skin.",
         variant: "destructive",
       });
       return;
@@ -336,7 +336,7 @@ const NewConsultation = () => {
                         htmlFor="chief-complaint"
                         className="text-base font-semibold"
                       >
-                        Chief Complaint *
+                        Tell us what's going on with your skin? *
                       </Label>
                       <Textarea
                         id="chief-complaint"
@@ -564,27 +564,33 @@ const NewConsultation = () => {
               <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50">
                 <CardHeader>
                   <CardTitle className="text-brand-text-secondary">
-                    Expected Timeline
+                    What to expect
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center space-x-2">
-                      <CheckCircle className="w-4 h-4 text-brand-primary" />
-                      <span className="text-brand-primary">
-                        Submit request: Now
-                      </span>
+                      {/* <CheckCircle className="w-4 h-4 text-brand-primary" />A */}
+                      <div className="flex items-center space-x-2">
+                        <div className="w-3 h-3 border-2 border-gray-300 rounded-full"></div>
+                        <span className="text-gray-600">
+                          A doctor will be assigned to you in under 10 minutes
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-brand-secondary rounded-full"></div>
-                      <span className="text-brand-secondary">
-                        Doctor review: Soon
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-gray-300 rounded-full"></div>
+                      <div className="w-3 h-3 border-2 border-gray-300 rounded-full"></div>
                       <span className="text-gray-600">
-                        Initial response: 30 mins
+                        You will enter a private chat room with your doctor
+                        where you can further describe your issue and send more
+                        pictures if necessary
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 border-2 border-gray-300 rounded-full"></div>
+                      <span className="text-gray-600">
+                        Your doctor will then give you a treatment plan suited
+                        to your needs or will guide you through your next steps
                       </span>
                     </div>
                   </div>

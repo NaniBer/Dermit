@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import { ShieldCheck } from "lucide-react";
 
 const PrivacyPolicy = () => {
@@ -189,19 +190,7 @@ const PrivacyPolicy = () => {
         </div>
       </main>
 
-      <footer className="bg-gray-900 text-white py-8 mt-12">
-        <div className="max-w-3xl mx-auto flex items-center justify-between px-4">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-bold">Dermit</span>
-          </div>
-          <p className="text-gray-400 text-sm">
-            © 2024 Dermit by WeMD Africa. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

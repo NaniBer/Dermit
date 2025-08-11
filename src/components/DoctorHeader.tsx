@@ -37,7 +37,7 @@ const DoctorHeader = () => {
     }
   };
 
-  const getFullName = (user: any) => {
+  const getFullName = (user) => {
     const meta = user?.user_metadata;
 
     // Try `fullname` first
@@ -71,7 +71,6 @@ const DoctorHeader = () => {
                   alt="Dermit Logo"
                   // className="w-5 h-5"
                 />
-                {/* <Stethoscope className="w-5 h-5 text-white" /> */}
               </div>
               {/* <span className="text-xl font-bold text-gray-900">Dermit</span> */}
               <Badge variant="secondary" className="ml-2">
