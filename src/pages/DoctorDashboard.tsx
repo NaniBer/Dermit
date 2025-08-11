@@ -45,9 +45,9 @@ const DoctorDashboard = () => {
 
         const totalConsultations = data?.length || 0;
         const pendingReviews =
-          data?.filter((c) => c.status === "pending").length || 0;
+          data?.filter((c: any) => c.status === "pending").length || 0;
         const completedToday =
-          data?.filter((c) => {
+          data?.filter((c: any) => {
             const consultationDate = new Date(c.created_at);
             return c.status === "completed" && consultationDate >= today;
           }).length || 0;

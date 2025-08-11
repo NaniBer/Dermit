@@ -51,7 +51,7 @@ const DoctorPatients = () => {
 
         const patientMap = new Map();
 
-        consultationData?.forEach((consultation) => {
+        consultationData?.forEach((consultation: any) => {
           const patientId = consultation.patient_id;
 
           const patient = {

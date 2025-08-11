@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
+import { SecureUserRole, isSecureUserRole } from "@/lib/securityTypes";
 
 const PatientHeader = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const PatientHeader = () => {
       if (!roleData || roleError) {
         if (roleError) {
           console.error("Error fetching user role:", roleError);
-        } else if (!roleData?.role) {
+        } else if (!roleData || !isSecureUserRole(roleData) || !roleData.role) {
           console.warn(
             "No role found for user, inserting default 'patient' role."
           );

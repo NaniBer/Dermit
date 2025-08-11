@@ -531,7 +531,7 @@ const AdminDoctors = () => {
 
         <DoctorsList
           doctors={filteredDoctors}
-          onEdit={handleEditDoctor}
+          onEdit={(id: string) => handleEditDoctor(parseInt(id))}
           onToggleStatus={handleToggleStatus}
         />
       </div>

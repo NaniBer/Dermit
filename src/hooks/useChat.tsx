@@ -2,14 +2,19 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import type { Database } from "@/integrations/supabase/types";
+import { SecureMessage, isSecureMessage, sanitizeInput, validateUUID } from "@/lib/securityTypes";
 
-type Message = Database["public"]["Tables"]["messages"]["Row"];
-type MessageInsert = Database["public"]["Tables"]["messages"]["Insert"];
-type MessageWithUrl = Message & { signedUrl?: string };
+type MessageInsert = {
+  consultation_id: string;
+  sender_id: string;
+  content: string;
+  message_type?: string;
+  file_url?: string;
+};
+type MessageWithUrl = SecureMessage & { signedUrl?: string };
 
 export const useChat = (consultationId: string) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<SecureMessage[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const { user, session } = useAuth();
@@ -31,7 +36,11 @@ export const useChat = (consultationId: string) => {
       if (error) throw error;
 
       const messagesWithSignedUrls = await Promise.all(
-        (data || []).map(async (msg) => {
+        (data || []).map(async (msg: any) => {
+          if (!isSecureMessage(msg)) {
+            console.error("Invalid message data:", msg);
+            return null;
+          }
           if (msg.message_type === "image") {
             try {
               const res = await fetch(`${backendUrl}/chat-signed-images`, {
@@ -58,7 +67,8 @@ export const useChat = (consultationId: string) => {
         })
       );
 
-      setMessages(messagesWithSignedUrls);
+      const validMessages = messagesWithSignedUrls.filter(Boolean) as SecureMessage[];
+      setMessages(validMessages);
 
       // Fetch status
       const { data: statusData, error: statusError } = await supabase
@@ -67,7 +77,7 @@ export const useChat = (consultationId: string) => {
         .eq("id", consultationId);
 
       if (statusError) throw statusError;
-      setStatus(statusData?.[0]?.status);
+      setStatus((statusData as any)?.[0]?.status);
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast({
@@ -89,10 +99,14 @@ export const useChat = (consultationId: string) => {
     ) => {
       if (!user || !consultationId) return;
 
+      if (!validateUUID(consultationId) || !validateUUID(user.id)) {
+        throw new Error("Invalid user or consultation ID");
+      }
+
       const newMessage: MessageInsert = {
         consultation_id: consultationId,
         sender_id: user.id,
-        content,
+        content: sanitizeInput(content),
         message_type: messageType,
         file_url: fileUrl,
       };
