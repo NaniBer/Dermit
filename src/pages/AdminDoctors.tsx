@@ -45,6 +45,7 @@ const AdminDoctors = () => {
   const [patientsNo, setPatientsNo] = useState(0);
   const [consultationsNo, setConsultationsNo] = useState(0);
   const [doctors, setDoctors] = useState([]);
+  const cloudinary_url = process.env.VITE_CLOUDINARY_URL;
   const addDoctor = (newDoctor) => {
     setDoctors((prevItems) => [...prevItems, newDoctor]);
   };
@@ -172,13 +173,10 @@ const AdminDoctors = () => {
       formData.append("upload_preset", "gth9yu4u");
       formData.append("folder", "doctor_profile");
 
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dmrspz5bh/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const res = await fetch(cloudinary_url, {
+        method: "POST",
+        body: formData,
+      });
 
       const data = await res.json();
       uploadedImageUrl = data.secure_url;
