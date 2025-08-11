@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import type { Database } from "@/integrations/supabase/types";
-
-type Notification = Database["public"]["Tables"]["notifications"]["Row"];
+import type { Notification } from "@/lib/tempTypes";
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -24,8 +22,9 @@ export const useNotifications = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setNotifications(data || []);
-      setUnreadCount(data?.filter((n) => !n.is_read).length || 0);
+      const notifications = (data as unknown as Notification[]) || [];
+      setNotifications(notifications);
+      setUnreadCount(notifications.filter((n) => !n.is_read).length || 0);
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }

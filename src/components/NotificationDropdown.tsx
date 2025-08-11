@@ -12,11 +12,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import type { Database } from "@/integrations/supabase/types";
+import { SecureConsultation, isSecureConsultation, sanitizeInput } from "@/lib/securityTypes";
 
-type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
-
-interface ConsultationWithDetails extends Consultation {
+interface ConsultationWithDetails extends SecureConsultation {
   chiefComplaint?: string;
 }
 
@@ -48,20 +46,24 @@ const NotificationDropdown = ({
 
       if (error) throw error;
 
-      const consultationsWithDetails = (data || []).map((consultation) => {
+      const consultationsWithDetails = (data || []).map((consultation: any) => {
+        if (!isSecureConsultation(consultation)) {
+          console.error("Invalid consultation data");
+          return null;
+        }
         const description = consultation.description || "";
         const chiefComplaintMatch = description.match(
           /Chief Complaint: ([^\n]+)/
         );
-        const chiefComplaint = chiefComplaintMatch
+        const chiefComplaint = sanitizeInput(chiefComplaintMatch
           ? chiefComplaintMatch[1]
-          : consultation.title;
+          : consultation.title);
 
         return {
           ...consultation,
           chiefComplaint,
         };
-      });
+      }).filter(Boolean);
 
       setPendingConsultations(consultationsWithDetails);
     } catch (error) {
@@ -87,7 +89,7 @@ const NotificationDropdown = ({
           filter: "status=eq.pending",
         },
         (payload) => {
-          const newConsultation = payload.new as Consultation;
+          const newConsultation = payload.new as SecureConsultation;
           const description = newConsultation.description || "";
           const chiefComplaintMatch = description.match(
             /Chief Complaint: ([^\n]+)/
@@ -120,7 +122,7 @@ const NotificationDropdown = ({
           table: "consultations",
         },
         (payload) => {
-          const updatedConsultation = payload.new as Consultation;
+          const updatedConsultation = payload.new as SecureConsultation;
           if (updatedConsultation.status !== "pending") {
             setPendingConsultations((prev) =>
               prev.filter((c) => c.id !== updatedConsultation.id)

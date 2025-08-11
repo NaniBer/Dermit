@@ -2,16 +2,21 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import type { Database } from '@/integrations/supabase/types';
+import { SecureMessage, SecureChat, isSecureMessage, isSecureChat, sanitizeInput, validateUUID } from '@/lib/securityTypes';
 
-type Message = Database['public']['Tables']['messages']['Row'];
-type MessageInsert = Database['public']['Tables']['messages']['Insert'];
-type Chat = Database['public']['Tables']['chats']['Row'];
+type MessageInsert = {
+  chat_id: string;
+  consultation_id: string;
+  sender_id: string;
+  content: string;
+  message_type?: string;
+  file_url?: string;
+};
 
 export const useOptimizedChat = (chatId: string) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<SecureMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [chat, setChat] = useState<Chat | null>(null);
+  const [chat, setChat] = useState<SecureChat | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -32,11 +37,12 @@ export const useOptimizedChat = (chatId: string) => {
 
       if (error) throw error;
       
-      // Update cache and state
-      const newMessages = data || [];
+      // Update cache and state with validation
+      const rawMessages = data || [];
+      const validMessages = (rawMessages as any[]).filter((msg: any) => isSecureMessage(msg)) as SecureMessage[];
       messagesCache.current.clear();
-      newMessages.forEach(msg => messagesCache.current.add(msg.id));
-      setMessages(newMessages);
+      validMessages.forEach(msg => messagesCache.current.add(msg.id));
+      setMessages(validMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
@@ -61,7 +67,9 @@ export const useOptimizedChat = (chatId: string) => {
         .single();
 
       if (error) throw error;
-      setChat(data);
+      if (data && isSecureChat(data)) {
+        setChat(data);
+      }
     } catch (error) {
       console.error('Error fetching chat:', error);
     }
@@ -74,14 +82,19 @@ export const useOptimizedChat = (chatId: string) => {
     fileUrl?: string
   ) => {
     if (!user || !chatId || !content.trim()) return;
+    
+    if (!validateUUID(chatId) || !validateUUID(user.id)) {
+      console.error("Invalid chat or user ID");
+      return;
+    }
 
     // Optimistic update - add message immediately to UI
-    const tempMessage: Message = {
+    const tempMessage: SecureMessage = {
       id: `temp-${Date.now()}`,
       chat_id: chatId,
       consultation_id: chat?.consultation_id || '',
       sender_id: user.id,
-      content: content.trim(),
+      content: sanitizeInput(content.trim()),
       message_type: messageType,
       file_url: fileUrl || null,
       created_at: new Date().toISOString(),
@@ -96,7 +109,7 @@ export const useOptimizedChat = (chatId: string) => {
           chat_id: chatId,
           consultation_id: chat?.consultation_id || '',
           sender_id: user.id,
-          content: content.trim(),
+          content: sanitizeInput(content.trim()),
           message_type: messageType,
           file_url: fileUrl,
         })
@@ -106,11 +119,13 @@ export const useOptimizedChat = (chatId: string) => {
       if (error) throw error;
 
       // Replace temp message with real one
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === tempMessage.id ? data : msg
-        )
-      );
+      if (data && isSecureMessage(data)) {
+        setMessages(prev => 
+          prev.map(msg => 
+            msg.id === tempMessage.id ? data as SecureMessage : msg
+          )
+        );
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       // Remove temp message on error
@@ -148,7 +163,11 @@ export const useOptimizedChat = (chatId: string) => {
           filter: `chat_id=eq.${chatId}`
         },
         (payload) => {
-          const newMessage = payload.new as Message;
+          const newMessage = payload.new as SecureMessage;
+          if (!isSecureMessage(newMessage)) {
+            console.error("Invalid message received:", newMessage);
+            return;
+          }
           
           // Avoid duplicates using cache
           if (!messagesCache.current.has(newMessage.id)) {
@@ -186,8 +205,10 @@ export const useOptimizedChat = (chatId: string) => {
           filter: `id=eq.${chatId}`
         },
         (payload) => {
-          const updatedChat = payload.new as Chat;
-          setChat(updatedChat);
+          const updatedChat = payload.new as SecureChat;
+          if (isSecureChat(updatedChat)) {
+            setChat(updatedChat);
+          }
         }
       )
       .subscribe();

@@ -45,7 +45,7 @@ const AdminDoctors = () => {
   const [patientsNo, setPatientsNo] = useState(0);
   const [consultationsNo, setConsultationsNo] = useState(0);
   const [doctors, setDoctors] = useState([]);
-  const cloudinary_url = process.env.VITE_CLOUDINARY_URL;
+  const cloudinary_url = "https://api.cloudinary.com/v1_1/dmrspz5bh/image/upload";
   const addDoctor = (newDoctor) => {
     setDoctors((prevItems) => [...prevItems, newDoctor]);
   };
@@ -531,7 +531,7 @@ const AdminDoctors = () => {
 
         <DoctorsList
           doctors={filteredDoctors}
-          onEdit={handleEditDoctor}
+          onEdit={(id: string) => handleEditDoctor(parseInt(id))}
           onToggleStatus={handleToggleStatus}
         />
       </div>

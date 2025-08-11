@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bell, User, Clock, Stethoscope, X } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
-
-type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
+import { SecureConsultation, isSecureConsultation, validateUUID } from "@/lib/securityTypes";
 
 interface InstantNotificationProps {
   onBadgeCountChange: (count: number | ((prev: number) => number)) => void;
@@ -59,7 +57,11 @@ const InstantNotificationSystem = ({
             filter: "status=eq.pending",
           },
           (payload) => {
-            const newConsultation = payload.new as Consultation;
+            const newConsultation = payload.new as SecureConsultation;
+            if (!isSecureConsultation(newConsultation) || !validateUUID(newConsultation.id)) {
+              console.error("Invalid consultation data received");
+              return;
+            }
             console.log("New consultation request:", newConsultation);
 
             // Extract chief complaint from description
@@ -152,8 +154,8 @@ const InstantNotificationSystem = ({
             schema: "public",
             table: "consultations",
           },
-          (payload) => {
-            const updatedConsultation = payload.new as Consultation;
+        (payload) => {
+            const updatedConsultation = payload.new as SecureConsultation;
             console.log("Consultation updated:", updatedConsultation);
             if (updatedConsultation.status !== "pending") {
               // Instantly update badge when consultation no longer pending
@@ -202,7 +204,7 @@ const InstantNotificationSystem = ({
         .eq("id", consultationId)
         .single();
 
-      if (!consultation) throw new Error("Consultation not found");
+      if (!consultation || !(consultation as any).patient_id) throw new Error("Consultation not found");
 
       // 3. Create a new chat entry
       const { data: chatData, error: chatError } = await supabase
@@ -210,7 +212,7 @@ const InstantNotificationSystem = ({
         .insert({
           consultation_id: consultationId,
           doctor_id: user.id,
-          patient_id: consultation.patient_id,
+          patient_id: (consultation as any).patient_id,
           status: "active",
         })
         .select()
