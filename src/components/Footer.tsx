@@ -39,7 +39,7 @@ const Footer = () => {
                 How it Works
               </Link> */}
               <Link
-                to="https://forms.gle/1QxJq1Hn91JoM2vX7"
+                to="/feedback"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 Register as a Doctor
