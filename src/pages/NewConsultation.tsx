@@ -130,12 +130,14 @@ const NewConsultation = () => {
       console.log(data);
       for (const images of uploadedImages) {
         const status = await uploadToDrive(images, data.id);
+        console.log(status);
 
         if (status) {
-          await supabase
+          const { data: updateData, error } = await supabase
             .from("consultations")
             .update({ status: "pending" })
             .eq("id", data.id);
+          console.log(updateData);
         }
       }
 

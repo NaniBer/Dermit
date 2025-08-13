@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, UserCheck, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Database } from "@/integrations/supabase/types";
+type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
 const AddNewUsers = () => {
   const [newDoctor, setNewDoctor] = useState({
     firstName: "",
@@ -55,10 +57,13 @@ const AddNewUsers = () => {
 
       if (authData.user) {
         // Assign doctor role
-        const { error: roleError } = await supabase.from("user_roles").insert({
-          user_id: authData.user.id,
-          role: "doctor",
-        });
+        const { data: roleData, error: roleError } = await supabase
+          .from("user_roles")
+          .insert({
+            user_id: authData.user.id,
+            role: "doctor",
+          });
+        console.log("roleData", roleData);
         if (roleError) throw roleError;
 
         const { data: AddPhoneData, error: AddPhoneError } = await supabase
@@ -67,7 +72,7 @@ const AddNewUsers = () => {
             phone: newDoctor.phone,
           })
           .eq("id", authData.user.id);
-        console.log(AddPhoneData);
+        console.log("AddPhoneData", AddPhoneData);
         if (AddPhoneError) throw AddPhoneError;
 
         toast.success("Doctor account created successfully!");
