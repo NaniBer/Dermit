@@ -78,6 +78,7 @@ const NewConsultation = () => {
     });
 
     if (!res.ok) throw new Error("Upload failed");
+    console.log(res);
     if (res.status === 200) {
       return true;
     } else {

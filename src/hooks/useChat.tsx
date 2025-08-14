@@ -2,7 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { SecureMessage, isSecureMessage, sanitizeInput, validateUUID } from "@/lib/securityTypes";
+import {
+  SecureMessage,
+  isSecureMessage,
+  sanitizeInput,
+  validateUUID,
+} from "@/lib/securityTypes";
 
 type MessageInsert = {
   consultation_id: string;
@@ -34,6 +39,7 @@ export const useChat = (consultationId: string) => {
         .order("created_at", { ascending: true });
 
       if (error) throw error;
+      console.log(token);
 
       const messagesWithSignedUrls = await Promise.all(
         (data || []).map(async (msg: any) => {
@@ -67,7 +73,9 @@ export const useChat = (consultationId: string) => {
         })
       );
 
-      const validMessages = messagesWithSignedUrls.filter(Boolean) as SecureMessage[];
+      const validMessages = messagesWithSignedUrls.filter(
+        Boolean
+      ) as SecureMessage[];
       setMessages(validMessages);
 
       // Fetch status

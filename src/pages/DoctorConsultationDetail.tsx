@@ -84,7 +84,7 @@ const DoctorConsultationDetail = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // If needed
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           consultation_id: id,
@@ -92,6 +92,7 @@ const DoctorConsultationDetail = () => {
       });
 
       const data = await res.json();
+      console.log(data);
 
       return data.signedUrls;
     };

@@ -36,6 +36,7 @@ const PatientMedicalDetails: React.FC<PatientMedicalDetailsProps> = ({
   consultation,
 }) => {
   const [showImagesModal, setShowImagesModal] = useState(false);
+
   return (
     <Card className="shadow-lg">
       <CardHeader>
@@ -51,13 +52,14 @@ const PatientMedicalDetails: React.FC<PatientMedicalDetailsProps> = ({
               {consultation.description || "No description provided. "}
             </p>
           </div>
-          {consultation.images && consultation.images.length > 0 && (
+
+          {images && images.length > 0 && (
             <div>
               <label className="text-sm font-medium text-gray-600">
                 Images
               </label>
               <p className="text-sm text-gray-900">
-                {consultation.images.length} image(s) uploaded
+                {images.length} image(s) uploaded
               </p>
               <Button
                 variant="outline"
