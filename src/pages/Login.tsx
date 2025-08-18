@@ -54,7 +54,7 @@ const Login = () => {
     setLoading(true);
     console.log(loading);
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(redirect);
     } catch (error) {
       toast({
         title: "Google Sign-In Error",

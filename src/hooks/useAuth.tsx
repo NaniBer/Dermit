@@ -26,7 +26,7 @@ interface AuthContextType {
     password: string
   ) => Promise<{ error: any; role?: string }>;
   signOut: () => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (redirectUrl: string) => Promise<void>;
   getRole: (userId) => Promise<string>;
   changePassword: (newPassword: string) => Promise<{ error: any }>;
 }
@@ -224,9 +224,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return { error: null, role };
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (redirect: string) => {
+    let redirectUrl;
+    if (redirect === "/auth-callback") {
+      redirectUrl = `${window.location.origin}/auth-callback`;
+    } else {
+      redirectUrl = `${window.location.origin}/${redirect}`;
+    }
     // const redirectUrl = `${window.location.origin}/patient/dashboard`; // or add /dashboard, etc.
-    const redirectUrl = `${window.location.origin}/auth-callback`;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
