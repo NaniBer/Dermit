@@ -139,7 +139,7 @@ const AcceptConsultationPage = () => {
         <p>{error}</p>
         <button
           className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/doctor/dashboard")}
         >
           Go to Dashboard
         </button>
