@@ -89,6 +89,16 @@ const AdminHeader = () => {
               >
                 Patients
               </Link>
+              <Link
+                to="/admin/feedbacks"
+                className={`${
+                  currentPath === "/admin/feedbacks"
+                    ? "text-gray-900 font-semibold"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                Feedbacks
+              </Link>
             </nav>
           </div>
           <div className="flex items-center space-x-4">

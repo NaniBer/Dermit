@@ -35,6 +35,7 @@ import DoctorThankyou from "./pages/DoctorThankyou";
 import AuthCallback from "./pages/auth-callback";
 import AccountIssue from "./pages/account-issue";
 import Feedback from "./pages/Feedback";
+import AdminFeedbacks from "./pages/AdminFeedbacks";
 
 const queryClient = new QueryClient();
 
@@ -120,6 +121,7 @@ const App = () => {
               <Route path="/admin/overview" element={<AdminOverview />} />
               <Route path="/admin/doctors" element={<AdminDoctors />} />
               <Route path="/admin/patients" element={<AdminPatients />} />
+              <Route path="/admin/feedbacks" element={<AdminFeedbacks />} />
 
               {/* Accepting the consultation */}
               <Route
