@@ -219,7 +219,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     toast({
       title: `Welcome back, ${name}!`,
       description: `You are signed in as a ${role}.`,
-    });
+    }); 
 
     return { error: null, role };
   };

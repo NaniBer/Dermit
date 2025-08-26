@@ -19,25 +19,17 @@ import DoctorHeader from "@/components/DoctorHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-type ConsultationRow = Database["public"]["Tables"]["consultations"]["Row"];
+// type ConsultationRow = Database["public"]["Tables"]["consultations"]["Row"];
+type ConsultationWithPatientProfileRow = Database["public"]["Views"]["consultations_with_patient_profiles"]["Row"];
 
-interface ConsultationWithRelations extends ConsultationRow {
-  patient?: {
-    first_name: string | null;
-    last_name: string | null;
-  };
-  doctor?: {
-    first_name: string | null;
-    last_name: string | null;
-  };
-}
+
 const DoctorConsultations = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [consultations, setConsultations] = useState<
-    ConsultationWithRelations[]
+    ConsultationWithPatientProfileRow[]
   >([]);
   const [loading, setLoading] = useState(true);
 
@@ -47,27 +39,16 @@ const DoctorConsultations = () => {
     const fetchConsultations = async () => {
       try {
         const { data, error } = await supabase
-          .from("consultations")
+          .from("consultations_with_patient_profiles")
           .select(
-            `
-            *,
-            patient:patient_id (
-              first_name,
-              last_name
-            ),
-            doctor:doctor_id (
-              first_name,
-              last_name
-            )
-          `
-          )
+            ' *')
           .eq("doctor_id", user.id)
           .order("created_at", { ascending: false });
-
+  
         if (error) throw error;
-
+            console.log(data)
         setConsultations(
-          (data as unknown as ConsultationWithRelations[]) || []
+          (data as unknown as ConsultationWithPatientProfileRow[]) || []
         );
       } catch (error) {
         console.error("Error fetching consultations:", error);
@@ -77,11 +58,12 @@ const DoctorConsultations = () => {
     };
 
     fetchConsultations();
+
   }, [user]);
 
   const filteredConsultations = consultations.filter((consultation) => {
-    const patientName = `${consultation.patient?.first_name || ""} ${
-      consultation.patient?.last_name || ""
+    const patientName = `${consultation.patient_first_name || ""} ${
+      consultation.patient_last_name || ""
     }`.toLowerCase();
     const search = searchTerm.toLowerCase();
 
@@ -223,7 +205,7 @@ const DoctorConsultations = () => {
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-12 w-12">
                           <AvatarFallback className="bg-blue-100 text-blue-600">
-                            {consultation.patient?.first_name?.[0] || "P"}
+                            {consultation.patient_first_name?.[0] || "P"}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -232,8 +214,8 @@ const DoctorConsultations = () => {
                           </h3>
                           <p className="text-sm text-gray-600">
                             Patient:{" "}
-                            {consultation.patient?.first_name || "Unknown"}{" "}
-                            {consultation.patient?.last_name || ""}
+                            {consultation.patient_first_name || "Unknown"}{" "}
+                            {consultation.patient_last_name || ""}
                           </p>
                           <p className="text-sm text-gray-600">
                             Created{" "}
