@@ -17,6 +17,7 @@ import MessageItem from "@/components/MessageItem";
 import ChatInput from "@/components/MessageInput";
 import PatientChatHeader from "@/components/patientChat/PatientChatHeader";
 import PatientDashboardButton from "@/components/PatientDashboardButton";
+import { useTranslation } from "react-i18next";
 
 const PatientConsultationChat = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,6 +34,7 @@ const PatientConsultationChat = () => {
   const navigate = useNavigate();
   const [feedbackData, setFeedbackData] = useState(null);
   const token = session?.access_token;
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchFeedback = async () => {
@@ -137,13 +139,11 @@ const PatientConsultationChat = () => {
               {loading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-600 mt-2">Loading messages...</p>
+                  <p className="text-gray-600 mt-2">{t("loadingMessages")}</p>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-600">
-                    No messages yet. Start the conversation!
-                  </p>
+                  <p className="text-gray-600">{t("noMessagesYet")}</p>
                 </div>
               ) : (
                 messages.map((msg) => (
@@ -160,7 +160,7 @@ const PatientConsultationChat = () => {
             {/* Message Input */}
             {status === "completed" ? (
               <div className="border-t p-4 text-center text-sm text-gray-500 italic">
-                💬 This chat has ended. Thank you for your message!
+                {t("chatEndedMessage")}
               </div>
             ) : (
               <ChatInput
@@ -176,12 +176,15 @@ const PatientConsultationChat = () => {
             )}
           </CardContent>
         </Card>
+
         {feedbackData && (
           <Card className="shadow-lg mb-6">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Feedback</CardTitle>
+              <CardTitle className="text-lg font-semibold">
+                {t("feedback")}
+              </CardTitle>
               <CardDescription className="mt-2 text-sm text-gray-600">
-                {feedbackData.feedback_message || "No feedback provided."}
+                {feedbackData.feedback_message || t("noFeedbackProvided")}
               </CardDescription>
 
               {/* Read-only Star Rating */}

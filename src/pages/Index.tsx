@@ -19,10 +19,12 @@ import {
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Footer from "@/components/Footer";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
   const { user, getRole } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const checkUserRoleAndRedirect = async () => {
@@ -68,7 +70,7 @@ const Index = () => {
                   variant="ghost"
                   className="brand-text-primary hover:text-gray-900 "
                 >
-                  Sign In
+                  {t("signIn")}
                 </Button>
               </Link>
               <Link to="/register">
@@ -79,7 +81,7 @@ const Index = () => {
     text-white transition-colors
   "
                 >
-                  Get Started
+                  {t("getStarted")}
                 </Button>
               </Link>
             </div>
@@ -112,7 +114,7 @@ const Index = () => {
                     size="lg"
                     className="bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-primary text-white px-8 py-3 text-lg"
                   >
-                    Start Consultation
+                    {t("startCosultation")}
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
@@ -122,7 +124,7 @@ const Index = () => {
                     variant="outline"
                     className="border-2 border-gray-200 hover:border-blue-300 px-8 py-3 text-lg"
                   >
-                    Join as Doctor
+                    {t("joinAsADoctor")}
                   </Button>
                 </Link>
               </div>
@@ -137,9 +139,11 @@ const Index = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">
-                        Upload Photo
+                        {t("uploadPhoto")}
                       </h3>
-                      <p className="text-gray-600">Share your skin concern</p>
+                      <p className="text-gray-600">
+                        {t("uploadPhotoDescription")}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
@@ -148,10 +152,10 @@ const Index = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">
-                        Expert Review
+                        {t("expertReview")}
                       </h3>
                       <p className="text-gray-600">
-                        Get professional diagnosis
+                        {t("expertReviewDescription")}
                       </p>
                     </div>
                   </div>
@@ -161,9 +165,11 @@ const Index = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">
-                        Treatment Plan
+                        {t("treatmentPlan")}
                       </h3>
-                      <p className="text-gray-600">Receive personalized care</p>
+                      <p className="text-gray-600">
+                        {t("treatmentPlanDescription")}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -178,39 +184,23 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-4xl font-bold text-gray-900">
-              Why Choose Dermit?
+              {t("whyChooseDermit")}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience the future of dermatology with our secure, convenient,
-              and professional platform
+              {t("whyChooseDermitDescription")}
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <CardHeader>
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-8 h-8 text-blue-600" />
-                </div>
-                <CardTitle className="text-xl">Secure & Private</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-gray-600">
-                 Platform ensuring your medical information
-                  stays confidential
-                </CardDescription>
-              </CardContent>
-            </Card> */}
-
             <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-to-r from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Clock className="w-8 h-8 text-green-600" />
                 </div>
-                <CardTitle className="text-xl">Quick Response</CardTitle>
+                <CardTitle className="text-xl"> {t("quickResponse")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-gray-600">
-                  Get expert consultations within 30 minutes of your request
+                  {t("quickResponseDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -220,11 +210,14 @@ const Index = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="w-8 h-8 text-blue-600" />
                 </div>
-                <CardTitle className="text-xl">Certified Experts</CardTitle>
+                <CardTitle className="text-xl">
+                  {" "}
+                  {t("certifiedExperts")}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-gray-600">
-                  Board-certified dermatologists with years of experience
+                  {t("certifiedExpertsDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -234,11 +227,14 @@ const Index = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Heart className="w-8 h-8 text-green-600" />
                 </div>
-                <CardTitle className="text-xl">Personalized Care</CardTitle>
+                <CardTitle className="text-xl">
+                  {" "}
+                  {t("personalizedCare")}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-gray-600">
-                  Tailored treatment plans based on your specific skin concerns
+                  {t("personalizedCareDescription")}
                 </CardDescription>
               </CardContent>
             </Card>
@@ -250,19 +246,17 @@ const Index = () => {
       <section className="py-24 bg-gradient-to-r from-brand-primary to-brand-secondary">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Get Started?
+            {t("readyToGetStarted")}
           </h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Getting expert dermatology care has never been easier. No waiting
-            rooms. No judgment. Just simple, secure online consultations — on
-            your terms. Start your skin check today in just a few clicks.
+            {t("readyToGetStartedDescription")}
           </p>
           <Link to="/register?type=patient">
             <Button
               size="lg"
               className="bg-white text-brand-text-primary hover:bg-gray-50 px-8 py-3 text-lg font-semibold"
             >
-              Start Your Consultation
+              {t("startCosultation")}
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>

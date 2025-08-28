@@ -36,6 +36,7 @@ import AuthCallback from "./pages/auth-callback";
 import AccountIssue from "./pages/account-issue";
 import Feedback from "./pages/Feedback";
 import AdminFeedbacks from "./pages/AdminFeedbacks";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <LanguageSwitcher />
 
           <BrowserRouter>
             <InstantNotificationSystem

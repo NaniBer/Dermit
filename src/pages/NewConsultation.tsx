@@ -27,6 +27,7 @@ import {
   CircleX,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +46,7 @@ const NewConsultation = () => {
   const { user, session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [formData, setFormData] = useState({
     chiefComplaint: "",
@@ -243,18 +245,13 @@ const NewConsultation = () => {
               className="flex items-center space-x-2"
             >
               <div className="w-32 h-13 rounded-lg flex items-center justify-center">
-                <img
-                  src="/DermitLong.png"
-                  alt="Dermit Logo"
-                  // className="w-5 h-5"
-                />
-                {/* <Stethoscope className="w-5 h-5 text-white" /> */}
+                <img src="/DermitLong.png" alt={t("welcome")} />
               </div>
             </Link>
 
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                Step {currentStep} of 3
+                {t("step")} {currentStep} {t("of")} 3
               </span>
               <div className="flex space-x-2">
                 {[1, 2, 3].map((step) => (
@@ -274,11 +271,10 @@ const NewConsultation = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            New Consultation Request
+            {t("newConsultationRequest")}
           </h1>
           <p className="text-gray-600">
-            Share your skin concern with our certified dermatologists for
-            professional advice
+            {t("newConsultationRequestDescription")}
           </p>
         </div>
 
@@ -292,11 +288,10 @@ const NewConsultation = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Camera className="w-5 h-5 text-brand-text-secondary" />
-                      <span>Upload Images (Optional)</span>
+                      <span>{t("uploadImagesOptional")}</span>
                     </CardTitle>
                     <CardDescription>
-                      Upload clear photos of your skin concern for better
-                      diagnosis
+                      {t("uploadImagesOptionalDescription")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -312,13 +307,14 @@ const NewConsultation = () => {
                       <label htmlFor="image-upload" className="cursor-pointer">
                         <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                          Upload Photos
+                          {t("uploadPhotos")}
                         </h3>
                         <p className="text-gray-500">
-                          Click to browse or drag and drop your images here
+                          {t("uploadPhotosDescription")}
                         </p>
                         <p className="text-sm text-gray-400 mt-2">
-                          Supports: JPG, PNG, WebP (Max 5MB each)
+                          {t("supportedFormats")} (
+                          {t("supportedFormatsDescription")})
                         </p>
                       </label>
                     </div>
@@ -346,15 +342,13 @@ const NewConsultation = () => {
 
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <h4 className="font-semibold text-brand-text-secondary mb-2">
-                        Photography Tips:
+                        {t("photographyTips")}:
                       </h4>
                       <ul className="text-sm text-brand-text-secondary space-y-1">
-                        <li>• Use good lighting - natural light works best</li>
-                        <li>• Take multiple angles if possible</li>
-                        <li>• Keep the camera steady and in focus</li>
-                        <li>
-                          • Include surrounding healthy skin for comparison
-                        </li>
+                        <li>• {t("tip1")}</li>
+                        <li>• {t("tip2")}</li>
+                        <li>• {t("tip3")}</li>
+                        <li>• {t("tip4")}</li>
                       </ul>
                     </div>
                   </CardContent>
@@ -367,11 +361,10 @@ const NewConsultation = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <FileText className="w-5 h-5 text-green-600" />
-                      <span>Medical Information</span>
+                      <span>{t("medicalInformation")}</span>
                     </CardTitle>
                     <CardDescription>
-                      Provide details about your skin concern and medical
-                      history
+                      {t("medicalInformationDescription")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
@@ -380,11 +373,11 @@ const NewConsultation = () => {
                         htmlFor="chief-complaint"
                         className="text-base font-semibold"
                       >
-                        Tell us what's going on with your skin? *
+                        {t("skinConcernPrompt")}
                       </Label>
                       <Textarea
                         id="chief-complaint"
-                        placeholder="Describe your main skin concern (e.g., 'Red, itchy rash on my arms for 2 weeks')"
+                        placeholder={t("skinConcernPromptDescription")}
                         value={formData.chiefComplaint}
                         onChange={(e) =>
                           setFormData({
@@ -402,11 +395,11 @@ const NewConsultation = () => {
                         htmlFor="known-illnesses"
                         className="text-base font-semibold"
                       >
-                        Known Medical Conditions
+                        {t("knownMedicalConditions")}
                       </Label>
                       <Textarea
                         id="known-illnesses"
-                        placeholder="List any medical conditions, allergies, or medications you're currently taking"
+                        placeholder={t("knownMedicalConditionsDescription")}
                         value={formData.knownIllnesses}
                         onChange={(e) =>
                           setFormData({
@@ -423,11 +416,11 @@ const NewConsultation = () => {
                         htmlFor="additional-comments"
                         className="text-base font-semibold"
                       >
-                        Additional Comments
+                        {t("additionalComments")}
                       </Label>
                       <Textarea
                         id="additional-comments"
-                        placeholder="Any additional information that might be relevant to your case"
+                        placeholder={t("additionalCommentsDescription")}
                         value={formData.additionalComments}
                         onChange={(e) =>
                           setFormData({
@@ -444,12 +437,10 @@ const NewConsultation = () => {
                         <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                         <div>
                           <h4 className="font-semibold text-yellow-800">
-                            Important Note
+                            {t("importantNote")}
                           </h4>
                           <p className="text-sm text-yellow-700">
-                            This platform is for non-emergency consultations
-                            only. If you have a medical emergency, please
-                            contact emergency services immediately.
+                            {t("importantNoteDescription")}
                           </p>
                         </div>
                       </div>
@@ -465,13 +456,13 @@ const NewConsultation = () => {
               <Card className="shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    Consultation Summary
+                    {t("consultationSummary")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">
-                      Images uploaded
+                      {t("imagesUploaded")}
                     </span>
                     <Badge
                       variant={
@@ -483,7 +474,7 @@ const NewConsultation = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">
-                      Chief complaint
+                      {t("chiefComplaint")}
                     </span>
                     <Badge
                       variant={
@@ -495,7 +486,7 @@ const NewConsultation = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">
-                      Medical history
+                      {t("medicalHistory")}
                     </span>
                     <Badge
                       variant={
@@ -512,34 +503,26 @@ const NewConsultation = () => {
               <Card className="shadow-lg bg-gradient-to-r from-blue-50 to-green-50">
                 <CardHeader>
                   <CardTitle className="text-brand-text-secondary">
-                    What to expect
+                    {t("whatToExpect")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center space-x-2">
-                      {/* <CheckCircle className="w-4 h-4 text-brand-primary" />A */}
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 border-2 border-gray-300 rounded-full"></div>
                         <span className="text-gray-600">
-                          A doctor will be assigned to you in under 10 minutes
+                          {t("expectStep1")}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 border-2 border-gray-300 rounded-full"></div>
-                      <span className="text-gray-600">
-                        You will enter a private chat room with your doctor
-                        where you can further describe your issue and send more
-                        pictures if necessary
-                      </span>
+                      <span className="text-gray-600">{t("expectStep2")}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 border-2 border-gray-300 rounded-full"></div>
-                      <span className="text-gray-600">
-                        Your doctor will then give you a treatment plan suited
-                        to your needs or will guide you through your next steps
-                      </span>
+                      <span className="text-gray-600">{t("expectStep3")}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -552,7 +535,7 @@ const NewConsultation = () => {
             <div>
               {currentStep > 1 && (
                 <Button type="button" variant="outline" onClick={prevStep}>
-                  Previous
+                  {t("previous")}
                 </Button>
               )}
             </div>
@@ -563,7 +546,7 @@ const NewConsultation = () => {
                   onClick={nextStep}
                   className="bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-primary"
                 >
-                  Next Step
+                  {t("nextStep")}
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               ) : (
@@ -572,7 +555,7 @@ const NewConsultation = () => {
                   className="bg-gradient-to-r from-brand-secondary to-brand-primary hover:from-brand-secondary hover:to-brand-primary"
                   disabled={loading}
                 >
-                  {loading ? "Submitting..." : "Submit Consultation Request"}
+                  {loading ? t("submitting") : t("submitConsultationRequest")}
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               )}
@@ -583,7 +566,7 @@ const NewConsultation = () => {
       <div className="space-y-2 p-4 border rounded-lg bg-gray-50">
         {submitting && (
           <div className="font-semibold mb-2">
-            Submitting your consultation… ⏳
+            {t("submittingConsultation")}
           </div>
         )}
       </div>

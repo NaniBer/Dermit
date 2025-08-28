@@ -1,0 +1,206 @@
+{
+  "welcome": "እንኳን ደህና መጡ!",
+  "signIn": "ይግቡ",
+  "getStarted": "ይጀምሩ",
+  "startCosultation": "ሃኪም ያማክሩ",
+  "joinAsADoctor": "ለሃኪሞች",
+
+  "uploadPhoto": "ፎቶ ማስገባት",
+  "uploadPhotoDescription": "በቆዳዎ ላይ ያለውን ችግር ፎቶ አንስተው ያስገቡ።",
+
+  "expertReview": "ሃኪም ማናገር",
+  "expertReviewDescription": "ስለችግሩ ከሃኪምዎ ጋር በነጻነት ይወያዩ።",
+
+  "treatmentPlan": "ህክምና ማግኘት",
+  "treatmentPlanDescription": "ለችግርዎ መፍትሄ የሚሆን ምክር ወይም መድሃኒት ከሃኪምዎ ይቀበሉ።",
+
+  "whyChooseDermit": "ደርሚትን ሲመርጡ",
+  "whyChooseDermitDescription": "ፈጣን ፣ ሚስጥራዊነቱን የጠበቀ የባለሞያ ምክር ያገኛሉ።",
+
+  "quickResponse": "ፈጣን ",
+  "quickResponseDescription": "ጥያቄዎትን ባስገቡ በ30 ደቂቃ ዉስጥ ሃኪም ያገኛሉ።",
+
+  "certifiedExperts": "ብቁ ባለሞያዎች",
+  "certifiedExpertsDescription": "የአመታት ልምድ ያካበቱ የቆዳ እና የአባላዘር በሽታ ሃኪሞችን ያገኛሉ።",
+
+  "personalizedCare": "መፍትሄ ተኮር",
+  "personalizedCareDescription": "ካሉበት ሆነው ላሳሰብዎት ችግር መፍትሄ የሚሆን ምክር ወይም መድሃኒት ከሃኪምዎት ያገኛሉ።",
+
+  "readyToGetStarted": "ለመጀመር ዝግጁ ነዎት?",
+  "readyToGetStartedDescription": "የቆዳ ህክምና ከምንጊሄውም በላይ ቀሏል! ከወረፋ እና ከመሳቀቅ ነጻ የሆነ ፣ ከገዛ ቤትዎ ሆነው በምቾት ህክምና ያግኙ።",
+
+  "welcomeBack": "Welcome back",
+  "welcomeBackDescription": "አጠቃላይ የክትትል መረጃዎት በዚህ ሰሌዳ ላይ ይቆጣጠሩ።",
+
+  "newConsultation": "ሃኪም ያማክሩ",
+  "newConsultationDescription": " ከቆዳ እና አባላዘር በሽታ ስፔሻሊስት ጋር አዲስ ምክክር ይጀምሩ።",
+
+  "mostRecentChats": "Most Recent Chats",
+  "mostRecentChatsDescription": "No Recent Consultation yet. Start your first consultation above!",
+
+  "activeChats": "Active Chats",
+  "activeChatsDescription": "Ongoing conversations with doctors",
+
+  "upcomingConsultations": "ቀጠሮ",
+  "upcomingConsultationsDescription": " የክትትል ቀጠሮዎችን እዚህ ያገኛሉ",
+
+  "noUpcomingAppointments": "በአሁን ሰአት ምንም ቀጠሮ የለዎትም።",
+  "noUpcomingAppointmentsDescription": "የመጀመሪያ ምክክርዎትን ከብቁ ባለሙያ ጋር አሁኑኑ ያድርጉ። ",
+
+  "scheduleConsultation": "Schedule Consultation",
+  "newConsultationRequest": "New Consultation Request",
+
+  "newConsultationRequestDescription": "Share your skin concern with our certified dermatologists for professional advice",
+  "uploadImagesOptional": "Upload Images (Optional)",
+
+  "uploadImagesOptionalDescription": "Upload clear photos of your skin concern for better diagnosis",
+  "uploadPhotos": "Upload Photos",
+
+  "uploadPhotosDescription": "Click to browse or drag and drop your images here",
+  "supportedFormats": "Supports: JPG, PNG, WebP",
+
+  "supportedFormatsDescription": "Max 5MB each",
+  "photographyTips": "ለተሻለ የፎቶ ጥራት የሚከተሉትን ያድርጉ፡",
+
+  "tip1": "የተፈጥሮ ብርሃን ባለበት ቦታ ፎቶውን ያንሱ",
+  "tip2": "ከተለያየ አንግል / አቅጣጫ ያንሱ",
+  "tip3": "ካሜራው አለመንቀጥቀጡን እና ፎከስ ማድረጉን ያረጋግጡ",
+  "tip4": "ለማስተያየት ያመች ዘንድ በዙርያው ያለዉን ጤናማ የቆዳ ክፍል በፎቶው ዉስጥ ያካቱ",
+
+  "consultationSummary": "አጠቃላይ የምክክር መረጃ",
+
+  "imagesUploaded": "ፎቶ ማስገባት",
+
+  "chiefComplaint": "ዋና ችግር",
+
+  "medicalHistory": "Medical history",
+
+  "whatToExpect": "What to expect",
+
+  "expectStep1": "A doctor will be assigned to you in under 10 minutes",
+  "expectStep2": "You will enter a private chat room with your doctor where you can further describe your issue and send more pictures if necessary",
+  "expectStep3": "Your doctor will then give you a treatment plan suited to your needs or will guide you through your next steps",
+
+  "nextStep": "Next Step",
+
+  "medicalInformation": "Medical Information",
+  "medicalInformationDescription": "Provide details about your skin concern and medical history",
+
+  "skinConcernPrompt": "Tell us what's going on with your skin? *",
+  "skinConcernPromptDescription": "Describe your main skin concern (e.g., 'Red, itchy rash on my arms for 2 weeks')",
+
+  "knownMedicalConditions": "Known Medical Conditions",
+  "knownMedicalConditionsDescription": "List any medical conditions, allergies, or medications you're currently taking",
+
+  "additionalComments": "Additional Comments",
+  "additionalCommentsDescription": "Any additional information that might be relevant to your case",
+
+  "importantNote": "Important Note",
+  "importantNoteDescription": "This platform is for non-emergency consultations only. If you have a medical emergency, please contact emergency services immediately.",
+
+  "previous": "Previous",
+
+  "submitConsultationRequest": "Submit Consultation Request",
+  "submitting": "Submitting...",
+  "submittingConsultation": "Submitting your consultation… ⏳",
+
+  "doctorFoundTitle": "Congratulations! We found your doctor.",
+  "doctorFoundDescription": "A dermatologist has accepted your consultation request. You'll be redirected to the chat shortly.",
+
+  "lookingForDoctorsTitle": "ሃኪም በመፈለግ ላይ ነን...",
+  "lookingForDoctorsDescription": " የርስዎን መጠይቅ ላሉን ባለሙያዎች እያደረስን ነው። እባክዎ ትንሽ ይጠብቁ።",
+
+  "sendingNotifications": "Sending notifications to doctors",
+
+  "waitingForResponse": "Waiting for response",
+
+  "returnToDashboard": "ወደ ሰሌዳ ይመለሱ",
+
+  "Dermatologist": "Dermatologist",
+
+  "noMessagesYet": "No messages yet. Start the conversation!",
+
+  "weValueYourPrivacy": "We Value Your Privacy",
+
+  "deletePicturePrompt": "Should we delete your picture from our database?",
+  "deletePictureNote": "If you haven’t uploaded a picture, feel free to ignore this message.",
+  "deleteButton": "Delete",
+
+  "weValueYourFeedback": "We Value Your Feedback",
+  "feedbackPrompt": "Tell us about your experience with Dermit.",
+
+  "rateYourExperience": "Rate your experience",
+
+  "commentsOrSuggestions": "Comments or suggestions",
+
+  "commentsPlaceholder": "How was your experience? What can we improve?",
+
+  "followUpConsent": "I’m open to being contacted for follow-up.",
+
+  "preferredContactMethod": "Preferred contact method",
+  "selectMethodPlaceholder": "Select method",
+  "contactMethods": {
+    "telegram": "Telegram",
+    "email": "Email",
+    "phone": "Phone"
+  },
+
+  "emailInputPlaceholder": "you@example.com",
+
+  "submitFeedbackButton": "Submit Feedback",
+
+  "step": "Step",
+
+  "of": "of",
+
+  "backToHome": "Back to Home",
+
+  "name": "Name",
+
+  "namePlaceholder": "Your name",
+  "email": "Email",
+
+  "subject": "Subject",
+  "subjectPlaceholder": "What is your feedback about?",
+
+  "message": "Message",
+  "messagePlaceholder": "Please share your feedback, suggestions, or report any issues...",
+
+  "pictureDeleted": "Picture Deleted",
+  "pictureDeletedMessage": "Your picture has been deleted from our database.",
+  "deleting": "Deleting...",
+
+  "telegramPlaceholder": "@yourhandle",
+  "phonePlaceholder": "+251911223344",
+
+  "rate": "Rate",
+  "star": "star",
+
+  "loadingMessages": "Loading messages...",
+
+  "chatEndedMessage": "💬 This chat has ended. Thank you for your message!",
+
+  "feedback": "Feedback",
+  "noFeedbackProvided": "No feedback provided.",
+
+  "dermitLogoAlt": "Dermit Logo",
+  "createAccountMessage": "Create your account to get started",
+  "signUp": "ይመዝገቡ",
+  "signUpDescription": "አዲስ መለያ ለመፍጠር እባክዎ ዝርዝሮችዎን ያስገቡ።",
+  "patient": "Patient",
+  "firstName": "First Name",
+  "firstNamePlaceholder": "Enter first name",
+  "lastName": "Last Name",
+  "lastNamePlaceholder": "Enter last name",
+  "emailPlaceholder": "Enter your email",
+  "password": "Password",
+  "passwordPlaceholder": "Create password",
+  "confirmPassword": "Confirm Password",
+  "confirmPasswordPlaceholder": "Confirm password",
+  "creatingAccount": "Creating Account...",
+  "createPatientAccount": "Create Patient Account",
+  "googleLogoAlt": "Google logo, a red 'G' with a blue, yellow, and green tail",
+  "signUpWithGoogle": " Google በመጠቀም ይግቡ",
+  "redirecting": "Redirecting...",
+  "alreadyHaveAccount": "አስቀድመው ተመዝግበዋል?"
+}

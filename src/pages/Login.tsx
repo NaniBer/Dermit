@@ -13,6 +13,7 @@ import { Loader2, Stethoscope } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -23,6 +24,7 @@ const Login = () => {
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get("redirect") || "/auth-callback";
+  const { t } = useTranslation();
 
   // Redirect if already logged in
   useEffect(() => {
@@ -89,7 +91,7 @@ const Login = () => {
         <Card className="shadow-xl border-0">
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-2xl font-bold text-gray-900">
-              Sign In
+              {t("signIn")}
             </CardTitle>
             <CardDescription className="text-gray-600">
               Enter your credentials to access your account

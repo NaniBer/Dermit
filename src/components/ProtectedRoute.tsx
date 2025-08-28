@@ -27,7 +27,7 @@ const ProtectedRoute = ({ children, allowedRoles }: Props) => {
 
   useEffect(() => {
     const checkAccess = async () => {
-      const userId = user.id;
+      const userId = user?.id;
       const role = await getRole(userId);
 
       if (allowedRoles && !allowedRoles.includes(role)) {

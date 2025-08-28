@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 export interface ProfileData {
   first_name: string | null;
   last_name: string | null;
@@ -26,6 +27,7 @@ const PatientFeedback = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { id } = useParams();
+  const { t } = useTranslation();
 
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [rating, setRating] = useState<number | null>(null);
@@ -38,6 +40,7 @@ const PatientFeedback = () => {
   >("");
   const [contactValue, setContactValue] = useState("");
   const [consultation, setConsultation] = useState(null);
+
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [formData, setFormData] = useState({
     patientName: "",
@@ -184,22 +187,19 @@ const PatientFeedback = () => {
         <Card className="flex flex-col justify-between p-6">
           {pictureDeleted ? (
             <div className="text-center">
-              <h2 className="text-lg font-semibold">Picture Deleted</h2>
-              <p className="text-gray-600 mt-2">
-                Your picture has been deleted from our database.
-              </p>
+              <h2 className="text-lg font-semibold">{t("pictureDeleted")}</h2>
+              <p className="text-gray-600 mt-2">{t("pictureDeletedMessage")}</p>
             </div>
           ) : (
             <>
               <CardHeader>
                 <CardTitle className="text-lg font-semibold">
-                  We Value Your Privacy
+                  {t("weValueYourPrivacy")}
                 </CardTitle>
                 <CardDescription className="text-gray-600">
-                  Should we delete your picture from our database?
+                  {t("deletePicturePrompt")}
                   <span className="text-sm text-gray-500 block mt-1">
-                    If you haven’t uploaded a picture, feel free to ignore this
-                    message.
+                    {t("deletePictureNote")}
                   </span>
                 </CardDescription>
               </CardHeader>
@@ -213,7 +213,7 @@ const PatientFeedback = () => {
                     deletePicture();
                   }}
                 >
-                  {pictureLoading ? "Deleting..." : "Delete"}
+                  {pictureLoading ? t("deleting") : t("deleteButton")}
                 </Button>
               </div>
             </>
@@ -223,19 +223,18 @@ const PatientFeedback = () => {
         <Card className="shadow-xl border-none rounded-2xl">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
-              We Value Your Feedback
+              {t("weValueYourFeedback")}
             </CardTitle>
             <CardDescription className="text-gray-600 text-sm sm:text-base">
-              Tell us about your experience with{" "}
-              <span className="font-semibold text-brand-primary">Dermit</span>.
+              {t("feedbackPrompt")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleFeedbackSubmit} className="space-y-6">
               {/* Rating */}
               <div>
-                <Label className="block mb-2  text-gray-700 font-medium text-center">
-                  Rate your experience
+                <Label className="block mb-2 text-gray-700 font-medium text-center">
+                  {t("rateYourExperience")}
                 </Label>
                 <div className="flex justify-center gap-1">
                   {[1, 2, 3, 4, 5].map((num) => (
@@ -248,7 +247,9 @@ const PatientFeedback = () => {
                           ? "text-brand-primary"
                           : "text-gray-300"
                       }`}
-                      aria-label={`Rate ${num} star${num > 1 ? "s" : ""}`}
+                      aria-label={`${t("rate")} ${num} ${t("star", {
+                        count: num,
+                      })}`}
                     >
                       <Star
                         className="w-7 h-7"
@@ -270,11 +271,11 @@ const PatientFeedback = () => {
                   htmlFor="feedback-message"
                   className="block mb-2 text-gray-700 font-medium"
                 >
-                  Comments or suggestions
+                  {t("commentsOrSuggestions")}
                 </Label>
                 <Textarea
                   id="feedback-message"
-                  placeholder="How was your experience? What can we improve?"
+                  placeholder={t("commentsPlaceholder")}
                   rows={5}
                   value={feedbackMessage}
                   onChange={(e) => setFeedbackMessage(e.target.value)}
@@ -295,7 +296,7 @@ const PatientFeedback = () => {
                   htmlFor="allow-contact"
                   className="text-sm leading-relaxed text-gray-700 cursor-pointer"
                 >
-                  I’m open to being contacted for follow-up.
+                  {t("followUpConsent")}
                 </Label>
               </div>
 
@@ -306,7 +307,7 @@ const PatientFeedback = () => {
                     htmlFor="contact-method"
                     className="font-medium text-gray-700"
                   >
-                    Preferred contact method
+                    {t("preferredContactMethod")}
                   </Label>
                   <select
                     id="contact-method"
@@ -318,10 +319,12 @@ const PatientFeedback = () => {
                     }
                     className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-primary"
                   >
-                    <option value="">Select method</option>
-                    <option value="telegram">Telegram</option>
-                    <option value="phone">Phone</option>
-                    <option value="email">Email</option>
+                    <option value="">{t("selectMethodPlaceholder")}</option>
+                    <option value="telegram">
+                      {t("contactMethods.telegram")}
+                    </option>
+                    <option value="phone">{t("contactMethods.phone")}</option>
+                    <option value="email">{t("contactMethods.email")}</option>
                   </select>
 
                   <Input
@@ -330,10 +333,10 @@ const PatientFeedback = () => {
                     onChange={(e) => setContactValue(e.target.value)}
                     placeholder={
                       contactMethod === "telegram"
-                        ? "@yourhandle"
+                        ? t("telegramPlaceholder")
                         : contactMethod === "phone"
-                        ? "+251911223344"
-                        : "you@example.com"
+                        ? t("phonePlaceholder")
+                        : t("emailInputPlaceholder")
                     }
                   />
                 </div>
@@ -345,7 +348,7 @@ const PatientFeedback = () => {
                 className="w-full bg-gradient-to-r from-brand-primary to-brand-secondary hover:bg-brand-primary-hover text-white font-semibold"
                 disabled={loading}
               >
-                {loading ? "Submitting..." : "Submit Feedback"}
+                {loading ? t("submitting") : t("submitFeedbackButton")}
               </Button>
             </form>
           </CardContent>

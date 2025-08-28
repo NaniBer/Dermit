@@ -23,10 +23,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import ActiveChats from "@/components/patientDashboard/ActiveChats";
 import MostRecentChat from "@/components/patientDashboard/MostRecentChat";
+import { useTranslation } from "react-i18next";
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
 
@@ -53,17 +55,14 @@ const PatientDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome back,{" "}
+            {t("welcomeBack")},{" "}
             {user?.user_metadata?.first_name ||
               (user?.user_metadata?.full_name
                 ? user.user_metadata.full_name.split(" ")[0]
-                : "User")}
+                : t("user"))}
             !
           </h1>
-          <p className="text-gray-600">
-            Manage your skin health consultations and track your progress with
-            our expert dermatologists
-          </p>
+          <p className="text-gray-600">{t("welcomeBackDescription")}</p>
         </div>
 
         {/* Quick Actions */}

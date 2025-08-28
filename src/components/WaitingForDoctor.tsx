@@ -5,6 +5,7 @@ import { CheckCircle, Loader2, Stethoscope } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 
 const WaitingForDoctor = () => {
   const [consultationStatus, setConsultationStatus] = useState<
@@ -12,6 +13,7 @@ const WaitingForDoctor = () => {
   >("looking");
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!user) return;
@@ -55,12 +57,9 @@ const WaitingForDoctor = () => {
               <CheckCircle className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Congratulations! We found your doctor.
+              {t("doctorFoundTitle")}
             </h2>
-            <p className="text-gray-600 mb-6">
-              A dermatologist has accepted your consultation request. You'll be
-              redirected to the chat shortly.
-            </p>
+            <p className="text-gray-600 mb-6">{t("doctorFoundDescription")}</p>
             <div className="animate-pulse">
               <div className="w-8 h-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded mx-auto"></div>
             </div>
@@ -78,26 +77,25 @@ const WaitingForDoctor = () => {
             <Loader2 className="w-8 h-8 text-white animate-spin" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Looking for available doctors...
+            {t("lookingForDoctorsTitle")}
           </h2>
           <p className="text-gray-600 mb-6">
-            We're notifying our dermatologists about your consultation request.
-            This usually takes just a few minutes.
+            {t("lookingForDoctorsDescription")}
           </p>
           <div className="space-y-3">
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
               <div className="w-2 h-2 bg-brand-primary rounded-full animate-pulse"></div>
-              <span>Sending notifications to doctors</span>
+              <span>{t("sendingNotifications")}</span>
             </div>
             <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
               <div className="w-2 h-2 bg-brand-secondary rounded-full animate-pulse animation-delay-200"></div>
-              <span>Waiting for response</span>
+              <span>{t("waitingForResponse")} </span>
             </div>
           </div>
           <div className="mt-8 pt-6 border-t border-gray-200">
             <Link to="/patient/dashboard">
               <Button variant="outline" className="w-full">
-                Return to Dashboard
+                {t("returnToDashboard")}
               </Button>
             </Link>
           </div>

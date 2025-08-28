@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ConsentCheckboxes from "@/components/consentCheckboxes";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
@@ -24,6 +25,7 @@ const Register = () => {
   const { signUp, user, signInWithGoogle, getRole } = useAuth();
 
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Patient form state
   const [patientData, setPatientData] = useState<{
@@ -165,30 +167,22 @@ const Register = () => {
         <div className="text-center mb-8">
           <Link
             to="/"
-            className="flex items-center justify-center space-x-2 w-full  "
+            className="flex items-center justify-center space-x-2 w-full"
           >
             <div className="w-32 h-13 rounded-lg flex items-center justify-center">
-              <img
-                src="/DermitLong.png"
-                alt="Dermit Logo"
-                // className="w-5 h-5"
-              />
-              {/* <Stethoscope className="w-5 h-5 text-white" /> */}
+              <img src="/DermitLong.png" alt={t("dermitLogoAlt")} />
             </div>
-            {/* <span className="text-xl font-bold text-gray-900">Dermit</span> */}
           </Link>
-          <p className="text-gray-600 mt-2">
-            Create your account to get started
-          </p>
+          <p className="text-gray-600 mt-2">{t("createAccountMessage")}</p>
         </div>
 
         <Card className="shadow-xl border-0">
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-2xl font-bold text-gray-900">
-              Sign Up
+              {t("signUp")}
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Join our platform as a patient or healthcare provider
+              {t("signUpDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -199,7 +193,7 @@ const Register = () => {
                   className="flex items-center space-x-2"
                 >
                   <User className="w-4 h-4" />
-                  <span>Patient</span>
+                  <span>{t("patient")}</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -207,10 +201,12 @@ const Register = () => {
                 <form onSubmit={handlePatientRegister} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="patient-firstName">First Name</Label>
+                      <Label htmlFor="patient-firstName">
+                        {t("firstName")}
+                      </Label>
                       <Input
                         id="patient-firstName"
-                        placeholder="Enter first name"
+                        placeholder={t("firstNamePlaceholder")}
                         value={patientData.firstName}
                         onChange={(e) =>
                           setPatientData({
@@ -222,10 +218,10 @@ const Register = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="patient-lastName">Last Name</Label>
+                      <Label htmlFor="patient-lastName">{t("lastName")}</Label>
                       <Input
                         id="patient-lastName"
-                        placeholder="Enter last name"
+                        placeholder={t("lastNamePlaceholder")}
                         value={patientData.lastName}
                         onChange={(e) =>
                           setPatientData({
@@ -237,12 +233,13 @@ const Register = () => {
                       />
                     </div>
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="patient-email">Email</Label>
+                    <Label htmlFor="patient-email">{t("email")}</Label>
                     <Input
                       id="patient-email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder={t("emailPlaceholder")}
                       value={patientData.email}
                       onChange={(e) =>
                         setPatientData({
@@ -253,13 +250,14 @@ const Register = () => {
                       required
                     />
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="patient-password">Password</Label>
+                      <Label htmlFor="patient-password">{t("password")}</Label>
                       <Input
                         id="patient-password"
                         type="password"
-                        placeholder="Create password"
+                        placeholder={t("passwordPlaceholder")}
                         value={patientData.password}
                         onChange={(e) =>
                           setPatientData({
@@ -272,12 +270,12 @@ const Register = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="patient-confirmPassword">
-                        Confirm Password
+                        {t("confirmPassword")}
                       </Label>
                       <Input
                         id="patient-confirmPassword"
                         type="password"
-                        placeholder="Confirm password"
+                        placeholder={t("confirmPasswordPlaceholder")}
                         value={patientData.confirmPassword}
                         onChange={(e) =>
                           setPatientData({
@@ -290,127 +288,23 @@ const Register = () => {
                     </div>
                   </div>
 
-                  {/* Consent Agreement Section */}
-                  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 space-y-4">
-                    {/* <div className="flex items-center space-x-2 mb-4">
-                      <Shield className="w-5 h-5 text-blue-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        Your Privacy & Consent Matter to Us
-                      </h3>
-                    </div> */}
-                    {/* 
-                    <div className="space-y-4 text-sm text-gray-700">
-                      <div className="space-y-3">
-                        <p className="font-medium text-gray-900">
-                          Helping You While Improving Care for Everyone
-                        </p>
-                        <p>
-                          When you share images of your skin condition with us,
-                          you're not just getting personalized care—you're also
-                          helping us build better AI tools that can serve people
-                          in your region more accurately.
-                        </p>
-                        <p>
-                          Your images may be used to train our AI models, which
-                          helps us provide more precise and culturally-relevant
-                          healthcare insights for your local community. This is
-                          an essential part of how our service works.
-                        </p>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-start space-x-2">
-                          <Globe className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="font-medium text-gray-900 mb-1">
-                              Where Your Data Lives
-                            </p>
-                            <p>
-                              We want to be completely transparent: your data is
-                              stored on secure servers that may be located
-                              outside your country's borders. However, we take
-                              your privacy seriously—all your information is
-                              encrypted and anonymized, meaning no personal
-                              details can be directly traced back to your
-                              images.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div> */}
-
-                    {/* Consent Checkboxes */}
-                    {/* <div className="space-y-3 pt-4 border-t border-gray-200">
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id="patient-consent-ai"
-                          checked={patientData.consentAiTraining}
-                          onCheckedChange={(checked) =>
-                            setPatientData({
-                              ...patientData,
-                              consentAiTraining: checked as boolean,
-                            })
-                          }
-                          className="mt-1"
-                        />
-                        <Label
-                          htmlFor="patient-consent-ai"
-                          className="text-sm text-gray-700 leading-relaxed cursor-pointer"
-                        >
-                          I understand and consent to my uploaded images being
-                          used to train AI models for improving healthcare
-                          services. I acknowledge that this is required to use
-                          the platform.
-                        </Label>
-                      </div>
-
-                      <div className="flex items-start space-x-3">
-                        <Checkbox
-                          id="patient-consent-storage"
-                          checked={patientData.consentDataStorage}
-                          onCheckedChange={(checked) =>
-                            setPatientData({
-                              ...patientData,
-                              consentDataStorage: checked as boolean,
-                            })
-                          }
-                          className="mt-1"
-                        />
-                        <Label
-                          htmlFor="patient-consent-storage"
-                          className="text-sm text-gray-700 leading-relaxed cursor-pointer"
-                        >
-                          I understand that my data may be stored on servers
-                          outside my country, and I consent to this arrangement
-                          knowing that my data has been anonymized and
-                          encrypted.
-                        </Label>
-                      </div>
-
-                      <div className="pt-3 border-t border-gray-200">
-                        <p className="text-sm font-medium text-gray-900">
-                          By signing up, I confirm I have read and agree to
-                          these terms.
-                        </p>
-                      </div>
-                    </div> */}
-                    <ConsentCheckboxes
-                      consentPrivacy={patientData.consentPrivacy}
-                      consentTerms={patientData.constentTerms}
-                      setConsentPrivacy={(checked) =>
-                        setPatientData((prev) => ({
-                          ...prev,
-                          consentPrivacy: checked,
-                        }))
-                      }
-                      setConsentTerms={(checked) =>
-                        setPatientData((prev) => ({
-                          ...prev,
-                          constentTerms: checked,
-                        }))
-                      }
-                    />
-                  </div>
+                  {/* Consent Section */}
+                  <ConsentCheckboxes
+                    consentPrivacy={patientData.consentPrivacy}
+                    consentTerms={patientData.constentTerms}
+                    setConsentPrivacy={(checked) =>
+                      setPatientData((prev) => ({
+                        ...prev,
+                        consentPrivacy: checked,
+                      }))
+                    }
+                    setConsentTerms={(checked) =>
+                      setPatientData((prev) => ({
+                        ...prev,
+                        constentTerms: checked,
+                      }))
+                    }
+                  />
 
                   <Button
                     type="submit"
@@ -421,8 +315,9 @@ const Register = () => {
                       !patientData.constentTerms
                     }
                   >
-                    {loading ? "Creating Account..." : "Create Patient Account"}
+                    {loading ? t("creatingAccount") : t("createPatientAccount")}
                   </Button>
+
                   <Button
                     variant="outline"
                     className="w-full mb-4 flex items-center justify-center space-x-2"
@@ -435,11 +330,11 @@ const Register = () => {
                   >
                     <img
                       src="/google-logo.svg"
-                      alt="Google logo, a red 'G' with a blue, yellow, and green tail"
+                      alt={t("googleLogoAlt")}
                       className="w-5 h-5"
                     />
                     <span>
-                      {loading ? "Redirecting..." : "Sign up with Google"}
+                      {loading ? t("redirecting") : t("signUpWithGoogle")}
                     </span>
                   </Button>
                 </form>
@@ -447,12 +342,12 @@ const Register = () => {
             </Tabs>
 
             <div className="text-center text-sm text-gray-600">
-              Already have an account?{" "}
+              {t("alreadyHaveAccount")}{" "}
               <Link
                 to="/login"
                 className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
               >
-                Sign in
+                {t("signIn")}
               </Link>
             </div>
           </CardContent>
