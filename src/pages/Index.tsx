@@ -20,6 +20,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Footer from "@/components/Footer";
 import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Index = () => {
   const { user, getRole } = useAuth();
@@ -64,7 +65,9 @@ const Index = () => {
               </div>
               {/* <span className="text-xl font-bold text-gray-900">Dermit</span> */}
             </div>
+
             <div className="flex items-center space-x-4">
+              <LanguageSwitcher />
               <Link to="/login">
                 <Button
                   variant="ghost"

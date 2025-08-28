@@ -29,17 +29,18 @@
   "readyToGetStarted": "ለመጀመር ዝግጁ ነዎት?",
   "readyToGetStartedDescription": "የቆዳ ህክምና ከምንጊሄውም በላይ ቀሏል! ከወረፋ እና ከመሳቀቅ ነጻ የሆነ ፣ ከገዛ ቤትዎ ሆነው በምቾት ህክምና ያግኙ።",
 
-  "welcomeBack": "Welcome back",
+  "welcomeBack": "እንኳን ደህና መጡ",
   "welcomeBackDescription": "አጠቃላይ የክትትል መረጃዎት በዚህ ሰሌዳ ላይ ይቆጣጠሩ።",
 
   "newConsultation": "ሃኪም ያማክሩ",
   "newConsultationDescription": " ከቆዳ እና አባላዘር በሽታ ስፔሻሊስት ጋር አዲስ ምክክር ይጀምሩ።",
 
-  "mostRecentChats": "Most Recent Chats",
-  "mostRecentChatsDescription": "No Recent Consultation yet. Start your first consultation above!",
+  "mostRecentChats": " የቅርብ ጊዜ ቻቶች",
+  "mostRecentChatsDescription1": "እስካሁን ድረስ ምንም የቅርብ ጊዜ ምክክር የለም ፡፡",
+  "mostRecentChatsDescription2": "የመጀመሪያውን ምክክርዎን አሁን ይጀምሩ!",
 
-  "activeChats": "Active Chats",
-  "activeChatsDescription": "Ongoing conversations with doctors",
+  "activeChats": "በሂደት ላይ ያሉ",
+  "activeChatsDescription": "ከሃኪም ጋር በሂደት ላይ ያሉ",
 
   "upcomingConsultations": "ቀጠሮ",
   "upcomingConsultationsDescription": " የክትትል ቀጠሮዎችን እዚህ ያገኛሉ",
@@ -47,8 +48,8 @@
   "noUpcomingAppointments": "በአሁን ሰአት ምንም ቀጠሮ የለዎትም።",
   "noUpcomingAppointmentsDescription": "የመጀመሪያ ምክክርዎትን ከብቁ ባለሙያ ጋር አሁኑኑ ያድርጉ። ",
 
-  "scheduleConsultation": "Schedule Consultation",
-  "newConsultationRequest": "New Consultation Request",
+  "scheduleConsultation": "ሃኪም ያማክሩ",
+  "newConsultationRequest": " ከቆዳ እና አባላዘር በሽታ ስፔሻሊስት ጋር አዲስ ምክክር ይጀምሩ።",
 
   "newConsultationRequestDescription": "Share your skin concern with our certified dermatologists for professional advice",
   "uploadImagesOptional": "Upload Images (Optional)",
@@ -77,9 +78,9 @@
 
   "whatToExpect": "What to expect",
 
-  "expectStep1": "A doctor will be assigned to you in under 10 minutes",
-  "expectStep2": "You will enter a private chat room with your doctor where you can further describe your issue and send more pictures if necessary",
-  "expectStep3": "Your doctor will then give you a treatment plan suited to your needs or will guide you through your next steps",
+  "expectStep1": "ጥያቄዎትን ባስገቡ በ10 ደቂቃ ውስጥ ሃኪም ያገኛሉ",
+  "expectStep2": "ግላዊነትዎትን በጠበቀ መልኩ ከሃኪምዎት ጋር ይወያያሉ፣ አስፈላጊ ሆኖ ከተገኘም ተጨማሪ ፎቶዎችን መላክ ይችላሉ።",
+  "expectStep3": "መፍትሄ ወይም ቀጣይ ሂደትን ከሃኪምዎት ጋር",
 
   "nextStep": "Next Step",
 
@@ -201,6 +202,11 @@
   "createPatientAccount": "Create Patient Account",
   "googleLogoAlt": "Google logo, a red 'G' with a blue, yellow, and green tail",
   "signUpWithGoogle": " Google በመጠቀም ይግቡ",
+  "signInWithGoogle": "Google በመጠቀም ይግቡ",
+
   "redirecting": "Redirecting...",
-  "alreadyHaveAccount": "አስቀድመው ተመዝግበዋል?"
+  "alreadyHaveAccount": "አስቀድመው ተመዝግበዋል?",
+
+  "noConversationsTitle": "እስካሁን ምንም ንግግር የለም",
+  "noConversationsDescription": "የመጀመሪያ ምክክርዎትን ከብቁ ባለሙያ ጋር አሁኑኑ ያድርጉ።"
 }

@@ -14,9 +14,11 @@ import { useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ConsultationList from "../patientConsultationPage/ConsultationList";
+import { useTranslation } from "react-i18next";
 
 const MostRecentChat = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [recentChat, setRecentChat] = useState([]); // single chat object or null
   const [loading, setLoading] = useState(true);
@@ -73,14 +75,14 @@ const MostRecentChat = () => {
             <Clock className="w-6 h-6 text-white" />
           </div>
           <h3 className="font-semibold text-gray-900 mb-2">
-            Most Recent Chats
+            {t("mostRecentChats")}
           </h3>
         </CardContent>
         {recentChat.length === 0 ? (
           <div className="text-center py-3 pb-12 text-gray-500">
             <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p className="text-lg">No Recent Consultation yet</p>
-            <p className="text-sm">Start your first consultation above!</p>
+            <p className="text-lg"> {t("mostRecentChatsDescription1")}</p>
+            <p className="text-sm">{t("mostRecentChatsDescription2")} </p>
           </div>
         ) : (
           <ConsultationList

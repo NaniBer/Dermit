@@ -48,7 +48,6 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <LanguageSwitcher />
 
           <BrowserRouter>
             <InstantNotificationSystem

@@ -24,6 +24,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { SecureUserRole, isSecureUserRole } from "@/lib/securityTypes";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const PatientHeader = () => {
   const navigate = useNavigate();
@@ -146,7 +147,7 @@ const PatientHeader = () => {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="relative">
+            {/* <Button variant="ghost" size="sm" className="relative">
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
                 <Badge
@@ -156,7 +157,8 @@ const PatientHeader = () => {
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </Badge>
               )}
-            </Button>
+            </Button> */}
+            <LanguageSwitcher />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">

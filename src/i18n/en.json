@@ -24,8 +24,11 @@
   "welcomeBackDescription": "Manage your skin health consultations and track your progress with our expert dermatologists",
   "newConsultation": "New Consultation",
   "newConsultationDescription": "Start a new consultation with a certified dermatologist",
+
   "mostRecentChats": "Most Recent Chats",
-  "mostRecentChatsDescription": "No Recent Consultation yet. Start your first consultation above!",
+  "mostRecentChatsDescription1": "No Recent Consultation yet.",
+  "mostRecentChatsDescription2": "Start your first consultation above!",
+
   "activeChats": "Active Chats",
   "activeChatsDescription": "Ongoing conversations with doctors",
   "upcomingConsultations": "Upcoming Consultations",
@@ -129,7 +132,10 @@
   "creatingAccount": "Creating Account...",
   "createPatientAccount": "Create Patient Account",
   "googleLogoAlt": "Google logo, a red 'G' with a blue, yellow, and green tail",
+
   "signUpWithGoogle": "Sign up with Google",
+  "signInWithGoogle": "Sign in with Google",
+
   "redirecting": "Redirecting...",
   "alreadyHaveAccount": "Already have an account?",
   "user": "User",
@@ -139,5 +145,9 @@
   "lookingForDoctorsDescription": "We're notifying our dermatologists about your consultation request. This usually takes just a few minutes.",
   "sendingNotifications": "Sending notifications to doctors",
   "waitingForResponse": "Waiting for response",
-  "returnToDashboard": "Return to Dashboard"
+  "returnToDashboard": "Return to Dashboard",
+  "noConversationsTitle": "No conversations yet",
+  "noConversationsDescription": "Start your first consultation to connect with a dermatologist!",
+  "startNewConsultation": "Start New Consultation",
+  "noUpcomingAppointmentsTitle": "No upcoming appointments"
 }
