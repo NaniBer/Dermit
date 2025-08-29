@@ -149,5 +149,11 @@
   "noConversationsTitle": "No conversations yet",
   "noConversationsDescription": "Start your first consultation to connect with a dermatologist!",
   "startNewConsultation": "Start New Consultation",
-  "noUpcomingAppointmentsTitle": "No upcoming appointments"
+  "noUpcomingAppointmentsTitle": "No upcoming appointments",
+
+  "consultationHistory": "Your Consultation History",
+  "consultationHistoryDescription": "A timeline of your skin health journey 🧴",
+  "noConsultations": "No consultations yet",
+  "startFirstConsultation": "Start your first consultation above!",
+  "activeTab": "Active"
 }

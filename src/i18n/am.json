@@ -101,49 +101,49 @@
 
   "previous": "Previous",
 
-  "submitConsultationRequest": "Submit Consultation Request",
-  "submitting": "Submitting...",
-  "submittingConsultation": "Submitting your consultation… ⏳",
+  "submitConsultationRequest": "የምክክር ጥያቄዎትን ያስገቡ",
+  "submitting": "ጥያቄዎት እየተላከ ነው...",
+  "submittingConsultation": "ጥያቄዎት እየተላከ ነው... ⏳",
 
-  "doctorFoundTitle": "Congratulations! We found your doctor.",
-  "doctorFoundDescription": "A dermatologist has accepted your consultation request. You'll be redirected to the chat shortly.",
+  "doctorFoundTitle": "ሃኪሞት ዝግጁ ነው/ናት.",
+  "doctorFoundDescription": "ወደ ቻቱ ለመግባት ይዘጋጁ.",
 
   "lookingForDoctorsTitle": "ሃኪም በመፈለግ ላይ ነን...",
   "lookingForDoctorsDescription": " የርስዎን መጠይቅ ላሉን ባለሙያዎች እያደረስን ነው። እባክዎ ትንሽ ይጠብቁ።",
 
-  "sendingNotifications": "Sending notifications to doctors",
+  "sendingNotifications": "ጥያቄዎት እየተላከ ነው",
 
-  "waitingForResponse": "Waiting for response",
+  "waitingForResponse": "መልስ እየጠበቅን ነው",
 
   "returnToDashboard": "ወደ ሰሌዳ ይመለሱ",
 
-  "Dermatologist": "Dermatologist",
+  "Dermatologist": "የቆዳ ሃኪም",
 
-  "noMessagesYet": "No messages yet. Start the conversation!",
+  "noMessagesYet": "ለጊዜው ምንም ምልዕክት የሎትም። ምክክሮትን ይጀምሩ!",
 
-  "weValueYourPrivacy": "We Value Your Privacy",
+  "weValueYourPrivacy": "ሚስጥሮት የተጠበቀ ነው",
 
-  "deletePicturePrompt": "Should we delete your picture from our database?",
-  "deletePictureNote": "If you haven’t uploaded a picture, feel free to ignore this message.",
-  "deleteButton": "Delete",
+  "deletePicturePrompt": "የላኩልንን ምስል ከመረጃ ቋታችን እናጥፋው?",
+  "deletePictureNote": "ምስል ካላኩልን፣ ይህንን መልዕክት ይለፉ.",
+  "deleteButton": "አጥፋ",
 
-  "weValueYourFeedback": "We Value Your Feedback",
-  "feedbackPrompt": "Tell us about your experience with Dermit.",
+  "weValueYourFeedback": "ሀሳብ እና አስተያየቶት አገልግሎታችንን እንድናሻሽል ስለሚጠቅመን እባኮት አንድ ደቂቃ ወስደው የተሰማዎትን ሳይሳቀቁ ይንገሩን",
+  "feedbackPrompt": "ከደርሚት ጋር የነበሮት ቆይታ እንዴት ነበር?",
 
-  "rateYourExperience": "Rate your experience",
+  "rateYourExperience": "አገልግሎታችንን ይገምግሙ",
 
-  "commentsOrSuggestions": "Comments or suggestions",
+  "commentsOrSuggestions": "ሀሳብ እና አስተያየቶት",
 
-  "commentsPlaceholder": "How was your experience? What can we improve?",
+  "commentsPlaceholder": "ምን እናሻሽል?",
 
-  "followUpConsent": "I’m open to being contacted for follow-up.",
+  "followUpConsent": "ለተጨማሪ ጥያቄ ፍቃደኛ ነኝ።",
 
-  "preferredContactMethod": "Preferred contact method",
+  "preferredContactMethod": "በምን መንገድ?",
   "selectMethodPlaceholder": "Select method",
   "contactMethods": {
-    "telegram": "Telegram",
-    "email": "Email",
-    "phone": "Phone"
+    "telegram": "በቴሌግራም",
+    "email": "በኢ ሜይል",
+    "phone": "በስልክ"
   },
 
   "emailInputPlaceholder": "you@example.com",
@@ -208,5 +208,11 @@
   "alreadyHaveAccount": "አስቀድመው ተመዝግበዋል?",
 
   "noConversationsTitle": "እስካሁን ምንም ንግግር የለም",
-  "noConversationsDescription": "የመጀመሪያ ምክክርዎትን ከብቁ ባለሙያ ጋር አሁኑኑ ያድርጉ።"
+  "noConversationsDescription": "የመጀመሪያ ምክክርዎትን ከብቁ ባለሙያ ጋር አሁኑኑ ያድርጉ።",
+
+  "consultationHistory": "Your Consultation History",
+  "consultationHistoryDescription": "A timeline of your skin health journey 🧴",
+  "noConsultations": "እስካሁን ድረስ ምንም ምክክር የለም",
+  "startFirstConsultation": "የመጀመሪያውን ምክክርዎን አሁን ይጀምሩ!",
+  "activeTab": "Active"
 }

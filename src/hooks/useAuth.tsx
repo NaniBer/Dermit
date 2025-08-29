@@ -219,7 +219,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     toast({
       title: `Welcome back, ${name}!`,
       description: `You are signed in as a ${role}.`,
-    }); 
+    });
 
     return { error: null, role };
   };
@@ -253,6 +253,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const {
       data: { session },
     } = await supabase.auth.getSession();
+    console.log(session);
 
     if (!session) {
       toast({

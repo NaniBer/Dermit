@@ -6,31 +6,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  MessageCircle,
-  Calendar,
-  User,
-  FileText,
-  Clock,
-  CheckCircle,
-  RotateCcw,
-  Plus,
-} from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import PatientHeader from "@/components/PatientHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import ConsultationList from "@/components/patientConsultationPage/ConsultationList";
 import PatientDashboardButton from "@/components/PatientDashboardButton";
+import { useTranslation } from "react-i18next";
 
 const PatientConsultations = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [consultations, setConsultations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   // Fetch real consultation data
   useEffect(() => {
@@ -38,19 +30,6 @@ const PatientConsultations = () => {
 
     const fetchConsultations = async () => {
       try {
-        // const { data, error } = await supabase
-        //   .from("consultations")
-        //   .select(
-        //     `
-        //     *,
-        //     profiles!consultations_doctor_id_fkey (
-        //       first_name,
-        //       last_name
-        //     )
-        //   `
-        //   )
-        //   .eq("patient_id", user.id)
-        //   .order("created_at", { ascending: false });
         const { data, error } = await supabase
           .from("consultations")
           .select("*")
@@ -108,14 +87,14 @@ const PatientConsultations = () => {
         <Card className="border-2 border-dashed border-blue-200 hover:border-blue-300 transition-all duration-300 hover:shadow-lg bg-gradient-to-r from-blue-50 to-white mb-8">
           <CardHeader className="text-center pb-4">
             <CardTitle className="text-2xl text-gray-900 flex items-center justify-center gap-2">
-              Start a New Consultation
+              {t("startNewConsultation")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 flex flex-col items-center mt-3">
             <Link to="/patient/new-consultation">
               <Button className="bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-primary">
                 <Plus className="w-4 h-4 mr-2" />
-                Schedule Consultation
+                {t("scheduleConsultation")}
               </Button>
             </Link>
           </CardContent>
@@ -126,10 +105,10 @@ const PatientConsultations = () => {
           <CardHeader className="border-b border-gray-100">
             <CardTitle className="text-2xl text-gray-900 flex items-center gap-2">
               <FileText className="w-6 h-6 text-blue-600" />
-              Your Consultation History
+              {t("consultationHistory")}
             </CardTitle>
             <CardDescription className="text-gray-600">
-              A timeline of your skin health journey 🧴
+              {t("consultationHistoryDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
@@ -170,8 +149,8 @@ const PatientConsultations = () => {
             {consultations.length === 0 && (
               <div className="text-center py-12 text-gray-500">
                 <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                <p className="text-lg">No consultations yet</p>
-                <p className="text-sm">Start your first consultation above!</p>
+                <p className="text-lg">{t("no_consultations")}</p>
+                <p className="text-sm">{t("start_first_consultation")}</p>
               </div>
             )}
           </CardContent>
