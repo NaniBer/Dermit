@@ -147,8 +147,8 @@ const Register = () => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      await signInWithGoogle();
-      console.log("Google sign-in successful", signInWithGoogle);
+      await signInWithGoogle("patient");
+      console.log("Google sign-in successful");
     } catch (error) {
       toast({
         title: "Google Sign-In Error",

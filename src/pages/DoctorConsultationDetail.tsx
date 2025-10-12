@@ -162,11 +162,13 @@ const DoctorConsultationDetail = () => {
     if (!consultation || !user) return;
 
     try {
+      // STEP 1: Doctor accepts consultation - trigger payment requirement for patient
+      // Update status to 'accepted_awaiting_payment' instead of directly to 'in_progress'
       const { error } = await supabase
         .from("consultations")
         .update({
           doctor_id: user.id,
-          status: "in_progress",
+          status: "accepted_awaiting_payment", // Patient must complete payment before consultation starts
         })
         .eq("id", consultation.id);
 
@@ -174,15 +176,20 @@ const DoctorConsultationDetail = () => {
 
       toast({
         title: "Consultation Accepted",
-        description: "You can now start chatting with the patient.",
+        description: "Payment request sent to patient. Consultation will begin after payment confirmation.",
       });
 
       // Update local state
       setConsultation({
         ...consultation,
         doctor_id: user.id,
-        status: "in_progress",
+        status: "accepted_awaiting_payment",
       });
+
+      // STEP 2: Notify patient to complete payment
+      // TODO: In production, trigger email/SMS notification to patient with payment link
+      console.log("Patient will receive payment notification for consultation:", consultation.id);
+
     } catch (error) {
       console.error("Error accepting consultation:", error);
       toast({

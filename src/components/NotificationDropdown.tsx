@@ -142,11 +142,13 @@ const NotificationDropdown = ({
     if (!user) return;
 
     try {
+      // STEP 1: Update consultation status to require payment from patient
+      // Status changes from 'pending' to 'accepted_awaiting_payment'
       const { error } = await supabase
         .from("consultations")
         .update({
           doctor_id: user.id,
-          status: "in_progress",
+          status: "accepted_awaiting_payment", // Patient must complete payment before consultation starts
         })
         .eq("id", consultationId);
 
@@ -155,10 +157,13 @@ const NotificationDropdown = ({
       toast({
         title: "Consultation Accepted",
         description:
-          "You have been assigned to this consultation. Redirecting to chat...",
+          "Payment request sent to patient. You'll be notified when payment is complete.",
       });
 
       setIsOpen(false);
+
+      // TODO: Send notification to patient with payment link
+      console.log("Patient should receive payment notification for consultation:", consultationId);
 
       setTimeout(() => {
         navigate(`/doctor/consultation/${consultationId}`);

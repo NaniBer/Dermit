@@ -186,18 +186,19 @@ const InstantNotificationSystem = ({
     if (!user) return;
 
     try {
-      // 1. Update consultation status and assign doctor
+      // STEP 1: Doctor accepts consultation - trigger payment requirement for patient
+      // Update status to 'accepted_awaiting_payment' instead of directly to 'in_progress'
       const { error: consultationError } = await supabase
         .from("consultations")
         .update({
           doctor_id: user.id,
-          status: "in_progress",
+          status: "accepted_awaiting_payment", // Patient must complete payment before consultation starts
         })
         .eq("id", consultationId);
 
       if (consultationError) throw consultationError;
 
-      // 2. Get consultation details for chat creation
+      // STEP 2: Get consultation details for chat creation
       const { data: consultation } = await supabase
         .from("consultations")
         .select("patient_id, doctor_id")
@@ -206,7 +207,7 @@ const InstantNotificationSystem = ({
 
       if (!consultation || !(consultation as any).patient_id) throw new Error("Consultation not found");
 
-      // 3. Create a new chat entry
+      // STEP 3: Create a new chat entry (will be activated after payment)
       const { data: chatData, error: chatError } = await supabase
         .from("chats")
         .insert({
@@ -223,14 +224,18 @@ const InstantNotificationSystem = ({
       toast({
         title: "✅ Consultation Accepted!",
         description:
-          "You've been assigned to this patient. Opening chat interface...",
+          "Payment request sent to patient. You'll be notified when payment is complete.",
         duration: 3000,
       });
 
-      // Immediate redirect to chat using chat_id
+      // Navigate to consultation detail page
       setTimeout(() => {
         navigate(`/doctor/consultation/${consultationId}`);
       }, 500);
+
+      // TODO: Send notification to patient with payment link
+      console.log("Patient should receive payment notification for consultation:", consultationId);
+
     } catch (error) {
       console.error("Error accepting consultation:", error);
       toast({

@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import ActiveChats from "@/components/patientDashboard/ActiveChats";
 import MostRecentChat from "@/components/patientDashboard/MostRecentChat";
+import PendingPayments from "@/components/patientDashboard/PendingPayments";
 import { useTranslation } from "react-i18next";
 
 const PatientDashboard = () => {
@@ -68,6 +69,10 @@ const PatientDashboard = () => {
         {/* Quick Actions */}
         <div className="grid md:grid-cols-1 gap-6 mb-8">
           <NewConsultationButton />
+          
+          {/* Pending Payments Alert */}
+          <PendingPayments />
+          
           <div className="grid md:grid-cols-2 gap-4">
             <MostRecentChat />
             <ActiveChats />

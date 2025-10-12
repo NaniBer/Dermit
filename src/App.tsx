@@ -22,6 +22,7 @@ import DoctorConsultationDetail from "./pages/DoctorConsultationDetail";
 import AdminDoctors from "./pages/AdminDoctors";
 import PatientConsultations from "./pages/PatientConsultation";
 import PatientConsultationChat from "./pages/PatientConsultationChat";
+import Payment from "./pages/Payment";
 import Consultations from "./pages/Consultations";
 import { useState } from "react";
 import InstantNotificationSystem from "./components/InstantNotificationSystem";
@@ -92,6 +93,10 @@ const App = () => {
               <Route
                 path="/patient/consultation/:id"
                 element={<PatientConsultationChat />}
+              />
+              <Route
+                path="/patient/payment/:id"
+                element={<Payment />}
               />
 
               {/* Doctor Routes */}
