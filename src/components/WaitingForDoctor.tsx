@@ -31,12 +31,19 @@ const WaitingForDoctor = () => {
         },
         (payload) => {
           const consultation = payload.new;
-          if (consultation.doctor_id && consultation.status === "in_progress") {
+          if (
+            consultation.doctor_id &&
+            consultation.status === "accepted_awaiting_payment"
+          ) {
             setConsultationStatus("found");
 
             // Redirect to chat after 2 seconds
+            // setTimeout(() => {
+            //   navigate(`/patient/consultation/${consultation.id}`);
+            // }, 2000);
+
             setTimeout(() => {
-              navigate(`/patient/consultation/${consultation.id}`);
+              navigate(`/patient/payment/${consultation.id}`);
             }, 2000);
           }
         }

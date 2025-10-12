@@ -9,13 +9,16 @@ import { Database } from "@/integrations/supabase/types";
 
 type Consultation = Database["public"]["Tables"]["consultations"]["Row"];
 type UserRole = Database["public"]["Tables"]["user_roles"]["Row"];
+
 const AcceptConsultationPage = () => {
   const { consultationId } = useParams();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [alreadyAccepted, setAlreadyAccepted] = useState(false);
+  const [waitingPayment, setWaitingPayment] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -23,97 +26,97 @@ const AcceptConsultationPage = () => {
       navigate(`/login?redirect=/consultation/${consultationId}/accept`);
       return;
     }
-    (async () => {
+
+    const acceptConsultation = async () => {
       try {
-        // Fetch role for logged-in user
+        // 1️⃣ Verify user role
         const { data: roleData, error: roleError } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id)
           .maybeSingle<UserRole>();
 
-        if (roleError || !roleData) {
-          setError("Failed to verify your permissions.");
-          setLoading(false);
-          return;
-        }
+        if (roleError || !roleData)
+          throw new Error("Failed to verify permissions.");
+        if (roleData.role !== "doctor")
+          throw new Error(
+            "You do not have permission to accept consultations."
+          );
 
-        if (roleData.role !== "doctor") {
-          setError("You do not have permission to accept consultations.");
-          setLoading(false);
-          return;
-        }
-
-        // Check if consultation already accepted by this doctor
+        // 2️⃣ Check if already accepted
         const { data: consultation, error: consultError } = await supabase
           .from("consultations")
-          .select("id, doctor_id, status")
+          .select("id, doctor_id, status, patient_id")
           .eq("id", consultationId)
           .maybeSingle<Consultation>();
-        console.log(consultation, consultError);
 
         if (consultError) throw consultError;
         if (
-          consultation &&
-          consultation.doctor_id === user.id &&
-          consultation.status === "in_progress"
+          consultation?.doctor_id === user.id &&
+          consultation.status === "accepted_awaiting_payment"
         ) {
           setAlreadyAccepted(true);
+          setWaitingPayment(true);
           setLoading(false);
+          listenToPayment(consultationId);
           return;
         }
 
-        // If not accepted yet, try to accept
+        // 3️⃣ Accept consultation if pending
         const { data, error: updateError } = await supabase
           .from("consultations")
           .update({
             doctor_id: user.id,
-            status: "in_progress",
+            status: "accepted_awaiting_payment",
           })
           .eq("id", consultationId)
-          .eq("status", "pending") // only accept if still pending
+          .eq("status", "pending")
           .select()
           .maybeSingle();
 
         if (updateError) throw updateError;
-
-        if (!data) {
-          setError(
+        if (!data)
+          throw new Error(
             "This consultation has already been accepted by another doctor."
           );
-          setLoading(false);
-          return;
-        }
-        // await createChat(data);
 
-        // Success! Redirect to chat
-        navigate(`/doctor/consultation/${consultationId}/`);
-      } catch (err) {
+        setWaitingPayment(true);
+        setLoading(false);
+
+        listenToPayment(consultationId);
+      } catch (err: any) {
         setError(err.message || "Failed to accept consultation.");
         setLoading(false);
       }
-    })();
-  }, [user, authLoading, consultationId, navigate]);
-  const createChat = async (consultation: {
-    id: string;
-    doctor_id: string;
-    patient_id: string;
-  }) => {
-    const { error: chatError } = await supabase.from("chats").insert([
-      {
-        consultation_id: consultation.id,
-        doctor_id: user.id,
-        patient_id: consultation.patient_id,
-        status: "active", // or "open", "in_progress", whatever fits your logic
-      },
-    ]);
+    };
 
-    if (chatError) {
-      console.error("Failed to create chat:", chatError);
-      // Optionally toast this or show error somewhere
-    } else {
-      console.log("✅ Chat created for consultation:", consultation.id);
-    }
+    acceptConsultation();
+  }, [user, authLoading, consultationId, navigate]);
+
+  // Listen to status change for patient payment
+  const listenToPayment = (consultationId: string) => {
+    const channel = supabase
+      .channel("consultation-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "consultations",
+          filter: `id=eq.${consultationId}`,
+        },
+        (payload) => {
+          const consultation = payload.new as Consultation;
+
+          if (consultation.status === "in_progress") {
+            // Patient has paid → redirect to consultation page
+            navigate(`/doctor/consultation/${consultationId}`);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
   };
 
   if (loading || authLoading) {
@@ -137,34 +140,33 @@ const AcceptConsultationPage = () => {
       <div className="p-6 max-w-md mx-auto mt-20 text-center text-red-600">
         <h2 className="text-xl font-bold mb-4">Oops!</h2>
         <p>{error}</p>
-        <button
-          className="mt-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={() => navigate("/doctor/dashboard")}
-        >
+        <Button onClick={() => navigate("/doctor/dashboard")} className="mt-4">
           Go to Dashboard
-        </button>
-      </div>
-    );
-  }
-
-  if (alreadyAccepted) {
-    return (
-      <div className="p-6 max-w-md mx-auto mt-20 text-center text-green-700">
-        <CheckCircle className="mx-auto mb-4 w-12 h-12" />
-        <h2 className="text-2xl font-bold mb-4">
-          You have already accepted this consultation.
-        </h2>
-        <Button
-          onClick={() => navigate(`/dcotor/consultation/${consultationId}`)}
-          className="mt-4"
-        >
-          Go to Chat
         </Button>
       </div>
     );
   }
 
-  // The code should never reach here
+  if (alreadyAccepted || waitingPayment) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md text-center shadow-xl border-0">
+          <CardContent className="p-8">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Loader2 className="w-8 h-8 text-white animate-spin" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Waiting for patient payment…
+            </h2>
+            <p className="text-gray-600 mb-6">
+              You will be redirected once the patient pays.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return null;
 };
 

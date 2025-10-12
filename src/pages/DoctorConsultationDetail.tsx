@@ -44,6 +44,7 @@ const DoctorConsultationDetail = () => {
   const [isChatClosed, setIsChatClosed] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [paid, setPaid] = useState(false);
 
   const {
     messages,
@@ -66,6 +67,13 @@ const DoctorConsultationDetail = () => {
           .single<Consultation>();
 
         if (error) throw error;
+        console.log(data.status);
+        if (data.status === "in_progress") {
+          setPaid(true);
+        }
+        if (data.status === "accepted_awaiting_payment") {
+          setPaid(false);
+        }
         setConsultation(data);
       } catch (error) {
         console.error("Error fetching consultation:", error);
@@ -92,7 +100,6 @@ const DoctorConsultationDetail = () => {
       });
 
       const data = await res.json();
-      console.log(data);
 
       return data.signedUrls;
     };
@@ -102,6 +109,42 @@ const DoctorConsultationDetail = () => {
       fetchSignedImages(id).then((urls) => setImages(urls));
     }
   }, [id, toast, backendUrl, token]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel("consultation-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "consultations",
+          filter: `id=eq.${id}`,
+        },
+        (payload) => {
+          const updatedConsultation = payload.new as Consultation;
+
+          // Update local consultation state
+          setConsultation(updatedConsultation);
+
+          // Check if patient has paid and consultation is now in progress
+          if (updatedConsultation.status === "in_progress" && !paid) {
+            setPaid(true);
+            toast({
+              title: "Payment Received",
+              description:
+                "The patient has completed payment. You can now start the consultation.",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    // Clean up subscription on unmount
+    return () => supabase.removeChannel(channel);
+  }, [id, paid, toast]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -176,7 +219,8 @@ const DoctorConsultationDetail = () => {
 
       toast({
         title: "Consultation Accepted",
-        description: "Payment request sent to patient. Consultation will begin after payment confirmation.",
+        description:
+          "Payment request sent to patient. Consultation will begin after payment confirmation.",
       });
 
       // Update local state
@@ -188,8 +232,10 @@ const DoctorConsultationDetail = () => {
 
       // STEP 2: Notify patient to complete payment
       // TODO: In production, trigger email/SMS notification to patient with payment link
-      console.log("Patient will receive payment notification for consultation:", consultation.id);
-
+      console.log(
+        "Patient will receive payment notification for consultation:",
+        consultation.id
+      );
     } catch (error) {
       console.error("Error accepting consultation:", error);
       toast({
@@ -246,6 +292,17 @@ const DoctorConsultationDetail = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading consultation...</p>
+        </div>
+      </div>
+    );
+  }
+  if (!paid && consultation?.status === "accepted_awaiting_payment") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">
+            Waiting for patient to complete payment...
+          </p>
         </div>
       </div>
     );
