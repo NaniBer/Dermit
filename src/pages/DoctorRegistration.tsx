@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, Upload, CheckCircle } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const DoctorRegistration = () => {
   const [formData, setFormData] = useState({
@@ -17,7 +18,9 @@ const DoctorRegistration = () => {
     medicalLicense: null as File | null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
@@ -33,15 +36,46 @@ const DoctorRegistration = () => {
     setIsSubmitting(true);
 
     try {
-      // TODO: Replace with real API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Validate all fields
+      if (!formData.fullName || !formData.phone || !formData.email || 
+          !formData.cityCountry || !formData.experience || !formData.medicalLicense) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill in all required fields.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
+      // For now, we'll store the file name in the database
+      // In production, you would upload to Supabase Storage first
+      const licenseFileName = formData.medicalLicense.name;
+
+      // Insert registration into database
+      const { error } = await supabase
+        .from("doctor_registrations")
+        .insert({
+          full_name: formData.fullName,
+          phone: formData.phone,
+          email: formData.email,
+          city_country: formData.cityCountry,
+          experience: parseInt(formData.experience),
+          medical_license_url: licenseFileName, // Will be replaced with actual URL when storage is implemented
+          status: "pending"
+        });
+
+      if (error) throw error;
+
+      // Show success state
+      setIsSuccess(true);
+      
       toast({
-        title: "Registration Submitted",
-        description:
-          "Thank you! We will review your registration and get back to you soon.",
+        title: "Registration Submitted Successfully!",
+        description: "Our admin team will review your application and contact you soon.",
       });
 
+      // Reset form
       setFormData({
         fullName: "",
         phone: "",
@@ -50,10 +84,17 @@ const DoctorRegistration = () => {
         experience: "",
         medicalLicense: null,
       });
-    } catch (error) {
+
+      // Redirect to home after 3 seconds
+      setTimeout(() => {
+        navigate("/");
+      }, 3000);
+
+    } catch (error: any) {
+      console.error("Registration error:", error);
       toast({
         title: "Error",
-        description: "Failed to submit registration. Please try again.",
+        description: error.message || "Failed to submit registration. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -61,26 +102,51 @@ const DoctorRegistration = () => {
     }
   };
 
+  // Success screen
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--brand-neutral-bg))] via-background to-[hsl(var(--brand-neutral-bg))] p-4 flex items-center justify-center">
+        <Card className="max-w-md w-full shadow-2xl border-[hsl(var(--brand-primary))]">
+          <CardContent className="p-8 text-center space-y-4">
+            <div className="w-16 h-16 bg-[hsl(var(--brand-primary))] rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-[hsl(var(--brand-text-primary))]">
+              Registration Submitted!
+            </h2>
+            <p className="text-[hsl(var(--brand-text-secondary))]">
+              Thank you for your interest in joining Dermit. Our admin team will review your application and contact you via email within 2-3 business days.
+            </p>
+            <Button 
+              onClick={() => navigate("/")}
+              className="w-full bg-[hsl(var(--brand-primary))] hover:bg-[hsl(var(--brand-primary-hover))] text-white"
+            >
+              Return to Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--brand-neutral-bg))] via-background to-[hsl(var(--brand-neutral-bg))] p-4">
       <div className="max-w-2xl mx-auto pt-8">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-6"
+          className="inline-flex items-center gap-2 text-[hsl(var(--brand-secondary))] hover:text-[hsl(var(--brand-primary))] mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
         </Link>
 
-        <Card className="shadow-xl border-0">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-gray-900">
-              Dermatologist Registration Form
+        <Card className="shadow-2xl border-[hsl(var(--brand-primary))] border-t-4">
+          <CardHeader className="text-center bg-gradient-to-r from-[hsl(var(--brand-neutral-bg))] to-background">
+            <CardTitle className="text-3xl font-bold text-[hsl(var(--brand-text-primary))]">
+              Dermatologist Registration
             </CardTitle>
-            <p className="text-gray-600 mt-2">
-              Welcome to Dermit! We're excited to have you join our network of
-              dermatology professionals. Please complete the form below to begin
-              the vetting process.
+            <p className="text-[hsl(var(--brand-text-secondary))] mt-2 text-sm">
+              Welcome to Dermit! Join our network of dermatology professionals. Complete the form below to begin the vetting process.
             </p>
           </CardHeader>
 
@@ -154,22 +220,41 @@ const DoctorRegistration = () => {
               </div>
 
               <div>
-                <Label htmlFor="medicalLicense">
+                <Label htmlFor="medicalLicense" className="text-[hsl(var(--brand-text-primary))]">
                   Upload Your Most Recent Renewed Medical License *
                 </Label>
-                <Input
-                  id="medicalLicense"
-                  name="medicalLicense"
-                  type="file"
-                  accept=".pdf,.jpg,.png"
-                  onChange={handleChange}
-                  required
-                />
+                <div className="mt-2 flex items-center gap-2">
+                  <Input
+                    id="medicalLicense"
+                    name="medicalLicense"
+                    type="file"
+                    accept=".pdf,.jpg,.png,.jpeg"
+                    onChange={handleChange}
+                    required
+                    className="cursor-pointer file:mr-4 file:px-4 file:py-2 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-[hsl(var(--brand-primary))] file:text-white hover:file:bg-[hsl(var(--brand-primary-hover))]"
+                  />
+                  {formData.medicalLicense && (
+                    <Upload className="w-5 h-5 text-[hsl(var(--brand-primary))]" />
+                  )}
+                </div>
+                {formData.medicalLicense && (
+                  <p className="text-xs text-[hsl(var(--brand-text-secondary))] mt-1">
+                    Selected: {formData.medicalLicense.name}
+                  </p>
+                )}
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                className="w-full bg-[hsl(var(--brand-primary))] hover:bg-[hsl(var(--brand-primary-hover))] text-white font-semibold py-6 text-lg transition-all duration-200" 
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Submitting..." : "Submit Registration"}
               </Button>
+
+              <p className="text-xs text-center text-muted-foreground">
+                By submitting this form, you agree to our verification process. We will contact you within 2-3 business days.
+              </p>
             </form>
           </CardContent>
         </Card>

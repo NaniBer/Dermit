@@ -39,6 +39,7 @@ import Feedback from "./pages/Feedback";
 import AdminFeedbacks from "./pages/AdminFeedbacks";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import DoctorRegistration from "./pages/DoctorRegistration";
+import AdminDoctorRegistrations from "./pages/AdminDoctorRegistrations";
 
 const queryClient = new QueryClient();
 
@@ -127,6 +128,7 @@ const App = () => {
               <Route path="/admin/doctors" element={<AdminDoctors />} />
               <Route path="/admin/patients" element={<AdminPatients />} />
               <Route path="/admin/feedbacks" element={<AdminFeedbacks />} />
+              <Route path="/admin/doctor-registrations" element={<AdminDoctorRegistrations />} />
 
               {/* Accepting the consultation */}
               <Route
