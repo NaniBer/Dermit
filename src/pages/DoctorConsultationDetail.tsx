@@ -111,7 +111,7 @@ const DoctorConsultationDetail = () => {
   }, [id, toast, backendUrl, token]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) return () => {};
 
     const channel = supabase
       .channel("consultation-updates")
