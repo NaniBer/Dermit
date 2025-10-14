@@ -40,7 +40,7 @@ const Footer = () => {
               </Link> */}
               <Link
                 // to="/feedback"
-                to="/"
+                to="/register/doctor"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 Register as a Doctor

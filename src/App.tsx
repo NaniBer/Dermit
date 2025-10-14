@@ -38,6 +38,7 @@ import AccountIssue from "./pages/account-issue";
 import Feedback from "./pages/Feedback";
 import AdminFeedbacks from "./pages/AdminFeedbacks";
 import LanguageSwitcher from "./components/LanguageSwitcher";
+import DoctorRegistration from "./pages/DoctorRegistration";
 
 const queryClient = new QueryClient();
 
@@ -94,10 +95,7 @@ const App = () => {
                 path="/patient/consultation/:id"
                 element={<PatientConsultationChat />}
               />
-              <Route
-                path="/patient/payment/:id"
-                element={<Payment />}
-              />
+              <Route path="/patient/payment/:id" element={<Payment />} />
 
               {/* Doctor Routes */}
               <Route
@@ -120,6 +118,7 @@ const App = () => {
 
               <Route path="/doctor/patients" element={<DoctorPatients />} />
               <Route path="/doctor/profile" element={<DoctorProfile />} />
+              <Route path="/register/doctor" element={<DoctorRegistration />} />
 
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminDashboard />} />

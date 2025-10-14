@@ -84,7 +84,7 @@ const AcceptConsultationPage = () => {
         setLoading(false);
 
         listenToPayment(consultationId);
-      } catch (err: any) {
+      } catch (err) {
         setError(err.message || "Failed to accept consultation.");
         setLoading(false);
       }
