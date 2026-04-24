@@ -225,8 +225,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signInWithGoogle = async (redirect: string) => {
-    // Use Supabase auth callback URL
-    const redirectUrl = "https://cfnqqiiwsgljxxzlvicz.supabase.co/auth/v1/callback";
+    // Redirect to the app's auth-callback page after Google sign-in
+    const redirectUrl = `${window.location.origin}/auth-callback`;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
