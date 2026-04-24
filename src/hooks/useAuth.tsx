@@ -225,13 +225,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signInWithGoogle = async (redirect: string) => {
-    let redirectUrl;
-    if (redirect === "/auth-callback") {
-      redirectUrl = `${window.location.origin}/auth-callback`;
-    } else {
-      redirectUrl = `${window.location.origin}/${redirect}`;
-    }
-    // const redirectUrl = `${window.location.origin}/patient/dashboard`; // or add /dashboard, etc.
+    // Use Supabase auth callback URL
+    const redirectUrl = "https://cfnqqiiwsgljxxzlvicz.supabase.co/auth/v1/callback";
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
