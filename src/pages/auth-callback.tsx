@@ -16,15 +16,21 @@ type ConsentType = {
   consent_privacy: boolean;
 };
 const AuthCallback = () => {
-  const { getRole, signOut, user } = useAuth();
+  const { getRole, signOut, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkEverything = async () => {
+      // Wait for auth to finish loading
+      if (authLoading) {
+        return;
+      }
+
       if (!user) {
         console.log("No user found, redirecting to login");
         navigate("/login");
+        setLoading(false);
         return;
       }
 
@@ -42,16 +48,20 @@ const AuthCallback = () => {
         if (error) {
           console.error("Error fetching profile:", error);
           navigate("/login");
+          setLoading(false);
           return;
         }
 
         if (!profile?.consent_terms || !profile?.consent_privacy) {
           navigate("/consent");
+          setLoading(false);
           return;
         }
 
         // If consent is good:
         navigate("/patient/dashboard");
+        setLoading(false);
+        return;
       }
 
       if (role === "doctor") {
@@ -63,6 +73,7 @@ const AuthCallback = () => {
 
         if (error) {
           console.error("Error fetching doctor status:", error);
+          setLoading(false);
           return;
         }
 
@@ -72,20 +83,26 @@ const AuthCallback = () => {
           await signOut();
           navigate("/account-issue");
         }
+        setLoading(false);
+        return;
       }
 
       if (role === "admin") {
         navigate("/admin/dashboard");
+        setLoading(false);
+        return;
       }
 
       if (!role) {
         console.warn("No role found, defaulting to patient dashboard.");
         navigate("/patient/dashboard");
+        setLoading(false);
+        return;
       }
     };
 
     checkEverything();
-  }, [user, getRole, navigate, signOut]);
+  }, [user, authLoading, getRole, navigate, signOut]);
 
   if (loading)
     return (
