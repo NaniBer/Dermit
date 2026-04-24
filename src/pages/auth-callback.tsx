@@ -22,11 +22,11 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const checkEverything = async () => {
-      // if (!user) {
-      //   console.log("halu");
-      //   navigate("/login");
-      //   return;
-      // }
+      if (!user) {
+        console.log("No user found, redirecting to login");
+        navigate("/login");
+        return;
+      }
 
       const userId = user.id;
       const role = await getRole(userId);
