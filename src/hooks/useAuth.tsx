@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           try {
             const accessToken = session?.access_token;
 
-            const SUPABASE_URL = "https://nydetrcmdwjkellmqjki.supabase.co";
+            const SUPABASE_URL = "https://cfnqqiiwsgljxxzlvicz.supabase.co";
             const response = await fetch(
               `${SUPABASE_URL}/functions/v1/google-oauth-signup-handler`,
               {
